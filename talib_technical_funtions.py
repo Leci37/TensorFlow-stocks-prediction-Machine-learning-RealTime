@@ -7,6 +7,8 @@ import numpy as np
 #Overlap Studies Functions
 #Overlap Studies Functions
 #BBANDS - Bollinger Bands
+import Utils_Yfinance
+
 
 def get_moving_average_indicator(close):
     df = pd.DataFrame()
@@ -61,8 +63,13 @@ def get_moving_average_indicator(close):
 
 def get_overlap_indicator( high, low, close):
     df = pd.DataFrame()
+
     # reliably restored by inspect Bollinger Bands
     df["olap_BBAND_UPPER"], df["olap_BBAND_MIDDLE"], df["olap_BBAND_LOWER"] = talib.BBANDS(close, timeperiod=5, nbdevup=2, nbdevdn=2, matype=0)
+    df['col_cierre'] = close
+    df = Utils_Yfinance.get_crash_points(df, 'olap_BBAND_UPPER', 'col_cierre', col_result="olap_BBAND_UPPER_crash")
+    df = Utils_Yfinance.get_crash_points(df, 'olap_BBAND_LOWER', 'col_cierre', col_result="olap_BBAND_LOWER_crash")
+    df = df.drop(columns=['col_cierre'])
     #HT_TRENDLINE - Hilbert Transform - Instantaneous Trendline
     df["olap_HT_TRENDLINE"] = talib.HT_TRENDLINE(close)
     #MIDPOINT - MidPoint over period
@@ -73,6 +80,7 @@ def get_overlap_indicator( high, low, close):
     df["olap_SAR"] = talib.SAR(high, low) #, acceleration=0, maximum=0)
     #SAREXT - Parabolic SAR - Extended
     df["olap_SAREXT"] = talib.SAREXT(high, low)#, startvalue=0, offsetonreverse=0, accelerationinitlong=0, accelerationlong=0, accelerationmaxlong=0, accelerationinitshort=0, accelerationshort=0, accelerationmaxshort=0)
+
     return df
 
 #Momentum Indicator Functions
@@ -100,10 +108,13 @@ def get_momentum_indicator(openS, high, low, close, volume):
     df["mtum_DX"] = talib.DX(high, low, close, timeperiod=14)
     #MACD - Moving Average Convergence/Divergence
     df["mtum_MACD"], df["mtum_MACD_signal"] ,df["mtum_MACD_list"] = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+    df = Utils_Yfinance.get_crash_points(df, 'mtum_MACD', 'mtum_MACD_signal', col_result="mtum_MACD_crash")
     #MACDEXT - MACD with controllable MA type
     df["mtum_MACD_ext"], df["mtum_MACD_ext_signal"] ,df["mtum_MACD_ext_list"] = talib.MACDEXT(close, fastperiod=12, fastmatype=0, slowperiod=26, slowmatype=0, signalperiod=9, signalmatype=0)
+    df = Utils_Yfinance.get_crash_points(df, 'mtum_MACD_ext', 'mtum_MACD_ext_signal', col_result="mtum_MACD_ext_crash")
     #MACDFIX - Moving Average Convergence/Divergence Fix 12/26
     df["mtum_MACD_fix"], df["mtum_MACD_fix_signal"] ,df["mtum_MACD_fix_list"] = talib.MACDFIX(close, signalperiod=9)
+    df = Utils_Yfinance.get_crash_points(df, 'mtum_MACD_fix', 'mtum_MACD_fix_signal', col_result="mtum_MACD_fix_crash")
     #MFI - Money Flow Index
     df["mtum_MFI"] = talib.MFI(high, low, close, volume, timeperiod=14)
     #MINUS_DI - Minus Directional Indicator
@@ -131,12 +142,15 @@ def get_momentum_indicator(openS, high, low, close, volume):
     #STOCH - Stochastic
     df["mtum_STOCH_k"], df["mtum_STOCH_d"] = talib.STOCH(high, low, close, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
     df["mtum_STOCH_kd"] =  df["mtum_STOCH_k"] - df["mtum_STOCH_d"]
+    df = Utils_Yfinance.get_crash_points(df, 'mtum_STOCH_k', 'mtum_STOCH_d', col_result="mtum_STOCH_crash")
     #STOCHF - Stochastic Fast
     df["mtum_STOCH_Fa_k"], df["mtum_STOCH_Fa_d"] = talib.STOCHF(high, low, close, fastk_period=5, fastd_period=3, fastd_matype=0)
     df["mtum_STOCH_Fa_kd"] = df["mtum_STOCH_Fa_k"] - df["mtum_STOCH_Fa_d"]
+    df = Utils_Yfinance.get_crash_points(df, 'mtum_STOCH_Fa_k', 'mtum_STOCH_Fa_d', col_result="mtum_STOCH_Fa_crash")
     #STOCHRSI - Stochastic Relative Strength Index
     df["mtum_STOCH_RSI_k"], df["mtum_STOCH_RSI_d"] = talib.STOCHRSI(close, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
     df["mtum_STOCH_RSI_kd"] = df["mtum_STOCH_RSI_k"] - df["mtum_STOCH_RSI_d"]
+    df = Utils_Yfinance.get_crash_points(df, 'mtum_STOCH_RSI_k', 'mtum_STOCH_RSI_d', col_result="mtum_STOCH_RSI_crash")
     #TRIX - 1-day Rate-Of-Change (ROC) of a Triple Smooth EMA
     df["mtum_TRIX"] = talib.TRIX(close, timeperiod=30)
     #ULTOSC - Ultimate Oscillator

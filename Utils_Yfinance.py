@@ -180,6 +180,21 @@ def prepare_df_to_json_by_date(df_full):
     return dict_j
 
 
+def get_crash_points(df, col_name_A, col_name_B, col_result, highlight_result_in_next_cell = 1 ):
+    df["diff"] = df[col_name_A] - df[col_name_B]
+    df[col_result] = 0
+
+    df.loc[((df["diff"] >= 0) & (df["diff"].shift() < 0)), col_result] = 1
+    df.loc[((df["diff"] <= 0) & (df["diff"].shift() > 0)), col_result] = -1
+    #TODO test with oder numer than 1
+    if highlight_result_in_next_cell > 0:
+        df.loc[((df[col_result].shift(highlight_result_in_next_cell) == 1)), col_result] = 1
+        df.loc[((df[col_result].shift(highlight_result_in_next_cell) == -1)), col_result] = -1
+
+    df = df.drop(columns=['diff'])
+
+    return df
+
 
 #aaa = get_root_from_url("https://www.investing.com/search/?q=RIVN")
 #from lxml.etree import tostring

@@ -1,6 +1,8 @@
 import pandas as pd
 from math import atan, pi
 from datetime import datetime
+
+import yhoo_history_stock
 from LogRoot.Logging import Logger
 from sklearn.metrics import confusion_matrix
 
@@ -134,43 +136,81 @@ def get_buy_sell_points(df_stock):
 
     return df_stock
 
-def check_buy_points_prediction (df, path_cm =  "d_price/plot_confusion_matrix_.png"):
+def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "d_price/plot_confusion_matrix_.png", SUM_RESULT_2_VALID = 1.45):
     LEN_DF = len(df)
-    SUM_RESULT_2_VALID = 1.45 #ESTO ES LA SUMA DE FILA  N + (N-1) SI ESTO DA MAS DE 1.45 SE TOMA COMO PUNTO DE COMPRA VALIDO
+    #ESTO ES LA SUMA DE FILA  N + (N-1) SI ESTO DA MAS DE 1.45 SE TOMA COMO PUNTO DE COMPRA VALIDO
 
     col = df.columns
-    list_stocks = [col for col in df if col.startswith('ticker_')]#todas las que empiecen por ticker_ , son variables tontas
-    df['ticker'] = df[list_stocks].idxmax(axis=1) #undo dummi variable
-    df.drop(columns=list_stocks, inplace=True)
+    #tickers_col = col.startswith('ticker_')
+
+    list_ticker_stocks = [col for col in df if col.startswith('ticker_')]#todas las que empiecen por ticker_ , son variables tontas
+    df['ticker'] = df[list_ticker_stocks].idxmax(axis=1) #undo dummi variable
+    df.drop(columns=list_ticker_stocks, inplace=True)
 
     df = df.sort_values(by=['ticker', "Date"], ascending=True)
     df['Date'] = pd.to_datetime(df['Date'], unit='s')#time stamp to Date
-    l2 = ["Date",'ticker', "result", "buy_sell_point", "Close", "per_Close", 'has_preMarket']
+
+    #RESET de per_close
+    df['Close'] = df['Close'] + 100
+    for t in list_ticker_stocks:
+        df[df['ticker'] == t] = yhoo_history_stock.add_variation_percentage(df[df['ticker'] == t])
+
+    l2 = ["Date",'ticker', result_column_name, "Close", "per_Close", 'has_preMarket'] #  "buy_sell_point",
     df = df[l2]
 
     df.index = pd.RangeIndex(len(df.index))
-    df["result_sum"] = df['result'].rolling(2).sum()  #para atras
+    df["result_sum"] = df[result_column_name] # df[result_column_name].rolling(2).sum()  #para atras
+    SUM_RESULT_2_VALID = SUM_RESULT_2_VALID /2
+
     df["is_result_buy"] = False
     df.loc[df['result_sum'] > SUM_RESULT_2_VALID, "is_result_buy"] = True
 
-    df['Close'] = df['Close'] + 101
+
     df['C'] = [window.round(2).to_list() for window in df['per_Close'].shift(-5).rolling(5)]
+
+    # df["per_Close_5_1"] = (df['per_Close'] *-1 ) #+ df['per_Close'].shift(-5).rolling(5).sum() #para alante
+    # df["per_Close_12_1"] = (df['per_Close'] *-1 ) #+ df['per_Close'].shift(-12).rolling(12).sum()
+    #
+    # df["per_Close_5_cast"] = df['per_Close'].shift(-5).rolling(5).mean() #para alante
+    # df["per_Close_12_cast"] = df['per_Close'].shift(-12).rolling(12).mean()
+
     df["per_Close_5"] = df['per_Close'].shift(-5).rolling(5).sum() #para alante
     df["per_Close_12"] = df['per_Close'].shift(-12).rolling(12).sum()
-    df[["Date",'ticker', "result","is_result_buy" , "result_sum", "per_Close_5", "per_Close_12"]]
 
-    df["isValid"] = False
-    df.loc[ (df['result_sum'] > SUM_RESULT_2_VALID), "isValid_SUM"] = True
-    df.loc[ (df['result_sum'] > SUM_RESULT_2_VALID)   &  (df["per_Close_12"] > 20) & (df["per_Close_5"] > 8), "isValid"] = True
+    df["per_Close_5mean"] = df['Close'].shift(-5).rolling(5).mean() #para alante
+    df["per_Close_12mean"] = df['Close'].shift(-12).rolling(12).mean()
 
-    for t in ["ticker_MDB", "ticker_MELI", "ticker_PYPL", "ticker_RIVN", "ticker_SNOW", "ticker_TSLA", #"ticker_GTLB",
-         "ticker_TWLO", "ticker_U", "ticker_UBER", "ticker_DDOG"]:
+    df["per_Close_5_2"] = df["per_Close_5mean"] -  df['Close'] #  .shift(-5).rolling(5).mean() #para alante
+    df["per_Close_12_2"] = df["per_Close_12mean"] -  df['Close']
+
+    # df["per_Close_last_5"] = df['per_Close'].shift(-5) #para alante
+    # df["per_Close_last_12"] = df['per_Close'].shift(-12)
+    #
+    # df["per_Close_5dif"] =  df['per_Close'].shift(-5).rolling(5).mean() - df['per_Close']  #.shift(-5).rolling(5).sum() #para alante
+    # df["per_Close_12dif"] = df['per_Close'].shift(-12).rolling(12).mean() - df['per_Close']  # df['per_Close'].shift(-12) - df['per_Close'].shift(-12).rolling(12).mean()
+
+    df[df['is_result_buy'] == True]["per_Close_5"].mean()
+
+    df[["Date",'ticker', result_column_name,"is_result_buy" , "result_sum", "per_Close_5", "per_Close_12"]]
+
+    df["isValid_to_buy"] = False
+    #df.loc[ (df['result_sum'] > SUM_RESULT_2_VALID)   &  (df["per_Close_12"] > 20) & (df["per_Close_5"] > 8), "isValid_to_buy"] = True
+    #(df['result_sum'] > SUM_RESULT_2_VALID) no es relevante para si es punto de compra o no
+    df.loc[ (df["per_Close_12"] > 14) & (df["per_Close_5"] > 5), "isValid_to_buy"] = True
+
+    print(df[['Date', 'ticker', "isValid_to_buy"]].groupby(["ticker","isValid_to_buy"]).count() )
+    print(df[['Date', 'ticker', "is_result_buy"]].groupby(["ticker","is_result_buy"]).count() )
+
+    for t in list_ticker_stocks:
         dfn = pd.DataFrame()
         dfn = df[df['ticker'] == t]
-        cf_matrix = confusion_matrix( dfn["is_result_buy"].astype(int), dfn["isValid"].astype(int))
+        cf_matrix = confusion_matrix(  dfn["isValid_to_buy"].astype(int), dfn["is_result_buy"].astype(int))
 
         print(path_cm+ " MATRIX: "+str(cf_matrix))
-        Utils_plotter.plot_confusion_matrix_cm_OUT(cf_matrix,path= path_cm, title_str ="\n" + str(t))
+        if cf_matrix.shape[0] == 2 and cf_matrix.shape[1] == 2:
+            Utils_plotter.plot_confusion_matrix_cm_OUT(cf_matrix,path= path_cm + str(t)+"_.png", title_str ="\n" + str(t))
+        else:
+            print("WARN la shape de la confusion matrix no es (2,2)",path_cm+ " MATRIX: "+str(cf_matrix))
 
 
     df = df[l2]

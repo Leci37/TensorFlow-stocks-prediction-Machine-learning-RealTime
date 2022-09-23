@@ -94,7 +94,7 @@ def __autopct_fun(abs_values):
 
 def plot_pie_countvalues(df, colum_count , stockid= "", opion = "", path=None ):
     df =  df.groupby(colum_count).count()
-    y = np.array(df['Open'])
+    y = np.array(df['Date'])
 
     plt.figure()
     plt.pie( y , labels=df.index, autopct=__autopct_fun(y),startangle=9, shadow=True)
@@ -266,6 +266,7 @@ def plot_confusion_matrix_cm_OUT(cf_matrix, path = None, title_str ='Seaborn Con
     #ax = sns.heatmap(cf_matrix, annot=labels, fmt='', cmap='Blues')
     # ax = sns.heatmap(cf_matrix / np.sum(cf_matrix), annot=True,
     #                  fmt='.2%', cmap='Blues')
+    print("annot NEGATIVES: ", annot[0]," POSITIVEs: ", annot[1])
     ax =  sns.heatmap(cm, annot=annot, fmt='', cmap='Blues')
 
     ax.set_title(title_str);
@@ -300,20 +301,38 @@ def plot_relationdist_main_val_and_all_rest_val(df, main_name = 'buy_sell_point'
     gs = gridspec.GridSpec(30, 1)
     for i, ele_B in enumerate(df[features]):
         plt.figure()
-        # condition_filter_b = (df[ele_B] == df[ele_B])#se recoge la condicion para incluir a todos
-        # if ele_B.startswith("cdl_"):
-        #     #Es un padron de vela se trata distinto, para que se vea bonito
-        #     max_b = 100
-        #     min_b = -100
-        #     condition_filter_b = (df[ele_B] == max_b) | (df[ele_B] == min_b)
-        sns.distplot(df[ele_B][(df[main_name] == 1)], bins=50)
-        sns.distplot(df[ele_B][(df[main_name] == 0)], bins=50)
-        # plt.set_xlabel('')
-        # plt.set_title('Feature: ' + str(ELEMENT_B))
+        if (ele_B.startswith('cdl_') or ele_B.startswith('mcrh_') or  ele_B.startswith('pcrh_')or  ele_B.startswith('has_') or ('_crash' in ele_B) ):
+
+            x, y =  ele_B , main_name
+
+            df1 = df.groupby(x)[y].value_counts(normalize=True)
+            df1 = df1.mul(100)
+            df1 = df1.rename('percent').reset_index()
+
+            g = sns.catplot(x=x, y='percent', hue=y, kind='bar', data=df1)
+            g.ax.set_ylim(0, 100)
+
+            for p in g.ax.patches:
+                txt = str(p.get_height().round(2)) + '%'
+                txt_x = p.get_x()
+                txt_y = p.get_height()
+                g.ax.text(txt_x, txt_y, txt)
+        else:
+            # condition_filter_b = (df[ele_B] == df[ele_B])#se recoge la condicion para incluir a todos
+            # if ele_B.startswith("cdl_"):
+            #     #Es un padron de vela se trata distinto, para que se vea bonito
+            #     max_b = 100
+            #     min_b = -100
+            #     condition_filter_b = (df[ele_B] == max_b) | (df[ele_B] == min_b)
+            sns.distplot(df[ele_B][(df[main_name] == 1)], bins=50)
+            sns.distplot(df[ele_B][(df[main_name] == 0)], bins=50)
+            # plt.set_xlabel('')
+            # plt.set_title('Feature: ' + str(ELEMENT_B))
         plt.title("Count relation values:\n" + main_name + "__" + ele_B)
         if path is not None:
             print(path + main_name + "__" + ele_B + ".png")
             plt.savefig(path + main_name + "__" + ele_B + ".png")
+
 
 
 def plot_average_precision_score(y_test, scores,path = None):

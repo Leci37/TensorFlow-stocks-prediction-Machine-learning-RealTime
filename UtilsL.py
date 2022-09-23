@@ -8,6 +8,86 @@ from LogRoot.Logging import Logger
 
 DF_URLS_STOCKS = pd.read_csv('URL_Stocks_DONTDEL.csv', sep='|')
 
+ALL_COLUMNS_NAME = ["Date", "Open", "High", "Low", "Close", "Volume", "per_Close", "per_Volume", "buy_sell_point",
+                    "has_preMarket", "per_preMarket",
+
+                    "olap_BBAND_UPPER", "olap_BBAND_MIDDLE", "olap_BBAND_LOWER","olap_BBAND_UPPER_crash", "olap_BBAND_LOWER_crash",  "olap_HT_TRENDLINE", "olap_MIDPOINT",
+                    "olap_MIDPRICE", "olap_SAR", "olap_SAREXT", "olap_ALMA_10_60_085", "olap_HWMA_02_01_01",
+                    "olap_JMA_7_0", "olap_MCGD_10", "olap_PWMA_10", "olap_SINWMA_14", "olap_SSF_10_2", "olap_SWMA_10",
+                    "olap_VWMA_10",
+
+                    "mtum_ADX", "mtum_ADXR", "mtum_APO", "mtum_AROON_down", "mtum_AROON_up", "mtum_AROONOSC",
+                    "mtum_BOP", "mtum_CCI", "mtum_CMO", "mtum_DX", "mtum_MACD", "mtum_MACD_signal", "mtum_MACD_list","mtum_MACD_crash",
+                    "mtum_MACD_ext", "mtum_MACD_ext_signal", "mtum_MACD_ext_list","mtum_MACD_ext_crash", "mtum_MACD_fix",
+                    "mtum_MACD_fix_signal", "mtum_MACD_fix_list", "mtum_MACD_fix_crash", "mtum_MFI", "mtum_MINUS_DI", "mtum_MINUS_DM",
+                    "mtum_MOM", "mtum_PLUS_DI", "mtum_PLUS_DM", "mtum_PPO", "mtum_ROC", "mtum_ROCP", "mtum_ROCR",
+                    "mtum_ROCR100", "mtum_RSI", "mtum_STOCH_k", "mtum_STOCH_d", "mtum_STOCH_kd","mtum_STOCH_crash", "mtum_STOCH_Fa_k",
+                    "mtum_STOCH_Fa_d", "mtum_STOCH_Fa_kd","mtum_STOCH_Fa_crash", "mtum_STOCH_RSI_k", "mtum_STOCH_RSI_d", "mtum_STOCH_RSI_kd","mtum_STOCH_RSI_crash",
+                    "mtum_TRIX", "mtum_ULTOSC", "mtum_WILLIAMS_R", "mtum_AO_5_34", "mtum_BIAS_SMA_26", "mtum_AR_26",
+                    "mtum_BR_26", "mtum_CFO_9", "mtum_CG_10", "mtum_CTI_12", "mtum_DMP_14", "mtum_DMN_14", "mtum_ER_10",
+                    "mtum_BULLP_13", "mtum_BEARP_13", "mtum_FISHERT_9_1", "mtum_FISHERTs_9_1", "mtum_INERTIA_20_14",
+                    "mtum_K_9_3", "mtum_D_9_3", "mtum_J_9_3", "mtum_PGO_14", "mtum_PSL_12", "mtum_PVO_12_26_9",
+                    "mtum_PVOh_12_26_9", "mtum_PVOs_12_26_9", "mtum_QQE_14_5_4236_RSIMA", "mtum_QQEl_14_5_4236",
+                    "mtum_QQEs_14_5_4236", "mtum_RSX_14", "mtum_STC_10_12_26_05", "mtum_STCmacd_10_12_26_05",
+                    "mtum_STCstoch_10_12_26_05", "mtum_SMI_5_20_5", "mtum_SMIs_5_20_5",
+                    "mtum_SMIo_5_20_5", "mtum_murrey_math", "mtum_td_seq", "mtum_td_seq_sig",
+
+                    "perf_CUMLOGRET_1", "perf_CUMPCTRET_1", "perf_z_30_1", "perf_ha", "tend_LDECAY_5", "tend_PSARl_002_02",
+                    "tend_PSARs_002_02", "tend_PSARaf_002_02", "tend_PSARr_002_02", "tend_VHF_28", "tend_renko_TR",
+                    "tend_renko_ATR", "tend_renko_brick", "tend_renko_change",
+
+                    "volu_Chaikin_AD", "volu_Chaikin_ADOSC", "volu_OBV", "volu_EFI_13", "volu_NVI_1", "volu_PVI_1",
+                    "volu_PVOL", "volu_PVR", "volu_PVT",
+
+                    "vola_ATR", "vola_NATR", "vola_TRANGE", "vola_HWM", "vola_HWU", "vola_HWL", "vola_KCLe_20_2",
+                    "vola_KCBe_20_2", "vola_KCUe_20_2", "vola_RVI_14", "vola_THERMO_20_2_05", "vola_THERMOma_20_2_05",
+                    "vola_THERMOl_20_2_05", "vola_THERMOs_20_2_05", "vola_TRUERANGE_1", "vola_UI_14",
+
+                    "cycl_DCPERIOD", "cycl_DCPHASE",
+                    "cycl_PHASOR_inph", "cycl_PHASOR_quad", "cycl_SINE_sine", "cycl_SINE_lead",
+                    "cycl_HT_TRENDMODE", "cycl_EBSW_40_10",
+
+                    "sti_BETA", "sti_CORREL", "sti_LINEARREG", "sti_LINEARREG_ANGLE", "sti_LINEARREG_INTERCEPT",
+                    "sti_LINEARREG_SLOPE", "sti_STDDEV", "sti_TSF", "sti_VAR", "sti_ENTP_10", "sti_KURT_30",
+                    "sti_TOS_STDEVALL_LR", "sti_TOS_STDEVALL_L_1", "sti_TOS_STDEVALL_U_1", "sti_TOS_STDEVALL_L_2",
+                    "sti_TOS_STDEVALL_U_2", "sti_TOS_STDEVALL_L_3", "sti_TOS_STDEVALL_U_3", "sti_ZS_30",
+
+                    "ma_DEMA_5", "ma_EMA_5", "ma_KAMA_5", "ma_SMA_5", "ma_T3_5", "ma_TEMA_5", "ma_TRIMA_5", "ma_WMA_5",
+                    "ma_DEMA_10", "ma_EMA_10", "ma_KAMA_10", "ma_SMA_10", "ma_T3_10", "ma_TEMA_10", "ma_TRIMA_10",
+                    "ma_WMA_10", "ma_DEMA_20", "ma_EMA_20", "ma_KAMA_20", "ma_SMA_20", "ma_T3_20", "ma_TEMA_20",
+                    "ma_TRIMA_20", "ma_WMA_20", "ma_DEMA_50", "ma_EMA_50", "ma_KAMA_50", "ma_SMA_50", "ma_T3_50",
+                    "ma_TEMA_50", "ma_TRIMA_50", "ma_WMA_50", "ma_DEMA_100", "ma_EMA_100", "ma_KAMA_100", "ma_SMA_100",
+                    "ma_T3_100", "ma_TEMA_100", "ma_TRIMA_100", "ma_WMA_100",
+
+                    "trad_s3", "trad_s2", "trad_s1", "trad_pp", "trad_r1", "trad_r2", "trad_r3", "clas_s3", "clas_s2",
+                    "clas_s1", "clas_pp", "clas_r1", "clas_r2", "clas_r3", "fibo_s3", "fibo_s2", "fibo_s1", "fibo_pp",
+                    "fibo_r1", "fibo_r2", "fibo_r3", "wood_s3", "wood_s2", "wood_s1", "wood_pp", "wood_r1", "wood_r2",
+                    "wood_r3", "demark_s1", "demark_pp", "demark_r1", "cama_s3", "cama_s2", "cama_s1", "cama_pp",
+                    "cama_r1", "cama_r2", "cama_r3",
+
+                    "ti_acc_dist", "ti_chaikin_10_3", "ti_choppiness_14", "ti_coppock_14_11_10", "ti_donchian_lower_20",
+                    "ti_donchian_center_20", "ti_donchian_upper_20", "ti_ease_of_movement_14", "ti_force_index_13",
+                    "ti_hma_20", "ti_kelt_20_lower", "ti_kelt_20_upper", "ti_mass_index_9_25", "ti_supertrend_20",
+                    "ti_vortex_pos_5", "ti_vortex_neg_5", "ti_vortex_pos_14", "ti_vortex_neg_14",
+
+                    "ichi_tenkan_sen", "ichi_kijun_sen", "ichi_senkou_a", "ichi_senkou_b", "ichi_isin_cloud",
+                    "ichi_crash", "ichi_chikou_span",
+
+
+                    "cdl_2CROWS", "cdl_3BLACKCROWS", "cdl_3INSIDE", "cdl_3LINESTRIKE", "cdl_3OUTSIDE",
+                    "cdl_3STARSINSOUTH", "cdl_3WHITESOLDIERS", "cdl_ABANDONEDBABY", "cdl_ADVANCEBLOCK", "cdl_BELTHOLD",
+                    "cdl_BREAKAWAY", "cdl_CLOSINGMARUBOZU", "cdl_CONCEALBABYSWALL", "cdl_COUNTERATTACK",
+                    "cdl_DARKCLOUDCOVER", "cdl_DOJI", "cdl_DOJISTAR", "cdl_DRAGONFLYDOJI", "cdl_ENGULFING",
+                    "cdl_EVENINGDOJISTAR", "cdl_EVENINGSTAR", "cdl_GAPSIDESIDEWHITE", "cdl_GRAVESTONEDOJI",
+                    "cdl_HAMMER", "cdl_HANGINGMAN", "cdl_HARAMI", "cdl_HARAMICROSS", "cdl_HIGHWAVE", "cdl_HIKKAKE",
+                    "cdl_HIKKAKEMOD", "cdl_HOMINGPIGEON", "cdl_IDENTICAL3CROWS", "cdl_INNECK", "cdl_INVERTEDHAMMER",
+                    "cdl_KICKING", "cdl_KICKINGBYLENGTH", "cdl_LADDERBOTTOM", "cdl_LONGLEGGEDDOJI", "cdl_LONGLINE",
+                    "cdl_MARUBOZU", "cdl_MATCHINGLOW", "cdl_MATHOLD", "cdl_MORNINGDOJISTAR", "cdl_MORNINGSTAR",
+                    "cdl_ONNECK", "cdl_PIERCING", "cdl_RICKSHAWMAN", "cdl_RISEFALL3METHODS", "cdl_SEPARATINGLINES",
+                    "cdl_SHOOTINGSTAR", "cdl_SHORTLINE", "cdl_SPINNINGTOP", "cdl_STALLEDPATTERN", "cdl_STICKSANDWICH",
+                    "cdl_TAKURI", "cdl_TASUKIGAP", "cdl_THRUSTING", "cdl_TRISTAR", "cdl_UNIQUE3RIVER",
+                    "cdl_UPSIDEGAP2CROWS", "cdl_XSIDEGAP3METHODS"
+                    ]
 
 def first_n_digits(num, n):
     return num // 10 ** (int(math.log(num, 10)) - n + 1)

@@ -6,8 +6,11 @@ import UtilsL
 #from predict_example import kaggle_stock_market_Tech
 import Utils_buy_sell_points
 import Utils_plotter
+import talib_technical_crash_points
 import talib_technical_funtions
 import talib_technical_PY_TI
+import talib_technical_pandas_TA
+import talib_technical_pandas_TU
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -95,7 +98,6 @@ def get_json_stock_values_history(stockId, opion, get_technical_data = False, pr
 
     if df_his is None:
         Logger.logr.debug("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  is NONE stock: " + stockId)
-
     else:
         if get_technical_data:
             df_his = add_variation_percentage(df_his)
@@ -105,6 +107,12 @@ def get_json_stock_values_history(stockId, opion, get_technical_data = False, pr
             df_his = talib_technical_funtions.gel_all_TALIB_funtion(df_his) #siempre ordenada la fecha de mas a menos TODO exception
             df_his = talib_technical_PY_TI.get_all_pivots_points(df_his)
             df_his = talib_technical_PY_TI.get_py_TI_indicator(df_his)
+            df_his = talib_technical_pandas_TA.get_all_pandas_TA_tecnical(df_his)
+            df_his = talib_technical_pandas_TU.get_all_pandas_TU_tecnical(df_his)
+            df_his = talib_technical_crash_points.get_ALL_CRASH_funtion(df_his)
+            # df_his.columns
+            # df_his = df_his[UtilsL.ALL_COLUMNS_NAME]
+
             df_his = df_his.round(6)
         df_his['Date'] = df_his['Date'].astype(str)
         df_his.reset_index(drop=True, inplace=True)
