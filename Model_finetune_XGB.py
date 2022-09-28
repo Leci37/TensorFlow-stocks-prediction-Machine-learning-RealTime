@@ -1,4 +1,4 @@
-import Model_sklearn_XGB
+import Model_train_sklearn_XGB
 import Utils_col_sele
 import xgboost as xgb
 
@@ -10,7 +10,7 @@ v = Utils_col_sele.DICT_COLUMNS_TYPES[k]
 # for k , v in Utils_col_sele.DICT_COLUMNS_TYPES:
 columns_selection = ['Date', Y_TARGET, 'ticker'] + v
 print("DICT_COLUMNS_TYPES: " +k+" Columns Selected:" + ', '.join(columns_selection))
-X_train, X_test, y_train, y_test = Model_sklearn_XGB.get_x_y_train_test_sklearn_XGB(columns_selection)
+X_train, X_test, y_train, y_test = Model_train_sklearn_XGB.get_x_y_train_test_sklearn_XGB(columns_selection, path="d_price/FAV_SCALA_stock_history_MONTH_3.csv")
 
 """Ok, now we're talking. Any chances of getting better with optimization?"""
 xgb_model = xgb.XGBClassifier(
@@ -40,7 +40,11 @@ CV_GBM = GridSearchCV(estimator = xgb_model,
                       n_jobs = -1,
                       refit = True)
 print("START CV_GBM.fit  ")
-CV_GBM.fit(X_train, y_train, verbose=2)
+CV_GBM.fit(X_train, y_train, verbose=10)
 
 CV_GBM.best_params_
 print(CV_GBM.best_params_)
+
+# TEST PARAM:  {'max_depth': [1, 3, 5], 'min_child_weight': [1, 3, 5], 'n_estimators': [100, 200, 500, 1000], 'learning_rate': [0.1, 0.01, 0.05], 'scale_pos_weight': [1, 0.1, 0.01, 1.0]}
+# START CV_GBM.fit
+# {'learning_rate': 0.1, 'max_depth': 5, 'min_child_weight': 1, 'n_estimators': 500, 'scale_pos_weight': 0.01}
