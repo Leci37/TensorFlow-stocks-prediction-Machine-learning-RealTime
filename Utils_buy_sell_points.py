@@ -3,30 +3,31 @@ import pandas as pd
 from math import atan, pi
 from datetime import datetime
 
-import yhoo_history_stock
+import Utils_Yfinance
 from LogRoot.Logging import Logger
 from sklearn.metrics import confusion_matrix
-
+Y_TARGET = 'buy_sell_point'
 
 import Utils_plotter
 
-TALERANCE_OF_LOST = 0.95  # porcentage del 5% 0.95
-#df_r['sell_value']
-def rollup_detect_sell_price(rolling_col_slection):
+MARGIN_LOST_WIN = 0.05  # porcentage del 5% 0.95
+TOLERANCE_LOST = 1 - MARGIN_LOST_WIN
+def rolling_get_sell_price_POS(rolling_col_slection):
     rolling_col_slection = [x + 100 for x in rolling_col_slection]
     start_value_buy = rolling_col_slection[0]
+
     update_value = start_value_buy
     for i in range(1, len(rolling_col_slection)):
         next_value = rolling_col_slection[i]
 
-        if start_value_buy * (TALERANCE_OF_LOST + 0.025) > next_value:
+        if start_value_buy * (TOLERANCE_LOST + 0.025) > next_value:
             #print("STOP LOSS after n interactions (by start) Win: ", next_value - start_value_buy, " n: ",i)  # " ".join(str(p) for p in a) )
             return start_value_buy * (
-                        TALERANCE_OF_LOST + 0.025) - 100  # * TALERANCE_OF_LOST -100  #end_point_if -start_value_buy
-        if update_value * (TALERANCE_OF_LOST + i / 220) > next_value:  # cada pasada de i se vuelve mas exigente
+                    TOLERANCE_LOST + 0.025) - 100  # * TALERANCE_OF_LOST -100  #end_point_if -start_value_buy
+        if update_value * (TOLERANCE_LOST + i / 220) > next_value:  # cada pasada de i se vuelve mas exigente
             #print("STOP LOSS after n interactions (by update) Win: ", next_value - start_value_buy, " n: ",i)  # " ".join(str(p) for p in a) )
             return update_value * (
-                        TALERANCE_OF_LOST + i / 220) - 100  # * (TALERANCE_OF_LOST + i/220)  -100   #end_point_if -start_value_buy
+                    TOLERANCE_LOST + i / 220) - 100  # * (TALERANCE_OF_LOST + i/220)  -100   #end_point_if -start_value_buy
 
         if next_value > update_value:
             update_value = next_value
@@ -34,8 +35,60 @@ def rollup_detect_sell_price(rolling_col_slection):
     #print("TAKE PROFICT after: ", len(rolling_col_slection), "interactions Win: ",update_value - start_value_buy)  # , i , " ".join(str(p) for p in a) )
     return update_value - 100
 
+TOLERANCE_WIN = 1 + MARGIN_LOST_WIN
+def rolling_get_sell_price_NEG(rolling_col_slection):
+    #si el next_value SUBE se tira fuera
+    rolling_col_slection = [x + 100 for x in rolling_col_slection]
+    start_value_buy = rolling_col_slection[0]
+    update_value = start_value_buy
+    for i in range(1, len(rolling_col_slection)):
+        next_value = rolling_col_slection[i]
 
-def get_buy_sell_points(df_stock):
+        if start_value_buy * (TOLERANCE_WIN - 0.025) < next_value:
+            #print("STOP LOSS after n interactions (by start) Win: ", next_value - start_value_buy, " n: ",i)  # " ".join(str(p) for p in a) )
+            return start_value_buy * (TOLERANCE_WIN - 0.025) - 100  # * TALERANCE_OF_LOST -100  #end_point_if -start_value_buy
+        if update_value * (TOLERANCE_WIN - i / 220) < next_value:  # cada pasada de i se vuelve mas exigente
+            #print("STOP LOSS after n interactions (by update) Win: ", next_value - start_value_buy, " n: ",i)  # " ".join(str(p) for p in a) )
+            return update_value * (TOLERANCE_WIN - i / 220) - 100  # * (TALERANCE_OF_LOST + i/220)  -100   #end_point_if -start_value_buy
+
+        if next_value < update_value:
+            update_value = next_value
+
+    #print("TAKE PROFICT after: ", len(rolling_col_slection), "interactions Win: ",update_value - start_value_buy)  # , i , " ".join(str(p) for p in a) )
+    return update_value - 100
+
+
+
+def get_buy_sell_points_Roll(df_stock):
+    df_stock['sell_value_POS'] = df_stock.Close.shift(-12).rolling( min_periods = 1, window=12).apply(rolling_get_sell_price_POS)
+    #df_stock['PROFIT_POS'] = (df_stock['sell_value_POS'] + 100) - (df_stock['Close'] + 100)
+    df_stock['per_PROFIT_POS'] = (df_stock['sell_value_POS'] * 100) / df_stock['Close'] - 100
+
+    df_stock['sell_value_NEG'] = df_stock.Close.shift(-12).rolling(min_periods=1, window=12).apply(rolling_get_sell_price_NEG)
+    #df_stock['PROFIT_NEG'] = (df_stock['sell_value_NEG'] + 100) - (df_stock['Close'] + 100)
+    df_stock['per_PROFIT_NEG'] = (df_stock['sell_value_NEG'] * 100) / df_stock['Close'] - 100
+
+    df_threshold = df_stock['per_PROFIT_NEG'].describe(percentiles=[0.02, 0.06]).round(4)
+    Threshold_MIN_2 = df_threshold["2%"]
+    Threshold_MIN_5 = df_threshold["6%"]
+    df_threshold = df_stock['per_PROFIT_POS'].describe(percentiles=[ 0.94, 0.98]).round(4)
+    Threshold_MAX_95 = df_threshold["94%"]
+    Threshold_MAX_98 = df_threshold["98%"]
+    Logger.logr.info("Parameters of acquisition \"buy_sell_points\" for this stock is set to \t2%: "+ str(Threshold_MIN_2) + " \t5%: "+ str(Threshold_MIN_5) +" \t95%: "+ str(Threshold_MAX_95) +" \t98%: "+ str(Threshold_MAX_98) )
+
+
+    df_stock.insert(loc=1, column=Y_TARGET, value=0)
+    df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_5, Y_TARGET] = -100
+    df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_2, Y_TARGET] = -101
+    df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_95, Y_TARGET] = 100
+    df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_98, Y_TARGET] = 101
+
+    df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','per_PROFIT_NEG', 'per_PROFIT_POS'], errors='ignore')
+    #df_stock[df_stock['Volume'] != 0].groupby(Y_TARGET).count()
+
+    return df_stock[Y_TARGET]
+
+def get_buy_sell_points_Arcos(df_stock):
     LEN_DF = len(df_stock)
     pd.options.mode.chained_assignment = None
 
@@ -52,11 +105,12 @@ def get_buy_sell_points(df_stock):
         Logger.logr.info("Past buying and selling points are taken YEARLY PER_NON_NOISE: " +str(
             PER_NON_NOISE)+ " PER_ARCO_DETECT: " + str(PER_ARCO_DETECT) )
 
-    df_stock['arco_member'] = 0.0
-    df_stock['arco_member_per_var'] = 0.0
+
+    df_stock.insert(loc=len(df_stock.columns), column='arco_member', value=0.0)
+    df_stock.insert(loc=len(df_stock.columns), column='arco_member_per_var', value=0.0)
+    df_stock.insert(loc=len(df_stock.columns), column='tendency', value=False)
     arco_menber_letter = 1
 
-    df_stock['tendency'] = False
     df_stock.loc[df_stock['per_Close'] >= 0, 'tendency'] = True
     df_stock.loc[df_stock['per_Close'] < 0, 'tendency'] = False
     per_change_arco = 0
@@ -166,7 +220,7 @@ def get_buy_sell_points(df_stock):
 
     return df_stock
 
-def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "d_price/plot_confusion_matrix_.png", SUM_RESULT_2_VALID = 1.45, generate_CM_for_each_ticker = False):
+def check_buy_points_prediction(df, result_column_name = 'result', path_cm =  "d_price/plot_confusion_matrix_.png", SUM_RESULT_2_VALID = 1.45, generate_CM_for_each_ticker = False):
     LEN_DF = len(df)
     #ESTO ES LA SUMA DE FILA  N + (N-1) SI ESTO DA MAS DE 1.45 SE TOMA COMO PUNTO DE COMPRA VALIDO
 
@@ -183,7 +237,7 @@ def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "
     #RESET de per_close
     df['Close'] = df['Close'] + 100
     for t in list_ticker_stocks:
-        df[df['ticker'] == t] = yhoo_history_stock.add_variation_percentage(df[df['ticker'] == t])
+        df[df['ticker'] == t] = Utils_Yfinance.add_variation_percentage(df[df['ticker'] == t])
 
     l2 = ["Date",'ticker', result_column_name, "Close", "per_Close", 'has_preMarket'] #  "buy_sell_point",
     df = df[l2]
