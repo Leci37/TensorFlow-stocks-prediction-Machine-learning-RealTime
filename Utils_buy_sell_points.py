@@ -1,3 +1,4 @@
+import numpy
 import pandas as pd
 from math import atan, pi
 from datetime import datetime
@@ -9,9 +10,34 @@ from sklearn.metrics import confusion_matrix
 
 import Utils_plotter
 
+TALERANCE_OF_LOST = 0.95  # porcentage del 5% 0.95
+#df_r['sell_value']
+def rollup_detect_sell_price(rolling_col_slection):
+    rolling_col_slection = [x + 100 for x in rolling_col_slection]
+    start_value_buy = rolling_col_slection[0]
+    update_value = start_value_buy
+    for i in range(1, len(rolling_col_slection)):
+        next_value = rolling_col_slection[i]
+
+        if start_value_buy * (TALERANCE_OF_LOST + 0.025) > next_value:
+            #print("STOP LOSS after n interactions (by start) Win: ", next_value - start_value_buy, " n: ",i)  # " ".join(str(p) for p in a) )
+            return start_value_buy * (
+                        TALERANCE_OF_LOST + 0.025) - 100  # * TALERANCE_OF_LOST -100  #end_point_if -start_value_buy
+        if update_value * (TALERANCE_OF_LOST + i / 220) > next_value:  # cada pasada de i se vuelve mas exigente
+            #print("STOP LOSS after n interactions (by update) Win: ", next_value - start_value_buy, " n: ",i)  # " ".join(str(p) for p in a) )
+            return update_value * (
+                        TALERANCE_OF_LOST + i / 220) - 100  # * (TALERANCE_OF_LOST + i/220)  -100   #end_point_if -start_value_buy
+
+        if next_value > update_value:
+            update_value = next_value
+
+    #print("TAKE PROFICT after: ", len(rolling_col_slection), "interactions Win: ",update_value - start_value_buy)  # , i , " ".join(str(p) for p in a) )
+    return update_value - 100
+
 
 def get_buy_sell_points(df_stock):
     LEN_DF = len(df_stock)
+    pd.options.mode.chained_assignment = None
 
 
     PER_NON_NOISE = 1 #0.5  # porcentage por el cual una pequeña bajada o subida se pasa a considerar ruido
@@ -40,6 +66,8 @@ def get_buy_sell_points(df_stock):
         i_next = 1
         if LEN_DF <= c+i_next:
             Logger.logr.debug("END THE LOOP return  c+i_next: " + str( c-i_next ))
+            continue
+        if numpy.isnan(df_stock['per_Close'][c-1]):
             continue
 
         # cateto_opuesto = df_stock['Close'][c] - df_stock['Close'][c - i_next]
@@ -134,9 +162,11 @@ def get_buy_sell_points(df_stock):
      'arco_member_SUM2','buy_sell_point_count', 'buy_sell_point_count2', #     parece un dato relevante  'buy_sell_point_count',
      'buy_sell_point2'], 1)
 
+    pd.options.mode.chained_assignment = 'warn'
+
     return df_stock
 
-def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "d_price/plot_confusion_matrix_.png", SUM_RESULT_2_VALID = 1.45):
+def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "d_price/plot_confusion_matrix_.png", SUM_RESULT_2_VALID = 1.45, generate_CM_for_each_ticker = False):
     LEN_DF = len(df)
     #ESTO ES LA SUMA DE FILA  N + (N-1) SI ESTO DA MAS DE 1.45 SE TOMA COMO PUNTO DE COMPRA VALIDO
 
@@ -144,7 +174,7 @@ def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "
     #tickers_col = col.startswith('ticker_')
 
     list_ticker_stocks = [col for col in df if col.startswith('ticker_')]#todas las que empiecen por ticker_ , son variables tontas
-    df['ticker'] = df[list_ticker_stocks].idxmax(axis=1) #undo dummi variable
+    df['ticker'] = df[list_ticker_stocks].idxmax(axis=1) #undo dummy variable
     df.drop(columns=list_ticker_stocks, inplace=True)
 
     df = df.sort_values(by=['ticker', "Date"], ascending=True)
@@ -190,30 +220,40 @@ def check_buy_points_prediction (df, result_column_name = 'result', path_cm =  "
     # df["per_Close_12dif"] = df['per_Close'].shift(-12).rolling(12).mean() - df['per_Close']  # df['per_Close'].shift(-12) - df['per_Close'].shift(-12).rolling(12).mean()
 
     df[df['is_result_buy'] == True]["per_Close_5"].mean()
-
     df[["Date",'ticker', result_column_name,"is_result_buy" , "result_sum", "per_Close_5", "per_Close_12"]]
 
     df["isValid_to_buy"] = False
     #df.loc[ (df['result_sum'] > SUM_RESULT_2_VALID)   &  (df["per_Close_12"] > 20) & (df["per_Close_5"] > 8), "isValid_to_buy"] = True
     #(df['result_sum'] > SUM_RESULT_2_VALID) no es relevante para si es punto de compra o no
+    #df.loc[ (df["per_Close_12"] > 14) & (df["per_Close_5"] > 5), "isValid_to_buy"] = True
     df.loc[ (df["per_Close_12"] > 14) & (df["per_Close_5"] > 5), "isValid_to_buy"] = True
 
     print(df[['Date', 'ticker', "isValid_to_buy"]].groupby(["ticker","isValid_to_buy"]).count() )
     print(df[['Date', 'ticker', "is_result_buy"]].groupby(["ticker","is_result_buy"]).count() )
 
-    for t in list_ticker_stocks:
-        dfn = pd.DataFrame()
-        dfn = df[df['ticker'] == t]
-        cf_matrix = confusion_matrix(  dfn["isValid_to_buy"].astype(int), dfn["is_result_buy"].astype(int))
 
-        print(path_cm+ " MATRIX: "+str(cf_matrix))
-        if cf_matrix.shape[0] == 2 and cf_matrix.shape[1] == 2:
-            Utils_plotter.plot_confusion_matrix_cm_OUT(cf_matrix,path= path_cm + str(t)+"_.png", title_str ="\n" + str(t))
-        else:
-            print("WARN la shape de la confusion matrix no es (2,2)",path_cm+ " MATRIX: "+str(cf_matrix))
+    if generate_CM_for_each_ticker:
+        for t in list_ticker_stocks:
+            dfn = pd.DataFrame()
+            dfn = df[df['ticker'] == t]
+            cf_matrix = confusion_matrix(  dfn["isValid_to_buy"].astype(int), dfn["is_result_buy"].astype(int))
 
+            print(path_cm+ " MATRIX: "+str(cf_matrix))
+            if cf_matrix.shape[0] == 2 and cf_matrix.shape[1] == 2:
+                Utils_plotter.plot_confusion_matrix_cm_OUT(cf_matrix,path= path_cm + str(t)+"_.png", title_str ="\n" + str(t))
+            else:
+                print("WARN la shape de la confusion matrix no es (2,2)",path_cm+ " MATRIX: "+str(cf_matrix))
 
-    df = df[l2]
+    cf_matrix = confusion_matrix(df["isValid_to_buy"].astype(int), df["is_result_buy"].astype(int))
+    print(path_cm + " MATRIX: " + str(cf_matrix))
+    if cf_matrix.shape[0] == 2 and cf_matrix.shape[1] == 2:
+        Utils_plotter.plot_confusion_matrix_cm_OUT(cf_matrix, path=path_cm +"full_.png", title_str="\n" + "FULL")
+    else:
+        print("WARN la shape de la confusion matrix no es (2,2)", path_cm + " MATRIX: " + str(cf_matrix))
+
+    #df = df[l2]
+    df["isValid_to_buy"] = df["isValid_to_buy"].astype(int)
+    return df["isValid_to_buy"].values
 
 
 
