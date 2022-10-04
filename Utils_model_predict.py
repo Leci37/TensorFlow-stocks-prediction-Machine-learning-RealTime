@@ -5,8 +5,15 @@ from tensorflow import keras
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
+import UtilsL
 
-ALL_METRICS = [
+METRICS_ACCU_PRE = [
+      #keras.metrics.TrueNegatives(name='tn'),
+      keras.metrics.BinaryAccuracy(name='accuracy')
+      #keras.metrics.Precision(name='precision')
+]
+
+METRICS_ALL = [
       keras.metrics.TruePositives(name='tp'),
       keras.metrics.FalsePositives(name='fp'),
       keras.metrics.TrueNegatives(name='tn'),
@@ -55,11 +62,35 @@ CANDLE_COLUMNS = ["cdl_2CROWS", "cdl_3BLACKCROWS", "cdl_3INSIDE", "cdl_3LINESTRI
 
 COLUMNS_VALIDS = NUMERIC_FEATURE_NAMES + CANDLE_COLUMNS
 
+#Too mach null in this columns
+DROPS_COLUMNS = ["ma_DEMA_50","ma_T3_20","mtum_TRIX", "ma_WMA_50","ma_EMA_100","ma_KAMA_100","ma_SMA_100","ma_TRIMA_100","ma_WMA_100"]
+
+
+def load_and_clean_DF_Train( path,columns_selection = [], Y_TARGET = 'buy_sell_point' ):
+    # https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
+    raw_df = pd.read_csv(path, index_col=False, sep='\t')
+    if not columns_selection:
+        print("columns_selection List is empty, works trains with all default columns")
+    else:
+        print("columns_selection List HAS vulues, works trains with: " + ', '.join(columns_selection))
+        raw_df = raw_df[columns_selection]
+        if 'ti_acc_dist' in raw_df.columns:
+            raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ti_acc_dist")
+
+    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace([101, -101], [100, -100])
+    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace(-100, 0)  # Solo para puntos de compra
+    print(raw_df[['Date', Y_TARGET]].groupby(Y_TARGET).count())
+    raw_df = cast_Y_label_binary(raw_df, label_name=Y_TARGET)
+    df = clean_redifine_df(raw_df)
+    return df
+
+
+
 
 def cast_Y_label_binary(raw_df, label_name = 'buy_sell_point'):
 
     Y_target_classes = raw_df[label_name].unique().tolist()
-    Y_target_classes.sort(reverse=True)#nothing must be the first
+    Y_target_classes.sort(reverse=False)#nothing must be the first
     print(f"Label classes: {Y_target_classes}")
     raw_df[label_name] = raw_df[label_name].map(Y_target_classes.index)
 
@@ -76,7 +107,8 @@ def clean_redifine_df(raw_df):
     # You don't want the `Time` column.
     if 'Date' in cleaned_df.columns:
         cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
-    cleaned_df = cleaned_df[COLUMNS_VALIDS]
+    #cleaned_df = cleaned_df[COLUMNS_VALIDS]
+    cleaned_df = cleaned_df.drop(columns=DROPS_COLUMNS, errors='ignore')
     if 'ticker' in cleaned_df.columns:
         cleaned_df = pd.get_dummies(cleaned_df, columns = [ 'ticker'])
     cleaned_df = cleaned_df.dropna()
@@ -84,10 +116,20 @@ def clean_redifine_df(raw_df):
     return cleaned_df
 
 
+def scaler_Raw_TF_onbalance(test_df, label_name = 'buy_sell_point'):
+    test_labels = np.array(test_df.pop(label_name))
+    test_features = np.array(test_df)
+    scaler = StandardScaler()
+    test_features = scaler.fit_transform(test_features)
+    test_features = np.clip(test_features, -5, 5)
+    print('Test labels shape:', test_labels.shape)
+    print('Test features shape:', test_features.shape)
+    return test_features,  test_labels
+
 def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point'):
     # Use a utility from sklearn to split and shuffle your dataset.
-    train_df, test_df = train_test_split(cleaned_df, test_size=0.2)
-    train_df, val_df = train_test_split(train_df, test_size=0.2)
+    train_df, test_df = train_test_split(cleaned_df, test_size = 0.28, shuffle=False)
+    train_df, val_df = train_test_split(train_df, test_size = 0.28, shuffle=False)
     # Form np arrays of labels and features.
     train_labels = np.array(train_df.pop(label_name))
     bool_train_labels = train_labels != 0
@@ -112,7 +154,7 @@ def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point'):
     return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
 
 
-def make_model_TF_onbalance(shape_features, metrics=ALL_METRICS, output_bias=None):
+def make_model_TF_onbalance(shape_features, metrics=METRICS_ALL, output_bias=None):
   if output_bias is not None:
     output_bias = keras.initializers.Constant(output_bias)
   model = keras.Sequential([
@@ -126,6 +168,26 @@ def make_model_TF_onbalance(shape_features, metrics=ALL_METRICS, output_bias=Non
 
   model.compile(
       optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+      loss=keras.losses.BinaryCrossentropy(),
+      metrics=metrics)
+
+  return model
+
+
+def make_model_TF_onbalance_fine_1(shape_features,metrics=METRICS_ACCU_PRE, output_bias=None):
+  if output_bias is not None:
+    output_bias = keras.initializers.Constant(output_bias)
+  model = keras.Sequential([
+      keras.layers.Dense(
+          28, activation='relu',
+          input_shape=(shape_features,)),
+      keras.layers.Dropout(0.2),
+      keras.layers.Dense(1, activation='relu',
+                         bias_initializer=output_bias),
+  ])
+
+  model.compile(
+      optimizer=keras.optimizers.Adam(learning_rate=0.001),
       loss=keras.losses.BinaryCrossentropy(),
       metrics=metrics)
 
