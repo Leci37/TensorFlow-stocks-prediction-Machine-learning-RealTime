@@ -196,6 +196,29 @@ def get_crash_points(df, col_name_A, col_name_B, col_result, highlight_result_in
     return df
 
 
+
+
+def add_variation_percentage(df_stock):
+    df_stock['per_Close'] = (df_stock['Close'] * 100 ) / df_stock['Close'].shift(1)  - 100
+    df_stock['per_Volume'] = (df_stock[df_stock['Volume'] != 0]['Volume'] * 100 ) / df_stock[df_stock['Volume'] != 0]['Volume'].shift(1) - 100
+    df_stock['per_Volume'] = df_stock['per_Volume'].fillna(0)
+    df_stock['per_Close'] = df_stock['per_Close'].fillna(0)
+    return df_stock
+
+def add_pre_market_percentage(df_his):
+    df_his.insert(loc=len(df_his.columns), column='has_preMarket', value=False)
+    df_his.insert(loc=len(df_his.columns), column='per_preMarket', value=0)
+
+    for i in range(1, len(df_his)):
+        if pd.to_datetime(df_his['Date'][i], errors='coerce').day != pd.to_datetime(df_his['Date'][i - 1],
+                                                                                    errors='coerce').day:
+            # df_his.at[i, 'pre_market'] = df_his.iloc[i]['Open'] - df_his.iloc[i - 1]['Close']
+            df_his.at[i, 'has_preMarket'] = True
+            df_his.at[i, 'per_preMarket'] = (df_his.iloc[i]['Open'] - df_his.iloc[i - 1]['Close']) * 100 / \
+                                            df_his.iloc[i - 1]['Close']
+    return df_his
+
+
 #aaa = get_root_from_url("https://www.investing.com/search/?q=RIVN")
 #from lxml.etree import tostring
 #inner_html = tostring(aaa)

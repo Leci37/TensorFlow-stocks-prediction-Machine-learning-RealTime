@@ -86,7 +86,7 @@ def get_buy_sell_points_Roll(df_stock):
     df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','per_PROFIT_NEG', 'per_PROFIT_POS'], errors='ignore')
     #df_stock[df_stock['Volume'] != 0].groupby(Y_TARGET).count()
 
-    return df_stock[Y_TARGET]
+    return df_stock
 
 def get_buy_sell_points_Arcos(df_stock):
     LEN_DF = len(df_stock)
