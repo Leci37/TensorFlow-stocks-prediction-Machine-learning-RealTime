@@ -16,7 +16,7 @@ model_folder = "Models/Sklearn_smote/"
 
 
 def get_x_y_train_test_sklearn_XGB( columns_selection = [], path= "d_price/FAV_SCALA_stock_history_MONTH_3.csv"):
-    df = Utils_model_predict.load_and_clean_DF_Train(path, columns_selection)
+    df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path, columns_selection)
     Utils_plotter.plot_pie_countvalues(df, Y_TARGET, stockid="", opion="", path=model_folder)
     # print(df.isnull().sum())
     # Splitting the dataset into the Training set and Test set

@@ -7,15 +7,30 @@ from sklearn.model_selection import train_test_split
 import Utils_col_sele
 import Utils_model_predict
 import Utils_plotter
+import a_manage_stocks_dict
 
-early_stopping = tf.keras.callbacks.EarlyStopping(
-    monitor='val_prc' , #'val_recall', # , #'val_fp' 72 val_tp 74 , 'val_f1' 54, #'val_prc' 60, #'val_recall' 78, #'val_accuracy' 66, #monitor='val_prc' 60,
-    verbose=2,
-    patience=7,
-    mode='max',
-    restore_best_weights=True)
+# early_stopping = tf.keras.callbacks.EarlyStopping(
+#     monitor='loss' , #'monitor argument of tf.keras.callbacks.EarlyStopping has 4 values: 'loss','accuracy','val_loss','val_accuracy'.
+#     verbose=2,
+#     patience=9,
+#     mode='auto',#min_delta=1 By default, any change in the performance measure, no matter how fractional, will be considered an improvement
+#     restore_best_weights=True)
 
+def get_EarlyStopping(model_h5_name):
+    monitor_type = 'val_accuracy'#EarlyStopping has 4 values: 'loss','accuracy','val_loss','val_accuracy'.
+    if a_manage_stocks_dict.MODEL_TYPE_COLM.VGOOD.value in model_h5_name:
+        monitor_type = 'accuracy'
+    elif a_manage_stocks_dict.MODEL_TYPE_COLM.GOOD.value in model_h5_name:
+        monitor_type = 'val_loss'
+    elif a_manage_stocks_dict.MODEL_TYPE_COLM.REG.value in model_h5_name:
+        monitor_type = 'val_loss'
 
+    return tf.keras.callbacks.EarlyStopping(
+        monitor=monitor_type , #'monitor argument of tf.keras.callbacks.EarlyStopping has 4 values: 'loss','accuracy','val_loss','val_accuracy'.
+        verbose=2,
+        patience=9,
+        mode='auto',#min_delta=1 By default, any change in the performance measure, no matter how fractional, will be considered an improvement
+        restore_best_weights=True)
 
 
 Y_TARGET = 'buy_sell_point'
@@ -29,9 +44,9 @@ MODEL_FOLDER_TF = "Models/TF_balance/"
 def train_TF_onBalance(columns_selection = [], model_h5_name = "TF_balance.h5" , path_csv = "d_price/FAV_SCALA_stock_history_MONTH_3.csv"):
     #LOAD
     global train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
-    df = Utils_model_predict.load_and_clean_DF_Train(path_csv, columns_selection)
+    df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path_csv, columns_selection)
     Utils_plotter.plot_pie_countvalues(df, Y_TARGET, stockid="", opion="", path=MODEL_FOLDER_TF)
-    print("df.isnull().sum(): ", df.isnull().sum())
+    # print("df.isnull().sum(): ", df.isnull().sum())
 
     # graficos de relaciones
     # Utils_plotter.plot_relationdist_main_val_and_all_rest_val(df[["mtum_RSI","mtum_STOCH_k","mtum_STOCH_d", Y_TARGET]],Y_TARGET ,path = model_folder+"plot_relationdistplot_")
@@ -68,6 +83,9 @@ def train_TF_onBalance(columns_selection = [], model_h5_name = "TF_balance.h5" ,
     output_layer.bias.assign([0])
     val_ds = tf.data.Dataset.from_tensor_slices((val_features, val_labels)).cache()
     val_ds = val_ds.batch(BATCH_SIZE).prefetch(2)
+
+    early_stopping = get_EarlyStopping(model_h5_name)
+
     resampled_history = resampled_model.fit(
         resampled_ds,
         epochs=EPOCHS,
