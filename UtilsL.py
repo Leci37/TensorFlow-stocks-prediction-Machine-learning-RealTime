@@ -267,8 +267,11 @@ def clean_dataset(df):
 
 
 def fill_last_values_of_colum_with_previos_value(df, colum_name):
-    df[[colum_name]] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
-    df = df.sort_values(['Date', 'ticker'], ascending=True)
+    try:
+        df[[colum_name]] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
+        df = df.sort_values(['Date', 'ticker'], ascending=True)
+    except Exception as e:
+        print(e)
     return df
 
 
