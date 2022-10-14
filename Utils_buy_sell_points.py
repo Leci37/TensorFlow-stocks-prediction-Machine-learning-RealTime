@@ -59,7 +59,7 @@ def rolling_get_sell_price_NEG(rolling_col_slection):
 
 
 
-def get_buy_sell_points_Roll(df_stock):
+def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
     df_stock['sell_value_POS'] = df_stock.Close.shift(-12).rolling( min_periods = 1, window=12).apply(rolling_get_sell_price_POS)
     #df_stock['PROFIT_POS'] = (df_stock['sell_value_POS'] + 100) - (df_stock['Close'] + 100)
     df_stock['per_PROFIT_POS'] = (df_stock['sell_value_POS'] * 100) / df_stock['Close'] - 100
@@ -76,14 +76,15 @@ def get_buy_sell_points_Roll(df_stock):
     Threshold_MAX_98 = df_threshold["98%"]
     Logger.logr.info("Parameters of acquisition \"buy_sell_points\" for this stock is set to \t2%: "+ str(Threshold_MIN_2) + " \t5%: "+ str(Threshold_MIN_5) +" \t95%: "+ str(Threshold_MAX_95) +" \t98%: "+ str(Threshold_MAX_98) )
 
+    if delete_aux_rows:
+        df_stock.insert(loc=1, column=Y_TARGET, value=0)
+        df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_5, Y_TARGET] = -100
+        df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_2, Y_TARGET] = -101
+        df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_95, Y_TARGET] = 100
+        df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_98, Y_TARGET] = 101
 
-    df_stock.insert(loc=1, column=Y_TARGET, value=0)
-    df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_5, Y_TARGET] = -100
-    df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_2, Y_TARGET] = -101
-    df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_95, Y_TARGET] = 100
-    df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_98, Y_TARGET] = 101
 
-    df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','per_PROFIT_NEG', 'per_PROFIT_POS'], errors='ignore')
+        df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','per_PROFIT_NEG', 'per_PROFIT_POS'], errors='ignore')
     #df_stock[df_stock['Volume'] != 0].groupby(Y_TARGET).count()
 
     return df_stock
@@ -221,15 +222,17 @@ def get_buy_sell_points_Arcos(df_stock):
     return df_stock
 
 def check_buy_points_prediction(df, result_column_name = 'result', path_cm =  "d_price/plot_confusion_matrix_.png", SUM_RESULT_2_VALID = 1.45, generate_CM_for_each_ticker = False):
+
     LEN_DF = len(df)
     #ESTO ES LA SUMA DE FILA  N + (N-1) SI ESTO DA MAS DE 1.45 SE TOMA COMO PUNTO DE COMPRA VALIDO
-
+    df = df.loc[:, ~df.columns.duplicated()]
     col = df.columns
     #tickers_col = col.startswith('ticker_')
 
     list_ticker_stocks = [col for col in df if col.startswith('ticker_')]#todas las que empiecen por ticker_ , son variables tontas
-    df['ticker'] = df[list_ticker_stocks].idxmax(axis=1) #undo dummy variable
-    df.drop(columns=list_ticker_stocks, inplace=True)
+    if len(list_ticker_stocks) != 0:
+        df['ticker'] = df[list_ticker_stocks].idxmax(axis=1) #undo dummy variable
+        df.drop(columns=list_ticker_stocks, inplace=True)
 
     df = df.sort_values(by=['ticker', "Date"], ascending=True)
     df['Date'] = pd.to_datetime(df['Date'], unit='s')#time stamp to Date
@@ -250,7 +253,7 @@ def check_buy_points_prediction(df, result_column_name = 'result', path_cm =  "d
     df.loc[df['result_sum'] > SUM_RESULT_2_VALID, "is_result_buy"] = True
 
 
-    df['C'] = [window.round(2).to_list() for window in df['per_Close'].shift(-5).rolling(5)]
+    #df['C'] = [window.round(2).to_list() for window in df['per_Close'].shift(-5).rolling(5)]
 
     # df["per_Close_5_1"] = (df['per_Close'] *-1 ) #+ df['per_Close'].shift(-5).rolling(5).sum() #para alante
     # df["per_Close_12_1"] = (df['per_Close'] *-1 ) #+ df['per_Close'].shift(-12).rolling(12).sum()
