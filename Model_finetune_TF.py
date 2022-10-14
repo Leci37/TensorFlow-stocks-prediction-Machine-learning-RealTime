@@ -81,7 +81,7 @@ print("DICT_COLUMNS_TYPES: " +k+" Columns Selected:" + ', '.join(columns_selecti
 p_tolerance = 0.45 * 2
 # df_TF = Utils_model_predict.cast_Y_label_binary(raw_df.copy(),  label_name = Y_TARGET)
 # df_TF = Utils_model_predict.clean_redifine_df(df_TF)
-df_TF = Utils_model_predict.load_and_clean_DF_Train("d_price/FAV_SCALA_stock_history_MONTH_3.csv", columns_selection)
+df_TF = Utils_model_predict.load_and_clean_DF_Train_from_csv("d_price/FAV_SCALA_stock_history_MONTH_3.csv", columns_selection)
 # (img_train, label_train), (img_test, label_test) = keras.datasets.fashion_mnist.load_data()
 # train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels = Utils_model_predict.scaler_split_TF_onbalance(
 #     df_TF, label_name=Y_TARGET)
