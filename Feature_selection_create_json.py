@@ -5,7 +5,6 @@ https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-
 '''
 from enum import Enum
 
-import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.ensemble import ExtraTreesClassifier
@@ -108,7 +107,7 @@ def get_best_columns_to_train(cleaned_df, opcion,num_best , CSV_NAME,path = None
     return df_result
 
 def get_json_feature_selection(list_all_columns , path):
-    len_list = len(set(list_all_columns))
+
     df_aux = pd.DataFrame({"ele": list_all_columns, "count": 0})
     df_aux = df_aux.groupby("ele").count().sort_values(["count"], ascending=False)
     df_aux['index'] = df_aux.index
@@ -133,22 +132,25 @@ def generate_json_best_columns(cleaned_df, Option_Cat_op = "POS", list_columns_g
         for c in ['chi2', 'f_regression', 'ExtraTrees', 'corrwith']:  # , ,
             list_all_columns += df[c].to_list()
 
+    #Remove elements not valid
     list_all_columns = list(filter(lambda a: a != Y_TARGET, list_all_columns))
+    list_all_columns = list(filter(lambda a: a != "Date", list_all_columns))
+    list_all_columns = list(filter(lambda a: a != "ichi_chikou_span", list_all_columns))
     get_json_feature_selection(list_all_columns,path )
 
 
 
-CSV_NAME = "@ROLL"
+CSV_NAME = "@VOLA"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
-list_stocks = ['@ROLL']
+# list_stocks = ['@ROLL']
 for l in list_stocks:
     CSV_NAME = l
 
 
     NUM_BEST_PARAMS_LIST = [8, 12, 16, 32, 72]
 
-    #df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3.csv",index_col=False, sep='\t')
-    df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3_sep.csv", index_col=False, sep='\t')
+    df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3.csv",index_col=False, sep='\t')
+    #df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3_sep.csv", index_col=False, sep='\t')
     df = df.drop(columns=Utils_col_sele.DROPS_COLUMNS +['ticker'] )
     cleaned_df = df.copy()
     # You don't want the `Time` column.
