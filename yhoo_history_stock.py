@@ -1,6 +1,6 @@
 from enum import Enum
 
-import talib
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 #from predict_example import kaggle_stock_market_Tech
 import Utils_Yfinance
@@ -22,6 +22,7 @@ from LogRoot.Logging import Logger
 class Option_Historical(Enum):
     YEARS_3 = 1
     MONTH_3 = 2
+    DAY_20 = 3
 
 list_stocks = ["RIVN", "VWDRY", "TWLO",          "GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",]
 list_stocks = ["GE","SPOT","F","SAN.MC","TMUS","MBG.DE","INTC","TRIG.L","GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",
@@ -62,6 +63,19 @@ def get_historial_data_3_month(stockID, prepos=True, interva="15m"):
 
     return df_his
 
+def get_historial_data_20_days(stockID, prepos=True, interva="15m"):
+    yho_stk = yf.Ticker(stockID)
+    #en 15 min , 1d es 25 filas
+    hist = yho_stk.history(period="20d",prepost=prepos, interval=interva)
+
+    df_his = pd.DataFrame(hist)
+    df_his.reset_index(inplace=True)
+    df_his = df_his.drop(columns=['Dividends', 'Stock Splits'],errors='ignore')
+
+    df_his = df_his.rename(columns={'Datetime': 'Date'})
+    df_his['Date'] = df_his['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    return df_his
+
 
 # def add_per_market_indicator(df_stock):
 #     df_stock['is_permarket'] = False
@@ -95,6 +109,8 @@ def get_stock_history_Tech_download(stockId, opion, get_technical_data = False, 
         df_his = get_historial_data_3y(stockId, prepos = prepost )
     elif opion.value == Option_Historical.MONTH_3.value:
         df_his = get_historial_data_3_month(stockId, prepos = prepost, interva=interval)
+    elif opion.value == Option_Historical.DAY_20.value:
+        df_his = get_historial_data_20_days(stockId, prepos = prepost, interva=interval)
 
     if add_stock_id_colum:
         df_his.insert(loc=1, column='ticker', value=stockId)
@@ -111,22 +127,7 @@ def get_stock_history_Tech_download(stockId, opion, get_technical_data = False, 
         Logger.logr.info("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  stock: " + stockId + " Shape: " + str(df_his.shape))
 
         return df_his
-        # df_his.to_excel("d_price/" + stockId + "_stock_history_"+str(opion.name) + '.xlsx', sheet_name="Hoja_1", index=False)
-        #TODO JSON fine creation
-        # df_his = df_his.groupby('Date', as_index=True).agg(list)
-        #
-        # dict_j = df_his.to_dict('index')  # df.to_dict('records') .to_dict('index'
-        # dict_j = {k: {a: b for a, b in v.items() if (not pd.isna(b).all() and not pd.isnull(b).all())} for k, v in
-        #           dict_j.items()}
-        # dict_j = UtilsL.replace_list_in_sub_keys_dicts(dict_j)
-        # dict_json = {}
-        # # dict_json['Date'] = dict_j
-        # dict_json = dict_j
-        # import json
-        #
-        # with open("d_price/" + stockId + "_stock_history_"+str(opion.name)+".json", 'w') as fp:
-        #     json.dump(dict_json, fp, allow_nan=True)
-        # Logger.logr.info("d_price/" + stockId + "_stock_history_"+str(opion.name)+".json Numbres of Keys: " + str(len(dict_json)))
+
 
 def get_stock_history_Tech_Local(df_his):
     df_his.reset_index(drop=True, inplace=True)
@@ -141,40 +142,15 @@ def get_stock_history_Tech_Local(df_his):
 
 
 
-def get_favs_SCALA_csv_stocks_history_Download(list_companys, csv_name, opion):
-    global sc, df_l, stockId
-    from sklearn.preprocessing import StandardScaler, MinMaxScaler
-    sc = StandardScaler()
-    sc = MinMaxScaler(feature_range=(-100, 100))
-    columns_delete_no_enogh_data =  Utils_col_sele.COLUMNS_DELETE_NO_ENOGH_DATA # ["ma_T3_50", "ma_TEMA_50", "ma_DEMA_100", "ma_T3_100", "ma_TEMA_100"]
+def get_favs_SCALA_csv_stocks_history_Download_list(list_companys, csv_name, opion):
+
+     # ["ma_T3_50", "ma_TEMA_50", "ma_DEMA_100", "ma_T3_100", "ma_TEMA_100"]
 
     df_all = pd.DataFrame()
     df_all_generate_history = pd.DataFrame()
 
     for l in list_companys:
-        df_l = get_stock_history_Tech_download(l, Option_Historical.MONTH_3, get_technical_data=True,
-                                                                  prepost=True, interval="15m", add_stock_id_colum=False)
-
-        df_l_generate_history = df_l[Utils_col_sele.RAW_PURE_COLUMNS]
-        df_l_generate_history.insert(loc=1, column='ticker', value=l)
-        df_all_generate_history = pd.concat([df_all_generate_history, df_l_generate_history])
-
-        # df_l = pd.read_csv("d_price/" + l + "_stock_history_" + str(opion.name) + ".csv", index_col=False, sep='\t')
-        df_l['buy_sell_point'].replace([101, -101], [100, -100], inplace=True)
-        df_l = df_l.drop(columns=columns_delete_no_enogh_data)  # luego hay que borrar los nan y daña mucho el dato
-        for c in Utils_col_sele.COLUMNS_CANDLE:  # a pesar de que no se haya dado ningun patron de vela el Scaler tiene que respetar el mas menos
-            df_l.at[0,c] = -100
-            df_l.at[1,c] = 100
-
-        aux_date_save = df_l['Date'] #despues se añade , hay que pasar el sc.fit_transform
-        df_l['Date'] = 0
-        array_stock = sc.fit_transform(df_l)
-        df_l = pd.DataFrame(array_stock, columns=df_l.columns)
-        df_l.insert(loc=1, column='ticker', value=l)
-        df_l['Date'] = aux_date_save #to correct join
-
-        print("get_favs_SCALA_csv_stocks_history_Download d_price/" + l + "_SCALA_stock_history_" + str(opion.name) + ".csv  Shape: " + str(df_l.shape))
-        df_l.to_csv("d_price/" + l + "_SCALA_stock_history_" + str(opion.name) + ".csv", sep='\t', index=None)
+        df_all_generate_history ,df_l = get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, opion)
         df_all = pd.concat([df_all,df_l ])
 
     #
@@ -189,6 +165,36 @@ def get_favs_SCALA_csv_stocks_history_Download(list_companys, csv_name, opion):
     df_all.to_csv("d_price/" + csv_name + "_SCALA_stock_history_" + str(opion.name) + "_sep.csv", sep='\t', index=None)
     print("get_favs_SCALA_csv_stocks_history_Download d_price/" + csv_name + "_SCALA_stock_history_" + str(opion.name) + ".csv  Shape: " + str(df_l.shape))
     return df_all
+
+
+def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, opion):
+    sc = MinMaxScaler(feature_range=(-100, 100))
+
+
+    df_l = get_stock_history_Tech_download(l, opion, get_technical_data=True,
+                                           prepost=True, interval="15m", add_stock_id_colum=False)
+
+    df_l_generate_history = df_l[Utils_col_sele.RAW_PURE_COLUMNS]
+    df_l_generate_history.insert(loc=1, column='ticker', value=l)
+    df_all_generate_history = pd.concat([df_all_generate_history, df_l_generate_history])
+    # df_l = pd.read_csv("d_price/" + l + "_stock_history_" + str(opion.name) + ".csv", index_col=False, sep='\t')
+
+    df_l['buy_sell_point'].replace([101, -101], [100, -100], inplace=True)
+    df_l = df_l.drop(columns=Utils_col_sele.COLUMNS_DELETE_NO_ENOGH_DATA)  # luego hay que borrar los nan y daña mucho el dato
+    for c in Utils_col_sele.COLUMNS_CANDLE:  # a pesar de que no se haya dado ningun patron de vela el Scaler tiene que respetar el mas menos
+        df_l.at[0, c] = -100
+        df_l.at[1, c] = 100
+
+    aux_date_save = df_l['Date']  # despues se añade , hay que pasar el sc.fit_transform
+    df_l['Date'] = 0
+    array_stock = sc.fit_transform(df_l)
+    df_l = pd.DataFrame(array_stock, columns=df_l.columns)
+    df_l.insert(loc=1, column='ticker', value=l)
+    df_l['Date'] = aux_date_save  # to correct join
+    print("get_favs_SCALA_csv_stocks_history_Download d_price/" + l + "_SCALA_stock_history_" + str(
+        opion.name) + ".csv  Shape: " + str(df_l.shape))
+    df_l.to_csv("d_price/" + l + "_SCALA_stock_history_" + str(opion.name) + ".csv", sep='\t', index=None)
+    return df_all_generate_history, df_l
 
 
 def get_favs_SCALA_csv_tocks_history_Local(df_his_stock, csv_name, opion):
