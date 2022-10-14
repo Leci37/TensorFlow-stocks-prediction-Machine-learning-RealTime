@@ -4,7 +4,6 @@ import pandas as pd
 import pandas_ta as ta
 
 import UtilsL
-import yhoo_history_stock
 
 def get_all_pandas_TA_tecnical(df_ta):
     #https://github.com/twopirllc/pandas-ta#available-metrics

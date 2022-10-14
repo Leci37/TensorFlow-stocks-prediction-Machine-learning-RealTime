@@ -16,7 +16,6 @@ from stocktrends import indicators
 
 import UtilsL
 import Utils_Yfinance
-import yhoo_history_stock
 
 stockId = "MSFT"
 stockId = "MELI"
@@ -168,7 +167,7 @@ Candle 1 appears as a bearish price candle"""
     diff_lst = np.diff(old_gt_new)
     diff_lst = np.insert(diff_lst, 0, False)
 
-    df_close['change_is_pos'] = False
+    #df_close.insert(loc=len(df_close.columns), column='change_is_pos', value=False)
     df_close['change_is_pos'] = (df_close['Close'] - df_close['Close'].shift(1)) > 0
 
     _td_sequential = [0 for _ in range(n)]
@@ -222,6 +221,7 @@ def get_all_pandas_TU_tecnical(df_TU):
     df_TU['mtum_murrey_math'] = murrey_Math_Oscillator(df_TU)
     df_TU['mtum_td_seq'] = td_sequential_pure(df_TU['Close'])
     df_TU['mtum_td_seq_sig'] = td_sequential_signo(df_TU[['Date', 'Close']])
+    #df_TU[['mtum_hhigh' , 'mtum_hlow' , 'mtum_llow', 'mtum_lhigh' ]] = get_LowerHighs_LowerHighs(df_TU['Close'])
     df_Ichi = get_clould_Ichimoku(df_TU)
     df_renko = get_Renko_2(df_TU)
     # print(df_renco.head())
@@ -232,6 +232,181 @@ def get_all_pandas_TU_tecnical(df_TU):
 
     return df_TU
 
+'''
+Bull & Bear Power Index
+https://stackoverflow.com/questions/64830383/calculating-bull-bear-markets-in-pandas
+'''
+
+
+def deleter(Data, index, times):
+    for i in range(1, times + 1):
+        Data = np.delete(Data, index, axis=1)
+    return Data
+
+
+def jump(Data, jump):
+    Data = Data[jump:, ]
+
+    return Data
+
+def ma(Data, lookback, what, where):
+    for i in range(len(Data)):
+        try:
+            Data[i, where] = (Data[i - lookback + 1:i + 1, what].mean())
+
+        except IndexError:
+            pass
+
+
+    return Data
+
+
+def ema(Data, alpha, lookback, what, where):
+    # alpha is the smoothing factor
+    # window is the lookback period
+    # what is the column that needs to have its average calculated
+    # where is where to put the exponential moving average
+
+    alpha = alpha / (lookback + 1.0)
+    beta = 1 - alpha
+
+    # First value is a simple SMA
+    Data = ma(Data, lookback, what, where)
+
+    # Calculating first EMA
+    Data[lookback + 1, where] = (Data[lookback + 1, what] * alpha) + (Data[lookback, where] * beta)
+    # Calculating the rest of EMA
+    for i in range(lookback + 2, len(Data)):
+        try:
+            Data[i, where] = (Data[i, what] * alpha) + (Data[i - 1, where] * beta)
+
+        except IndexError:
+                pass
+    return Data
+
+
+
+
+#TODO DARVAS BOX https://www.tradingview.com/script/uiwRnGlw/
+#esta en matlab https://github.com/vakilp/darvasBox
+
+'''
+LowerHighs_LowerHighs
+https://raposa.trade/blog/higher-highs-lower-lows-and-calculating-price-trends-in-python/ 
+'''
+def get_LowerHighs_LowerHighs(close_values, order=5, K=14):
+    hh = getHigherHighs(close_values, order, K) - close_values
+    hl = getHigherLows(close_values, order, K) - close_values
+    ll = getLowerLows(close_values, order, K) - close_values
+    lh = getLowerHighs(close_values, order, K) - close_values
+    return hh,hl,ll, lh
+
+'''https://raposa.trade/blog/higher-highs-lower-lows-and-calculating-price-trends-in-python/ '''
+from collections import deque
+from scipy.signal import argrelextrema
+def getHigherLows(data: np.array, order=5, K=14):
+  '''
+  Finds consecutive higher lows in price pattern.
+  Must not be exceeded within the number of periods indicated by the width
+  parameter for the value to be confirmed.
+  K determines how many consecutive lows need to be higher.
+  '''
+  # Get lows
+  low_idx = argrelextrema(data, np.less, order=order)[0]
+  lows = data[low_idx]
+  # Ensure consecutive lows are higher than previous lows
+  extrema = []
+  ex_deque = deque(maxlen=K)
+  for i, idx in enumerate(low_idx):
+    if i == 0:
+      ex_deque.append(idx)
+      continue
+    if lows[i] < lows[i-1]:
+      ex_deque.clear()
+
+    ex_deque.append(idx)
+    if len(ex_deque) == K:
+      extrema.append(ex_deque.copy())
+
+  return extrema
+
+def getLowerHighs(data: np.array, order=5, K=14):
+  '''
+  Finds consecutive lower highs in price pattern.
+  Must not be exceeded within the number of periods indicated by the width
+  parameter for the value to be confirmed.
+  K determines how many consecutive highs need to be lower.
+  '''
+  # Get highs
+  high_idx = argrelextrema(data, np.greater, order=order)[0]
+  highs = data[high_idx]
+  # Ensure consecutive highs are lower than previous highs
+  extrema = []
+  ex_deque = deque(maxlen=K)
+  for i, idx in enumerate(high_idx):
+    if i == 0:
+      ex_deque.append(idx)
+      continue
+    if highs[i] > highs[i-1]:
+      ex_deque.clear()
+
+    ex_deque.append(idx)
+    if len(ex_deque) == K:
+      extrema.append(ex_deque.copy())
+
+  return extrema
+
+def getHigherHighs(data: np.array, order=5, K=14):
+  '''
+  Finds consecutive higher highs in price pattern.
+  Must not be exceeded within the number of periods indicated by the width
+  parameter for the value to be confirmed.
+  K determines how many consecutive highs need to be higher.
+  '''
+  # Get highs
+  high_idx = argrelextrema(data, np.greater, order=5)[0]
+  highs = data[high_idx]
+  # Ensure consecutive highs are higher than previous highs
+  extrema = []
+  ex_deque = deque(maxlen=K)
+  for i, idx in enumerate(high_idx):
+    if i == 0:
+      ex_deque.append(idx)
+      continue
+    if highs[i] < highs[i-1]:
+      ex_deque.clear()
+
+    ex_deque.append(idx)
+    if len(ex_deque) == K:
+      extrema.append(ex_deque.copy())
+
+  return extrema
+
+def getLowerLows(data: np.array, order=5, K=14):
+  '''
+  Finds consecutive lower lows in price pattern.
+  Must not be exceeded within the number of periods indicated by the width
+  parameter for the value to be confirmed.
+  K determines how many consecutive lows need to be lower.
+  '''
+  # Get lows
+  low_idx = argrelextrema(data, np.less, order=order)[0]
+  lows = data[low_idx]
+  # Ensure consecutive lows are lower than previous lows
+  extrema = []
+  ex_deque = deque(maxlen=K)
+  for i, idx in enumerate(low_idx):
+    if i == 0:
+      ex_deque.append(idx)
+      continue
+    if lows[i] > lows[i-1]:
+      ex_deque.clear()
+
+    ex_deque.append(idx)
+    if len(ex_deque) == K:
+      extrema.append(ex_deque.copy())
+
+  return extrema
 # df = yhoo_history_stock.get_historial_data_3_month(stockId, prepos=False)
 #
 # ##WARN avoid TAcharts.indicators.ichimoku import Ichimoku

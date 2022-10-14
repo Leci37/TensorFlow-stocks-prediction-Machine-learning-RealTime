@@ -2,7 +2,7 @@
 #https://github.com/CanerIrfanoglu/medium/blob/master/candle_stick_recognition/identify_candlestick.py
 import talib
 import pandas as pd
-import numpy as np
+
 
 #Overlap Studies Functions
 #Overlap Studies Functions
@@ -184,9 +184,6 @@ def get_volatility_indicator(high, low, close):
     df["vola_NATR"] = talib.NATR(high, low, close, timeperiod=14)
     #TRANGE - True Range
     df["vola_TRANGE"] = talib.TRANGE(high, low, close)
-    #High Low indicator https://medium.com/geekculture/the-high-low-index-a-simple-contrarian-indicator-worth-using-17f1600341e5
-    #TODO conseguir el Highs/Lows(14) de investing la formula DeMark's Bull/Bear Power(13)
-    #df["vola_HIGHLOW"] =( talib.MA(high, timeperiod=14) / ( talib.MA(high, timeperiod=14) - talib.MA(low, timeperiod=14)) ) *100
     return df
 
 
