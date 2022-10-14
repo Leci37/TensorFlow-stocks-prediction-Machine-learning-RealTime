@@ -6,6 +6,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 import UtilsL
+import Utils_col_sele
+from LogRoot.Logging import Logger
 
 METRICS_ACCU_PRE = [
       #keras.metrics.TrueNegatives(name='tn'),
@@ -24,80 +26,57 @@ METRICS_ALL = [
       keras.metrics.AUC(name='auc'),
       keras.metrics.AUC(name='prc', curve='PR'), # precision-recall curve
 ]
-# def ALL_METRICS():
-#     return ALL_METRICS
-
-NUMERIC_FEATURE_NAMES = ['buy_sell_point',
-                         # "Date",
-                         "Open","High","Low","Close","Volume","per_Close","per_Volume","per_preMarket","olap_BBAND_UPPER","olap_BBAND_MIDDLE",
-                         "olap_BBAND_LOWER","olap_HT_TRENDLINE","olap_MIDPOINT","olap_MIDPRICE","olap_SAR","olap_SAREXT","mtum_ADX","mtum_ADXR","mtum_APO",
-                         "mtum_AROON_down","mtum_AROON_up","mtum_AROONOSC","mtum_BOP","mtum_CCI","mtum_CMO","mtum_DX","mtum_MACD","mtum_MACD_signal","mtum_MACD_list",
-                         "mtum_MACD_ext","mtum_MACD_ext_signal","mtum_MACD_ext_list","mtum_MACD_fix","mtum_MACD_fix_signal","mtum_MACD_fix_list","mtum_MFI",
-                         "mtum_MINUS_DI","mtum_MINUS_DM","mtum_MOM","mtum_PLUS_DI","mtum_PLUS_DM","mtum_PPO","mtum_ROC","mtum_ROCP","mtum_ROCR","mtum_ROCR100",
-                         "mtum_RSI","mtum_STOCH_k","mtum_STOCH_d","mtum_STOCH_kd","mtum_STOCH_Fa_k","mtum_STOCH_Fa_d","mtum_STOCH_Fa_kd","mtum_STOCH_RSI_k",
-                         "mtum_STOCH_RSI_d","mtum_STOCH_RSI_kd","mtum_ULTOSC","mtum_WILLIAMS_R","volu_Chaikin_AD","volu_Chaikin_ADOSC","volu_OBV",
-                         "vola_ATR","vola_NATR","vola_TRANGE","cycl_DCPERIOD","cycl_DCPHASE","cycl_PHASOR_inph","cycl_PHASOR_quad","cycl_SINE_sine","cycl_SINE_lead",  # "cycl_HT_TRENDMODE",
-                         "sti_BETA","sti_CORREL","sti_LINEARREG","sti_LINEARREG_ANGLE","sti_LINEARREG_INTERCEPT",
-                         "sti_LINEARREG_SLOPE", "sti_STDDEV", "sti_TSF", "sti_VAR", "ma_DEMA_5", "ma_EMA_5", "ma_KAMA_5", "ma_SMA_5", "ma_T3_5", "ma_TEMA_5", "ma_TRIMA_5",
-                         "ma_WMA_5", "ma_DEMA_10", "ma_EMA_10", "ma_KAMA_10", "ma_SMA_10", "ma_T3_10", "ma_TEMA_10", "ma_TRIMA_10", "ma_WMA_10", "ma_DEMA_20", "ma_EMA_20",
-                         "ma_KAMA_20", "ma_SMA_20", "ma_TEMA_20", "ma_TRIMA_20", "ma_WMA_20", "ma_EMA_50", "ma_KAMA_50", "ma_SMA_50", "ma_TRIMA_50",
-                         # TOO MACH null data in this columns ,"ma_DEMA_50","ma_T3_20","mtum_TRIX"
-                         #  "ma_WMA_50","ma_EMA_100","ma_KAMA_100","ma_SMA_100","ma_TRIMA_100","ma_WMA_100",
-                         "trad_s3", "trad_s2", "trad_s1", "trad_pp", "trad_r1", "trad_r2",
-                         "trad_r3", "clas_s3", "clas_s2", "clas_s1", "clas_pp", "clas_r1", "clas_r2", "clas_r3", "fibo_s3", "fibo_s2", "fibo_s1", "fibo_pp", "fibo_r1", "fibo_r2",
-                         "fibo_r3", "wood_s3", "wood_s2", "wood_s1", "wood_pp", "wood_r1", "wood_r2", "wood_r3", "demark_s1", "demark_pp", "demark_r1", "cama_s3", "cama_s2",
-                         "cama_s1", "cama_pp", "cama_r1", "cama_r2", "cama_r3", "ti_acc_dist", "ti_chaikin_10_3", "ti_choppiness_14", "ti_coppock_14_11_10",
-                         "ti_donchian_lower_20", "ti_donchian_center_20", "ti_donchian_upper_20", "ti_ease_of_movement_14", "ti_force_index_13", "ti_hma_20",
-                         "ti_kelt_20_lower", "ti_kelt_20_upper", "ti_mass_index_9_25", "ti_supertrend_20", "ti_vortex_pos_5", "ti_vortex_neg_5", "ti_vortex_pos_14", "ti_vortex_neg_14"]
-
-CANDLE_COLUMNS = ["cdl_2CROWS", "cdl_3BLACKCROWS", "cdl_3INSIDE", "cdl_3LINESTRIKE", "cdl_3OUTSIDE", "cdl_3STARSINSOUTH", "cdl_3WHITESOLDIERS",
-                         "cdl_ABANDONEDBABY","cdl_ADVANCEBLOCK","cdl_BELTHOLD","cdl_BREAKAWAY","cdl_CLOSINGMARUBOZU","cdl_CONCEALBABYSWALL","cdl_COUNTERATTACK",
-                         "cdl_DARKCLOUDCOVER","cdl_DOJI","cdl_DOJISTAR","cdl_DRAGONFLYDOJI","cdl_ENGULFING","cdl_EVENINGDOJISTAR","cdl_EVENINGSTAR",
-                         "cdl_GAPSIDESIDEWHITE","cdl_GRAVESTONEDOJI","cdl_HAMMER","cdl_HANGINGMAN","cdl_HARAMI","cdl_HARAMICROSS","cdl_HIGHWAVE","cdl_HIKKAKE",
-                         "cdl_HIKKAKEMOD","cdl_HOMINGPIGEON","cdl_IDENTICAL3CROWS","cdl_INNECK","cdl_INVERTEDHAMMER","cdl_KICKING","cdl_KICKINGBYLENGTH",
-                         "cdl_LADDERBOTTOM","cdl_LONGLEGGEDDOJI","cdl_LONGLINE","cdl_MARUBOZU","cdl_MATCHINGLOW","cdl_MATHOLD","cdl_MORNINGDOJISTAR","cdl_MORNINGSTAR",
-                         "cdl_ONNECK","cdl_PIERCING","cdl_RICKSHAWMAN","cdl_RISEFALL3METHODS","cdl_SEPARATINGLINES","cdl_SHOOTINGSTAR","cdl_SHORTLINE",
-                         "cdl_SPINNINGTOP","cdl_STALLEDPATTERN","cdl_STICKSANDWICH","cdl_TAKURI","cdl_TASUKIGAP","cdl_THRUSTING","cdl_TRISTAR","cdl_UNIQUE3RIVER",
-                         "cdl_UPSIDEGAP2CROWS","cdl_XSIDEGAP3METHODS"]
-
-COLUMNS_VALIDS = NUMERIC_FEATURE_NAMES + CANDLE_COLUMNS
-
-#Too mach null in this columns
-DROPS_COLUMNS = ["ma_DEMA_50","ma_T3_20","mtum_TRIX", "ma_WMA_50","ma_EMA_100","ma_KAMA_100","ma_SMA_100","ma_TRIMA_100","ma_WMA_100"]
 
 
-def load_and_clean_DF_Train( path,columns_selection = [], Y_TARGET = 'buy_sell_point' ):
+
+def load_and_clean_DF_Train_from_csv(path, columns_selection = [], Y_TARGET ='buy_sell_point'):
     # https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
-    raw_df = pd.read_csv(path, index_col=False, sep='\t')
-    if not columns_selection:
-        print("columns_selection List is empty, works trains with all default columns")
-    else:
-        print("columns_selection List HAS vulues, works trains with: " + ', '.join(columns_selection))
-        raw_df = raw_df[columns_selection]
-        if 'ti_acc_dist' in raw_df.columns:
-            raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ti_acc_dist")
 
-    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace([101, -101], [100, -100])
-    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace(-100, 0)  # Solo para puntos de compra
-    print(raw_df[['Date', Y_TARGET]].groupby(Y_TARGET).count())
-    raw_df = cast_Y_label_binary(raw_df, label_name=Y_TARGET)
-    df = clean_redifine_df(raw_df)
+    #El metodo puede recibir por path, leer.csv o por un df descargado en el momento
+    raw_df = pd.read_csv(path, index_col=False, sep='\t')
+    Logger.logr.info("df loaded from .csv Shape: "+ str( raw_df.shape ) + " Path: "+path )
+    # else:
+    #     Logger.logr.info("df has just loaded in memory (no read .csv) Shape: "+ str(  raw_df.shape))
+
+    df = load_and_clean__buy_sell_atack(raw_df, columns_selection, Y_TARGET)
     return df
 
 
+def load_and_clean__buy_sell_atack( raw_df, columns_selection,  Y_TARGET  ='buy_sell_point' ):
+    if not columns_selection:
+        Logger.logr.info("columns_selection List is empty, works trains with all default columns")
+    else:
+        Logger.logr.debug("columns_selection List HAS vulues, works trains with: " + ', '.join(columns_selection))
+        raw_df = raw_df[columns_selection]
+        if 'ti_acc_dist' in raw_df.columns:
+            raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ti_acc_dist")
+        if "ichi_chikou_span" in raw_df.columns:  # TODO muchas columnas nan eliminar
+            raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ichi_chikou_span")
+
+    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace([101, -101], [100, -100])
+    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace(-100, 0)  # Solo para puntos de compra
+    print("COMPRA VENTA PUNTO")
+    Logger.logr.debug(" groupby(Y_TARGET).count() " + str(raw_df[['Date', Y_TARGET]].groupby(Y_TARGET).count()))
+    raw_df = cast_Y_label_binary(raw_df, label_name=Y_TARGET)
+    df = clean_redifine_df(raw_df)
+    return df
 
 
 def cast_Y_label_binary(raw_df, label_name = 'buy_sell_point'):
 
     Y_target_classes = raw_df[label_name].unique().tolist()
     Y_target_classes.sort(reverse=False)#nothing must be the first
-    print(f"Label classes: {Y_target_classes}")
+    Logger.logr.debug(f"Label classes: {Y_target_classes}")
     raw_df[label_name] = raw_df[label_name].map(Y_target_classes.index)
 
-    neg, pos = np.bincount(raw_df[label_name])
-    total = neg + pos
-    print('Examples:\n    Total: {}\n    Positive: {} ({:.2f}% of total)\n'.format(
-        total, pos, 100 * pos / total))
+    if len(Y_target_classes) == 2:
+        neg, pos = np.bincount(raw_df[label_name])
+        total = neg + pos
+        print('Examples:\n    Total: {}\n    Positive: {} ({:.2f}% of total)\n'.format(
+            total, pos, 100 * pos / total))
+    else:
+        Logger.logr.info(f"Label classes is NOT 2 (pos/neg) Label classes:: {Y_target_classes}")
+
     return raw_df
 
 
@@ -108,9 +87,14 @@ def clean_redifine_df(raw_df):
     if 'Date' in cleaned_df.columns:
         cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
     #cleaned_df = cleaned_df[COLUMNS_VALIDS]
-    cleaned_df = cleaned_df.drop(columns=DROPS_COLUMNS, errors='ignore')
+    cleaned_df = cleaned_df.drop(columns= Utils_col_sele.DROPS_COLUMNS, errors='ignore')
     if 'ticker' in cleaned_df.columns:
         cleaned_df = pd.get_dummies(cleaned_df, columns = [ 'ticker'])
+        #Si solo hay una accion no hace falta que ponga ticker_U ticker_PYPL
+        filter_col = [col for col in cleaned_df if col.startswith('ticker_')]
+        if len(filter_col) == 1:
+            cleaned_df = cleaned_df.rename({filter_col[0]: 'ticker'}, axis='columns')
+
     cleaned_df = cleaned_df.dropna()
 
     return cleaned_df
@@ -122,8 +106,8 @@ def scaler_Raw_TF_onbalance(test_df, label_name = 'buy_sell_point'):
     scaler = StandardScaler()
     test_features = scaler.fit_transform(test_features)
     test_features = np.clip(test_features, -5, 5)
-    print('Test labels shape:', test_labels.shape)
-    print('Test features shape:', test_features.shape)
+    Logger.logr.debug('Test labels shape:'+ str( test_labels.shape))
+    Logger.logr.debug('Test features shape:'+ str(  test_features.shape))
     return test_features,  test_labels
 
 def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point'):
@@ -145,12 +129,14 @@ def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point'):
     train_features = np.clip(train_features, -5, 5)
     val_features = np.clip(val_features, -5, 5)
     test_features = np.clip(test_features, -5, 5)
-    print('Training labels shape:', train_labels.shape)
-    print('Validation labels shape:', val_labels.shape)
-    print('Test labels shape:', test_labels.shape)
-    print('Training features shape:', train_features.shape)
-    print('Validation features shape:', val_features.shape)
-    print('Test features shape:', test_features.shape)
+
+    Logger.logr.info('Training labels shape:'+ str( train_labels.shape))
+    Logger.logr.debug('Validation labels shape:'+ str( val_labels.shape))
+    Logger.logr.debug('Test labels shape:'+ str( test_labels.shape))
+    Logger.logr.debug('Training features shape:'+ str( train_features.shape))
+    Logger.logr.debug('Validation features shape:'+ str( val_features.shape))
+    Logger.logr.debug('Test features shape:'+ str( test_features.shape))
+
     return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
 
 
@@ -229,10 +215,8 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
     pos_ds = make_ds(pos_features, pos_labels)
     neg_ds = make_ds(neg_features, neg_labels)
     # Each dataset provides `(feature, label)` pairs:
-    for features, label in pos_ds.take(1):
-        print("Features:\n", features.numpy())
-        print()
-        print("Label: ", label.numpy())
+    # for features, label in pos_ds.take(1):
+
     # Merge the two together using `tf.data.Dataset.sample_from_datasets`:
     resampled_ds = tf.data.Dataset.sample_from_datasets([pos_ds, neg_ds], weights=[0.5, 0.5])
     resampled_ds = resampled_ds.batch(BATCH_SIZE).prefetch(2)
@@ -240,3 +224,42 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
         print(label.numpy().mean())
 
     return resampled_ds
+
+Y_TARGET = 'buy_sell_point'
+def __prepare_get_all_result_df(X_test, y_test):
+    df_re = X_test[['Date', "Close", "per_Close", 'has_preMarket', 'Volume']].copy()
+    list_ticker_stocks = [col for col in X_test.columns if
+                          col.startswith('ticker_')]  # todas las que empiecen por ticker_ , son variables tontas
+    if (list_ticker_stocks is not None) and len(list_ticker_stocks) > 0:
+        df_re['ticker'] = X_test[list_ticker_stocks].idxmax(axis=1).copy()  # undo dummy variable
+        df_re[Y_TARGET] = y_test.copy()
+        df_re = df_re[['Date', Y_TARGET, 'ticker', "Close", "per_Close", 'has_preMarket', 'Volume']]
+    else:
+        df_re[Y_TARGET] = y_test.copy()
+        df_re = df_re[['Date', Y_TARGET,  "Close", "per_Close", 'has_preMarket', 'Volume']]
+
+    df_re = df_re.loc[:,~df_re.columns.duplicated()].copy()
+    return df_re.copy()
+
+
+def fill_first_time_df_result_all(df):
+    global df_result_all
+    X = df.drop(columns=Y_TARGET)  # iloc[:,:-1] df.iloc[:,:-1] #iloc[:,:-1]
+    y = df[Y_TARGET]  # df.iloc[:,-1] #.iloc[:,-1] #.iloc[:,-1]
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.28, shuffle=False)
+    X_test = X.copy()
+    y_test = y
+    df_result = X.copy()
+    # PARA organizar la salida en el df_result de los resultados
+    return __prepare_get_all_result_df(X_test, y_test)
+
+def get_df_for_list_of_result(df_full):
+    df_list_r = pd.DataFrame()
+    list_ticker_stocks = [col for col in df_full.columns if
+                          col.startswith('ticker_')]  # todas las que empiecen por ticker_ , son variables tontas
+    if (list_ticker_stocks is not None) and len(list_ticker_stocks) > 0:
+        df_full['ticker'] = df_full[list_ticker_stocks].idxmax(axis=1).copy()  # undo dummy variable
+        df_list_r = df_full[['Date', Y_TARGET, 'ticker', "Close", 'has_preMarket', 'Volume']].copy()
+    else:
+        df_list_r = df_full[['Date', Y_TARGET, "Close", 'has_preMarket', 'Volume']].copy()
+    return df_list_r
