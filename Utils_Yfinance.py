@@ -198,11 +198,11 @@ def get_crash_points(df, col_name_A, col_name_B, col_result, highlight_result_in
 
 
 
-def add_variation_percentage(df_stock):
-    df_stock['per_Close'] = (df_stock['Close'] * 100 ) / df_stock['Close'].shift(1)  - 100
-    df_stock['per_Volume'] = (df_stock[df_stock['Volume'] != 0]['Volume'] * 100 ) / df_stock[df_stock['Volume'] != 0]['Volume'].shift(1) - 100
-    df_stock['per_Volume'] = df_stock['per_Volume'].fillna(0)
-    df_stock['per_Close'] = df_stock['per_Close'].fillna(0)
+def add_variation_percentage(df_stock, prefix = ""):
+    df_stock[prefix+'per_Close'] = (df_stock['Close'] * 100 ) / df_stock['Close'].shift(1)  - 100
+    df_stock[prefix+'per_Volume'] = (df_stock[df_stock['Volume'] != 0]['Volume'] * 100 ) / df_stock[df_stock['Volume'] != 0]['Volume'].shift(1) - 100
+    df_stock[prefix+'per_Volume'] = df_stock[prefix+'per_Volume'].fillna(0)
+    df_stock[prefix+'per_Close'] = df_stock[prefix+'per_Close'].fillna(0)
     return df_stock
 
 def add_pre_market_percentage(df_his):
