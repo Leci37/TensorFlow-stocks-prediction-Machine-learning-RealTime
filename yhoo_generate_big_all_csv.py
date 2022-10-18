@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 
 import pandas as pd
 
+from yhoo_external_raw_factors import DICT_EXTERNAL_FACTORS
 
 stockId = 'MELI'
 opion = yhoo_history_stock.Option_Historical.MONTH_3
