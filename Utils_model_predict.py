@@ -6,7 +6,9 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 import UtilsL
+import Utils_buy_sell_points
 import Utils_col_sele
+import a_manage_stocks_dict
 from LogRoot.Logging import Logger
 
 METRICS_ACCU_PRE = [
@@ -29,7 +31,7 @@ METRICS_ALL = [
 
 
 
-def load_and_clean_DF_Train_from_csv(path, columns_selection = [], Y_TARGET ='buy_sell_point'):
+def load_and_clean_DF_Train_from_csv(path, op_buy_sell : a_manage_stocks_dict.Op_buy_sell, columns_selection = [], Y_TARGET ='buy_sell_point',  ):
     # https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
 
     #El metodo puede recibir por path, leer.csv o por un df descargado en el momento
@@ -38,11 +40,12 @@ def load_and_clean_DF_Train_from_csv(path, columns_selection = [], Y_TARGET ='bu
     # else:
     #     Logger.logr.info("df has just loaded in memory (no read .csv) Shape: "+ str(  raw_df.shape))
 
-    df = load_and_clean__buy_sell_atack(raw_df, columns_selection, Y_TARGET)
+    df = load_and_clean__buy_sell_atack(raw_df, columns_selection, op_buy_sell, Y_TARGET)
     return df
 
 
-def load_and_clean__buy_sell_atack( raw_df, columns_selection,  Y_TARGET  ='buy_sell_point' ):
+def load_and_clean__buy_sell_atack( raw_df, columns_selection, op_buy_sell : a_manage_stocks_dict.Op_buy_sell,  Y_TARGET  ='buy_sell_point' ):
+
     if not columns_selection:
         Logger.logr.info("columns_selection List is empty, works trains with all default columns")
     else:
@@ -50,15 +53,20 @@ def load_and_clean__buy_sell_atack( raw_df, columns_selection,  Y_TARGET  ='buy_
         raw_df = raw_df[columns_selection]
         if 'ti_acc_dist' in raw_df.columns:
             raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ti_acc_dist")
+        if "ti_ease_of_movement_14" in raw_df.columns:
+            raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ti_ease_of_movement_14")
         if "ichi_chikou_span" in raw_df.columns:  # TODO muchas columnas nan eliminar
             raw_df = UtilsL.fill_last_values_of_colum_with_previos_value(raw_df, "ichi_chikou_span")
 
-    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace([101, -101], [100, -100])
-    raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace(-100, 0)  # Solo para puntos de compra
+    # raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace([101, -101], [100, -100])
+    # raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace(-100, 0)  # Solo para puntos de compra
+
+    df = Utils_buy_sell_points.select_work_buy_or_sell_point(raw_df.copy(), op_buy_sell )
+
     print("COMPRA VENTA PUNTO")
-    Logger.logr.debug(" groupby(Y_TARGET).count() " + str(raw_df[['Date', Y_TARGET]].groupby(Y_TARGET).count()))
-    raw_df = cast_Y_label_binary(raw_df, label_name=Y_TARGET)
-    df = clean_redifine_df(raw_df)
+    Logger.logr.debug(" groupby(Y_TARGET).count() " + str(df[['Date', Y_TARGET]].groupby(Y_TARGET).count()))
+    df = cast_Y_label_binary(df, label_name=Y_TARGET)
+    df = clean_redifine_df(df)
     return df
 
 
@@ -160,16 +168,31 @@ def make_model_TF_onbalance(shape_features, metrics=METRICS_ALL, output_bias=Non
   return model
 
 
-def make_model_TF_onbalance_fine_1(shape_features,metrics=METRICS_ACCU_PRE, output_bias=None):
+def make_model_TF_onbalance_fine_28(shape_features, metrics=METRICS_ACCU_PRE, output_bias=None):
   if output_bias is not None:
     output_bias = keras.initializers.Constant(output_bias)
   model = keras.Sequential([
-      keras.layers.Dense(
-          28, activation='relu',
-          input_shape=(shape_features,)),
+      keras.layers.Dense(28, activation='relu',input_shape=(shape_features,)),
       keras.layers.Dropout(0.2),
-      keras.layers.Dense(1, activation='relu',
-                         bias_initializer=output_bias),
+      keras.layers.Dense(1, activation='relu',bias_initializer=output_bias),
+  ])
+
+  model.compile(
+      optimizer=keras.optimizers.Adam(learning_rate=0.001),
+      loss=keras.losses.BinaryCrossentropy(),
+      metrics=metrics)
+
+  return model
+
+def make_model_TF_onbalance_fine_64(shape_features,metrics=METRICS_ACCU_PRE, output_bias=None):
+  if output_bias is not None:
+    output_bias = keras.initializers.Constant(output_bias)
+  model = keras.Sequential([
+      keras.layers.Dense(64, activation='relu',input_shape=(shape_features,)),
+      keras.layers.Dense(32, activation='relu', input_shape=(shape_features,)),
+      keras.layers.Dropout(0.2),
+      keras.layers.Dense(4, activation='relu', input_shape=(shape_features,)),
+      keras.layers.Dense(1, activation='relu',bias_initializer=output_bias),
   ])
 
   model.compile(
@@ -238,7 +261,7 @@ def __prepare_get_all_result_df(X_test, y_test):
         df_re[Y_TARGET] = y_test.copy()
         df_re = df_re[['Date', Y_TARGET,  "Close", "per_Close", 'has_preMarket', 'Volume']]
 
-    df_re = df_re.loc[:,~df_re.columns.duplicated()].copy()
+    df_re = df_re.loc[:,~df_re.columns.duplicated()].copy() #quitar remove duplicates duplicadas
     return df_re.copy()
 
 
