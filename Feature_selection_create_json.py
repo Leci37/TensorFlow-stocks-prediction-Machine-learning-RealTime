@@ -12,31 +12,20 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2, f_regression
 from numpy import array
 
+import Utils_buy_sell_points
 import a_manage_stocks_dict
 
-
-class ExtendedEnum(Enum):
-    @classmethod
-    def list(cls):
-        return list(map(lambda c: c.value, cls))
-class Option_Cat(ExtendedEnum):
-    BOTH = "both"
-    POS = "pos"
-    NEG = "neg"
 
 import Utils_col_sele
 
 Y_TARGET = 'buy_sell_point'
 
-def get_best_columns_to_train(cleaned_df, opcion,num_best , CSV_NAME,path = None):
+def get_best_columns_to_train(cleaned_df, op_buy_sell : a_manage_stocks_dict.Op_buy_sell , num_best , CSV_NAME,path = None):
     df_result = pd.DataFrame()
 
-    cleaned_df[Y_TARGET].replace([101, -101], [100, -100], inplace=True)
-    if opcion == str(Option_Cat.POS.name):
-        cleaned_df['buy_sell_point'].replace([-100], [0], inplace=True)  # Solo para puntos de compra
-    if opcion == str(Option_Cat.NEG.name):
-        cleaned_df['buy_sell_point'].replace([100], [0], inplace=True)  # Solo para puntos de venta
-    df = cleaned_df.dropna()
+    df = Utils_buy_sell_points.select_work_buy_or_sell_point(cleaned_df.copy(), op_buy_sell)
+
+    df = df.dropna()
     X = df.drop(columns=Y_TARGET)
     y = df[Y_TARGET]
 
@@ -102,7 +91,7 @@ def get_best_columns_to_train(cleaned_df, opcion,num_best , CSV_NAME,path = None
 
     if path is not None:
         df_result.to_csv(path,sep='\t', index=None)
-        print("END plots_relations/best_selection_" + CSV_NAME + "_" + opcion + "_" + str(num_best) + ".csv")
+        print("END plots_relations/best_selection_" + CSV_NAME + "_" + opcion.value + "_" + str(num_best) + ".csv")
 
     return df_result
 
@@ -123,11 +112,11 @@ def get_json_feature_selection(list_all_columns , path):
     print(path)
 
 
-def generate_json_best_columns(cleaned_df, Option_Cat_op = "POS", list_columns_got = [8, 12, 16, 32, 72], path ="plots_relations/best_selection_sum_up.json"):
+def generate_json_best_columns(cleaned_df, Op_buy_sell : a_manage_stocks_dict.Op_buy_sell, list_columns_got = [8, 12, 16, 32, 72], path ="plots_relations/best_selection_sum_up.json"):
     list_all_columns = []
     for n in list_columns_got:
-        print("\tget best columns Opcion: ", Option_Cat_op, " Number: ", n)
-        df = get_best_columns_to_train(cleaned_df, Option_Cat_op, n, CSV_NAME, path=None)
+        print("\tget best columns Opcion: ", Op_buy_sell.value, " Number: ", n)
+        df = get_best_columns_to_train(cleaned_df, Op_buy_sell, n, CSV_NAME, path=None)
 
         for c in ['chi2', 'f_regression', 'ExtraTrees', 'corrwith']:  # , ,
             list_all_columns += df[c].to_list()
@@ -142,8 +131,9 @@ def generate_json_best_columns(cleaned_df, Option_Cat_op = "POS", list_columns_g
 
 CSV_NAME = "@VOLA"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+a_manage_stocks_dict.Op_buy_sell.POS
 # list_stocks = ['@ROLL']
-for l in list_stocks:
+for l in ["@VOLA"] : #list_stocks:
     CSV_NAME = l
 
 
@@ -157,6 +147,6 @@ for l in list_stocks:
     cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
 
 
-    for option_Cat_op in Option_Cat.list():
-        path = "plots_relations/best_selection_" + CSV_NAME + "_" + option_Cat_op + ".json"
+    for option_Cat_op in a_manage_stocks_dict.Op_buy_sell.list(): # both pos neg
+        path = "plots_relations/best_selection_" + CSV_NAME + "_" + option_Cat_op.value + ".json"
         generate_json_best_columns(cleaned_df, option_Cat_op, NUM_BEST_PARAMS_LIST, path)
