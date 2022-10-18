@@ -96,7 +96,7 @@ def get_clould_Ichimoku(df):
     df2.loc[ ( (df2['Close'] > df2['ichi_senkou_b']) & (df2['Close'] < df2['ichi_senkou_a']) ), "ichi_isin_cloud"] = 1
     df2.loc[ ( (df2['Close'] < df2['ichi_senkou_b']) & (df2['Close']> df2['ichi_senkou_a']) ), "ichi_isin_cloud"] = -1
 
-    df2 = Utils_Yfinance.get_crash_points(df2, 'ichi_senkou_a','ichi_senkou_b', col_result = "ichi_crash"  )
+    df2 = Utils_Yfinance.get_crash_points(df2, 'ichi_senkou_a','ichi_senkou_b', col_result = "ichi_crash" , highlight_result_in_next_cell =2)
     #df2.groupby('ichi_isin_cloud')['Close'].count()
 
     # The most current closing price plotted 22 time periods behind (optional)
@@ -217,16 +217,32 @@ def get_Renko_2(df_r, days_back = 26):
 
 
 
-def get_all_pandas_TU_tecnical(df_TU):
-    df_TU['mtum_murrey_math'] = murrey_Math_Oscillator(df_TU)
-    df_TU['mtum_td_seq'] = td_sequential_pure(df_TU['Close'])
-    df_TU['mtum_td_seq_sig'] = td_sequential_signo(df_TU[['Date', 'Close']])
-    #df_TU[['mtum_hhigh' , 'mtum_hlow' , 'mtum_llow', 'mtum_lhigh' ]] = get_LowerHighs_LowerHighs(df_TU['Close'])
-    df_Ichi = get_clould_Ichimoku(df_TU)
-    df_renko = get_Renko_2(df_TU)
-    # print(df_renco.head())
-    # df.ta.td_seq(asint=True, show_all=True, append=True)
-    df_TU = pd.merge(df_Ichi, df_renko)  # df_Ichi.append(df_renko)
+def get_all_pandas_TU_tecnical(df_TU, cos_cols = None):
+    df_renko = None
+    df_Ichi = None
+
+    if cos_cols is None or "mtum_murrey_math" in cos_cols:
+        df_TU['mtum_murrey_math'] = murrey_Math_Oscillator(df_TU)
+    if cos_cols is None or "mtum_td_seq" in cos_cols:
+        df_TU['mtum_td_seq'] = td_sequential_pure(df_TU['Close'])
+    if cos_cols is None or "mtum_td_seq_sig" in cos_cols:
+        df_TU['mtum_td_seq_sig'] = td_sequential_signo(df_TU[['Date', 'Close']])
+
+    if cos_cols is None or "tend_hh" in cos_cols or "tend_hl" in cos_cols or "tend_ll" in cos_cols or "tend_lh" in cos_cols  or "tend_hh_crash" in cos_cols or "tend_hl_crash" in cos_cols or "tend_ll_crash" in cos_cols or "tend_lh_crash" in cos_cols:
+        df_TU = get_LowerHighs_LowerHighs(df_TU)
+
+    if cos_cols is None or "ichi_tenkan_sen" in cos_cols or "ichi_kijun_sen" in cos_cols or "ichi_senkou_a" in cos_cols or "ichi_senkou_b" in cos_cols or "ichi_isin_cloud" in cos_cols or "ichi_crash" in cos_cols or "ichi_chikou_span" in cos_cols:
+        df_Ichi = get_clould_Ichimoku(df_TU)
+
+    if cos_cols is None or "tend_renko_TR" in cos_cols or "tend_renko_ATR" in cos_cols or "tend_renko_brick" in cos_cols or "tend_renko_change" in cos_cols:
+        df_renko = get_Renko_2(df_TU)
+
+    if (df_renko is not None) and (df_Ichi is not None):
+        df_TU = pd.merge(df_Ichi, df_renko)  # df_Ichi.append(df_renko)
+    elif df_Ichi is not None:
+        df_TU = df_Ichi
+    elif df_renko is not None:
+        df_TU = df_renko
 
     df_TU = UtilsL.replace_bat_chars_in_columns_name(df_TU, "")
 
@@ -294,17 +310,37 @@ def ema(Data, alpha, lookback, what, where):
 LowerHighs_LowerHighs
 https://raposa.trade/blog/higher-highs-lower-lows-and-calculating-price-trends-in-python/ 
 '''
-def get_LowerHighs_LowerHighs(close_values, order=5, K=14):
-    hh = getHigherHighs(close_values, order, K) - close_values
-    hl = getHigherLows(close_values, order, K) - close_values
-    ll = getLowerLows(close_values, order, K) - close_values
-    lh = getLowerHighs(close_values, order, K) - close_values
-    return hh,hl,ll, lh
+def get_LowerHighs_LowerHighs(df, order=5, k=2, get_crash_point = True):
+    hh = getHigherHighs(df['Close'].values, order, K=k) #- close_values
+    hl = getHigherLows(df['Close'].values, order, K=k) #- close_values
+    ll = getLowerLows(df['Close'].values, order, K=k) #- close_values
+    lh = getLowerHighs(df['Close'].values, order, K=k) #- close_values
+
+
+    clean_LowerHighs_LowerHighs(df, hh, prefix_name="hh")
+    clean_LowerHighs_LowerHighs(df, hl, prefix_name="hl")
+    clean_LowerHighs_LowerHighs(df, ll, prefix_name="ll")
+    clean_LowerHighs_LowerHighs(df, lh, prefix_name="lh")
+
+    if get_crash_point:
+        df = Utils_Yfinance.get_crash_points(df, 'tend_hh', 'Close', col_result="tend_hh_crash",highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_hl', 'Close', col_result="tend_hl_crash",highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_ll', 'Close', col_result="tend_ll_crash",highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_lh', 'Close', col_result="tend_lh_crash",highlight_result_in_next_cell=1)
+
+    return df
+
+
+def clean_LowerHighs_LowerHighs(df, hh, prefix_name):
+    df_aux = pd.concat([df['Close'][i] for i in hh])  # .fillna(method='ffill')
+    df['tend_' + prefix_name] = df_aux[~df_aux.index.duplicated(keep='first')]
+    df['tend_' + prefix_name] = df['tend_' + prefix_name].fillna(method='ffill')
+
 
 '''https://raposa.trade/blog/higher-highs-lower-lows-and-calculating-price-trends-in-python/ '''
 from collections import deque
 from scipy.signal import argrelextrema
-def getHigherLows(data: np.array, order=5, K=14):
+def getHigherLows(data: np.array, order=5, K=2):
   '''
   Finds consecutive higher lows in price pattern.
   Must not be exceeded within the number of periods indicated by the width
@@ -330,7 +366,7 @@ def getHigherLows(data: np.array, order=5, K=14):
 
   return extrema
 
-def getLowerHighs(data: np.array, order=5, K=14):
+def getLowerHighs(data: np.array, order=5, K=2):
   '''
   Finds consecutive lower highs in price pattern.
   Must not be exceeded within the number of periods indicated by the width
@@ -356,7 +392,7 @@ def getLowerHighs(data: np.array, order=5, K=14):
 
   return extrema
 
-def getHigherHighs(data: np.array, order=5, K=14):
+def getHigherHighs(data: np.array, order=5, K=2):
   '''
   Finds consecutive higher highs in price pattern.
   Must not be exceeded within the number of periods indicated by the width
@@ -364,7 +400,7 @@ def getHigherHighs(data: np.array, order=5, K=14):
   K determines how many consecutive highs need to be higher.
   '''
   # Get highs
-  high_idx = argrelextrema(data, np.greater, order=5)[0]
+  high_idx = argrelextrema(data, np.greater, order=order)[0]
   highs = data[high_idx]
   # Ensure consecutive highs are higher than previous highs
   extrema = []
@@ -382,7 +418,7 @@ def getHigherHighs(data: np.array, order=5, K=14):
 
   return extrema
 
-def getLowerLows(data: np.array, order=5, K=14):
+def getLowerLows(data: np.array, order=5, K=2):
   '''
   Finds consecutive lower lows in price pattern.
   Must not be exceeded within the number of periods indicated by the width

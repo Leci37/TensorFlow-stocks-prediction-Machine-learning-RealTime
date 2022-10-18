@@ -26,18 +26,25 @@ def gel_MA_CRASH_funtion(df):
         #Si los ultimos 2 chars no son los mismos , se procede a comparar , no interesa EJ:  "ma_TEMA_20", "ma_TRIMA_20"
         if(ma_1[-2:] != ma_2[-2:]):
             new_column_name = "mcrh_" + ma_1.replace("ma_", "") + "_" + ma_2.replace("ma_", "")
-            df = Utils_Yfinance.get_crash_points(df, ma_1, ma_2, col_result=new_column_name)
+            if cos_cols is None or new_column_name in cos_cols:
+                df = Utils_Yfinance.get_crash_points(df, ma_1, ma_2, col_result=new_column_name)
     return df
 
 
 def gel_PP_CRASH_funtion(df):
     for pp in list_PP_columns:
         new_column_name = "pcrh_" + pp
-        df = Utils_Yfinance.get_crash_points(df, "Close", pp, col_result=new_column_name,  highlight_result_in_next_cell =0)
+
+        if cos_cols is None or new_column_name in cos_cols:
+            df = Utils_Yfinance.get_crash_points(df, "Close", pp, col_result=new_column_name,  highlight_result_in_next_cell =0)
+
     return df
 
+cos_cols = None
+def get_ALL_CRASH_funtion(df, costum_columns=None):
+    global cos_cols
+    cos_cols = costum_columns
 
-def get_ALL_CRASH_funtion(df):
     df = gel_PP_CRASH_funtion(df)
     df = gel_MA_CRASH_funtion(df)
     return df
