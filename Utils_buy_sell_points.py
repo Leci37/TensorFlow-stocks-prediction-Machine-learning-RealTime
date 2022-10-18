@@ -4,6 +4,7 @@ from math import atan, pi
 from datetime import datetime
 
 import Utils_Yfinance
+import a_manage_stocks_dict
 from LogRoot.Logging import Logger
 from sklearn.metrics import confusion_matrix
 Y_TARGET = 'buy_sell_point'
@@ -57,6 +58,24 @@ def rolling_get_sell_price_NEG(rolling_col_slection):
     #print("TAKE PROFICT after: ", len(rolling_col_slection), "interactions Win: ",update_value - start_value_buy)  # , i , " ".join(str(p) for p in a) )
     return update_value - 100
 
+
+def select_work_buy_or_sell_point(cleaned_df, opcion : a_manage_stocks_dict.Op_buy_sell, Y_TARGET = 'buy_sell_point'):
+
+    if type(opcion) is not a_manage_stocks_dict.Op_buy_sell :
+        Logger.logr.error("la variable op_buy_sell , no es de tipo .Op_buy_sell o no tiene valor valido (solo POS y NEG son validos)")
+        raise ValueError("la variable op_buy_sell , no es de tipo .Op_buy_sell o no tiene valor valido (solo POS y NEG son validos)")
+
+
+    cleaned_df[Y_TARGET].astype(int).replace([101, -101], [100, -100], inplace=True)
+
+    if opcion == a_manage_stocks_dict.Op_buy_sell.POS : #or opcion.casefold() == str(a_manage_stocks_dict.Op_buy_sell.POS.value).casefold():
+        cleaned_df[Y_TARGET] = cleaned_df[Y_TARGET].astype(int).replace(-100, 0) # Solo para puntos de compra POS
+
+    elif opcion == a_manage_stocks_dict.Op_buy_sell.NEG :
+        cleaned_df[Y_TARGET] = cleaned_df[Y_TARGET].astype(int).replace(100, 0)
+        cleaned_df[Y_TARGET] = cleaned_df[Y_TARGET].astype(int).replace(-100, 100)
+
+    return cleaned_df
 
 
 def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
