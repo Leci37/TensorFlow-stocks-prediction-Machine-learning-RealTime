@@ -11,6 +11,7 @@ import Utils_model_predict
 
 #https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
 import a_manage_stocks_dict
+import yhoo_history_stock
 from LogRoot.Logging import Logger
 
 
@@ -67,7 +68,8 @@ def __get_df_Evaluation_from_all_models_model_ok_thresholdCSV(df_result_all, nam
 
 
 def get_list_good_models(df_result_all ,groupby_colum , path = None):
-    thorshool_is_valid_model = 0.1 # tiene que tener mas que esto para ser valido
+    THORSHOOL_VALID_MODEL_down = 0.15 # tiene que tener mas que esto para ser valido
+    THORSHOOL_VALID_MODEL_up = 0.4
 
     rows_test_in_df = int(df_result_all.shape[0] * 0.35)
     df_eval_result_paramans = df_result_all[-rows_test_in_df:].groupby(groupby_colum).mean().T
@@ -81,7 +83,7 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
     if path is not None:
         list_r_params = [col for col in df_eval_result_paramans.index.values if col.startswith('r_')]
         df_json = df_eval_result_paramans["r_eval"][list_r_params].round(4)
-        scoring_sum_only_pos = df_eval_result_paramans["r_eval"][list_r_params][ df_eval_result_paramans["r_eval"][list_r_params] > thorshool_is_valid_model ].sum()
+        scoring_sum_only_pos = df_eval_result_paramans["r_eval"][list_r_params][ df_eval_result_paramans["r_eval"][list_r_params] > THORSHOOL_VALID_MODEL_down ].sum()
 
         list_r_TF_params = [col for col in list_r_params if col.startswith('r_TF_')]
         scoring_sum_TF = df_eval_result_paramans["r_eval"][list_r_TF_params].sum()
@@ -95,25 +97,30 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         dict_json["score_sum_TF"] = scoring_sum_TF.round(4)
         dict_json["score_sum_not_TF"] = scoring_sum_not_TF.round(4)
         dict_json["rows_num_eval"] = rows_test_in_df
+        dict_json["THORSHOOL_VALID_MODEL_down_up"] = str(THORSHOOL_VALID_MODEL_down) + "__"+str(THORSHOOL_VALID_MODEL_up)
         path = path +"_groupby_"+groupby_colum+"_"+str(int(scoring_sum * 100))+".json"
 
-        list_valid_params = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= thorshool_is_valid_model].index.values
-        list_valid_params = [col for col in list_valid_params if col.startswith('r_')]
-        dict_json["list_good_params"] = list_valid_params
+        list_valid_params_down = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= THORSHOOL_VALID_MODEL_down].index.values
+        list_valid_params_down = [col for col in list_valid_params_down if col.startswith('r_')]
+        dict_json["list_good_params_down"] = list_valid_params_down
+        list_valid_params_up = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= THORSHOOL_VALID_MODEL_up].index.values
+        list_valid_params_up = [col for col in list_valid_params_up if col.startswith('r_')]
+        dict_json["list_good_params_up"] = list_valid_params_up
+
 
         with open(path, 'w') as fp:
             json.dump(dict_json, fp, allow_nan=True, indent=3)
             print("\tget_json_ Scoring path: ", path)
         print(path)
 
-    return list_valid_params , scoring_sum
+    # return list_valid_params_down , scoring_sum
 
 
 
 
 
 
-CSV_NAME = "@VOLA"
+CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 #type_detect = a_manage_stocks_dict.Op_buy_sell.POS #for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
 df_final_list_stocks = pd.DataFrame()
