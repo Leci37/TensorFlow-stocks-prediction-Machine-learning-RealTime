@@ -139,13 +139,15 @@ def get_dict_scoring_evaluation(stockId , type_buy_sell : a_manage_stocks_dict.O
     if len(prefixed) != 1:
         Logger.logr.error("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion ")
         raise ValueError("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion ")
+
     path_json = folder + prefixed[0]
+    Logger.logr.info(path_json)
     with open(path_json) as json_file:
         dict_scores = json.load(json_file)
     return dict_scores
 
 
-def is_predict_buy_point(df_Ab, df_threshold, list_valid_params):
+def is_predict_buy_point_bt_scoring_csv(df_Ab, df_threshold, list_valid_params):
     THO_DOWN = 88
     THO_UP = 93
     THO_UPH = 95
@@ -157,6 +159,7 @@ def is_predict_buy_point(df_Ab, df_threshold, list_valid_params):
 
     df_list_r.insert(loc=len(df_list_r.columns), column="sum_r_" + str(THO_DOWN), value=0)
     df_list_r.insert(loc=len(df_list_r.columns), column="sum_r_" + str(THO_UP), value=0)
+    df_list_r.insert(loc=len(df_list_r.columns), column="sum_r_" + str(THO_UPH), value=0)
     df_list_r.insert(loc=len(df_list_r.columns), column="have_to_oper", value=False)
     df_list_r.insert(loc=len(df_list_r.columns), column="sum_r_TF", value=0)
     df_list_r.insert(loc=len(df_list_r.columns), column="have_to_oper_TF", value=False)
@@ -177,15 +180,35 @@ def is_predict_buy_point(df_Ab, df_threshold, list_valid_params):
 
         df_list_r["sum_r_" + str(THO_DOWN)] = df_list_r["sum_r_" + str(THO_DOWN)] + df_list_r["b"+col_r_ + "_" + str(THO_DOWN)]
         df_list_r["sum_r_" + str(THO_UP)] = df_list_r["sum_r_" + str(THO_UP)] + df_list_r["b"+col_r_ + "_" + str(THO_UP)]
+        df_list_r["sum_r_" + str(THO_UPH)] = df_list_r["sum_r_" + str(THO_UPH)] + df_list_r["b" + col_r_ + "_" + str(THO_UPH)]
         count_models_eval = count_models_eval + 1
 
-    print("La evalucion de punto have to oper se hara por encima de Down "+ str(THO_DOWN)+ "% : "+ str(int(count_models_eval / 2 +1)) +" Up "+ str(THO_DOWN)+ "% : "+ str(int(count_models_eval / 2 -1 )))
+    print("La evaluación del punto have_to_oper se hara por encima de Down "+ str(THO_DOWN)+ "% : "+ str(int(count_models_eval / 2 +1)) +" Up "+ str(THO_UP)+ "% : "+ str(int(count_models_eval / 2 -1 )))
+
     df_list_r["have_to_oper"] = (df_list_r["sum_r_" + str(THO_DOWN)] > int(count_models_eval / 2) +1 ) & (df_list_r["sum_r_" + str(THO_UP)] > int(count_models_eval / 2 - 1) )
     if count_models_eval_TF > 0:
         df_list_r["have_to_oper_TF"] = df_list_r["sum_r_TF"] >= count_models_eval_TF
 
     result_cols_binary = [col for col in df_list_r.columns if col.startswith('br_')]
 
-    df_list_r = df_list_r[['Date', 'buy_sell_point', 'Close', 'has_preMarket', 'Volume', "sum_r_" + str(THO_DOWN), "sum_r_" + str(THO_UP), 'have_to_oper', 'sum_r_TF', 'have_to_oper_TF'] + result_cols_binary ]
+    df_list_r = df_list_r[['Date', 'buy_sell_point', 'Close', 'has_preMarket', 'Volume', "sum_r_" + str(THO_DOWN), "sum_r_" + str(THO_UP),"sum_r_" + str(THO_UPH), 'have_to_oper', 'sum_r_TF', 'have_to_oper_TF'] + result_cols_binary ]
     return df_list_r
 
+
+
+
+def how_much_each_entry_point_earns(df_r, stock_id, type_buy_sell : a_manage_stocks_dict.Op_buy_sell, NUM_LAST_ROWS = -400):
+    df_final_list_stocks = pd.DataFrame()
+    # aqui es solo evalucion solo hay que tener en cuenta los profit_NEG_units y profit_POS_units
+    df_r = Utils_buy_sell_points.get_buy_sell_points_Roll(df_r, delete_aux_rows=False).drop(columns=Y_TARGET)
+    df_r = df_r.dropna(how='any')
+
+    if type_buy_sell == a_manage_stocks_dict.Op_buy_sell.POS or type_buy_sell == a_manage_stocks_dict.Op_buy_sell.BOTH:
+        df_final_list_stocks['bought_' + stock_id + "_" + type_buy_sell.value + "_units"] = df_r[NUM_LAST_ROWS:].groupby("have_to_oper")['profit_POS_units'].sum()
+        df_final_list_stocks['boughtTF_' + stock_id + "_" + type_buy_sell.value+ "_units"] = df_r[NUM_LAST_ROWS:].groupby("have_to_oper_TF")['profit_POS_units'].sum()
+
+    if type_buy_sell == a_manage_stocks_dict.Op_buy_sell.NEG or type_buy_sell == a_manage_stocks_dict.Op_buy_sell.BOTH:
+        df_final_list_stocks['bought_' + stock_id + "_" + type_buy_sell.value+ "_units"] = df_r[NUM_LAST_ROWS:].groupby("have_to_oper")['profit_NEG_units'].sum()
+        df_final_list_stocks['boughtTF_' + stock_id + "_" + type_buy_sell.value+ "_units"] = df_r[NUM_LAST_ROWS:].groupby("have_to_oper_TF")['profit_NEG_units'].sum()
+
+    return df_final_list_stocks
