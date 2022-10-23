@@ -6,7 +6,7 @@ import math
 
 from LogRoot.Logging import Logger
 
-#DF_URLS_STOCKS = pd.read_csv('URL_Stocks_DONTDEL.csv', sep='|')
+
 
 
 def first_n_digits(num, n):
@@ -26,7 +26,7 @@ def singleton(cls):
 # @singleton
 # class Url_stocks_pd():
 #     def __init__(self):
-#         self.pd = DF_URLS_STOCKS
+#         self.pd = pd.read_csv('yfinance/URL_Stocks_DONTDEL.csv', sep='|')
 #
 #     def get_url(self, stock, country="US"):
 #         u = ""
@@ -275,3 +275,8 @@ def fill_last_values_of_colum_with_previos_value(df, colum_name):
     return df
 
 
+
+def get_recent_dates(df_dates, format_strftime = "%Y%m%d"):
+    max_recent_date = pd.to_datetime(df_dates['Date'].max()).strftime(format_strftime)
+    min_recent_date = pd.to_datetime(df_dates['Date'].min()).strftime(format_strftime)
+    return max_recent_date, min_recent_date
