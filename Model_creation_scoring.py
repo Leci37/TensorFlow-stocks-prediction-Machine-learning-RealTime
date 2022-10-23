@@ -146,19 +146,10 @@ for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dic
 
         df_threshold = pd.read_csv("Models/Scoring/" + S + "_" + type_buy_sell.value + "_" + "_when_model_ok_threshold.csv", index_col=0, sep='\t')#How to set in pandas the first column and row as index? index_col=0,
 
-        df_r =  Model_predictions_handle.is_predict_buy_point(df_A, df_threshold, None)
-        df_r['Close']  = df_r['Close'] + 100.1
-        df_r = Utils_buy_sell_points.get_buy_sell_points_Roll(df_r, delete_aux_rows=False)
-        df_r = df_r.dropna(how='any')
-        if type_buy_sell == a_manage_stocks_dict.Op_buy_sell.POS:
-            df_r['per_PROFIT_POS'] = df_r['per_PROFIT_POS'].astype(float)
-            df_final_list_stocks['ticker_' + S+ "_" + type_buy_sell.value] = df_r[-400:].groupby("have_to_oper")['per_PROFIT_POS'].sum()
-            df_final_list_stocks['tickTF_' + S+ "_" + type_buy_sell.value] = df_r[-400:].groupby("have_to_oper_TF")['per_PROFIT_POS'].sum()
+        df_r =  Model_predictions_handle.is_predict_buy_point_bt_scoring_csv(df_A, df_threshold, None)
+        df_f = Model_predictions_handle.how_much_each_entry_point_earns(df_r, S, type_buy_sell, NUM_LAST_ROWS = -400)
+        df_final_list_stocks = pd.concat([df_final_list_stocks, df_f], axis=1)
 
-        elif type_buy_sell == a_manage_stocks_dict.Op_buy_sell.NEG:
-            df_r['per_PROFIT_NEG'] = df_r['per_PROFIT_NEG'].astype(float)
-            df_final_list_stocks['ticker_' + S+ "_" + type_buy_sell.value] = df_r[-400:].groupby("have_to_oper")['per_PROFIT_NEG'].sum()
-            df_final_list_stocks['tickTF_' + S+ "_" + type_buy_sell.value] = df_r[-400:].groupby("have_to_oper_TF")['per_PROFIT_NEG'].sum()
     print("END")
 
     print("Models/Scoring/_All_" + type_buy_sell.value + "_predict_result.csv")
