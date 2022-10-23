@@ -3,6 +3,7 @@ from enum import Enum
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 #from predict_example import kaggle_stock_market_Tech
+import UtilsL
 import Utils_Yfinance
 import Utils_buy_sell_points
 import Utils_col_sele
@@ -25,7 +26,7 @@ from yhoo_external_raw_factors import DICT_EXTERNAL_FACTORS
 class Option_Historical(Enum):
     YEARS_3 = 1
     MONTH_3 = 2
-    DAY_20 = 3
+    DAY_6 = 3
 
 list_stocks = ["RIVN", "VWDRY", "TWLO",          "GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",]
 list_stocks = ["GE","SPOT","F","SAN.MC","TMUS","MBG.DE","INTC","TRIG.L","GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",
@@ -66,10 +67,10 @@ def get_historial_data_3_month(stockID, prepos=True, interva="15m"):
 
     return df_his
 
-def get_historial_data_20_days(stockID, prepos=True, interva="15m"):
+def get_historial_data_6_days(stockID, prepos=True, interva="15m"):
     yho_stk = yf.Ticker(stockID)
     #en 15 min , 1d es 25 filas
-    hist = yho_stk.history(period="20d",prepost=prepos, interval=interva)
+    hist = yho_stk.history(period="6d",prepost=prepos, interval=interva)
 
     df_his = pd.DataFrame(hist)
     df_his.reset_index(inplace=True)
@@ -148,8 +149,8 @@ def __select_dowload_time_config(interval, opion, prepost, stockId):
         df_his = get_historial_data_3y(stockId, prepos=prepost)
     elif opion.value == Option_Historical.MONTH_3.value:
         df_his = get_historial_data_3_month(stockId, prepos=prepost, interva=interval)
-    elif opion.value == Option_Historical.DAY_20.value:
-        df_his = get_historial_data_20_days(stockId, prepos=prepost, interva=interval)
+    elif opion.value == Option_Historical.DAY_6.value:
+        df_his = get_historial_data_6_days(stockId, prepos=prepost, interva=interval)
     return df_his
 
 
@@ -179,9 +180,8 @@ def get_favs_SCALA_csv_stocks_history_Download_list(list_companys, csv_name, opi
 
     #
     df_all_generate_history = df_all_generate_history.sort_values(by=['Date', 'ticker'], ascending=True)
-    max_recent_date = pd.to_datetime(df_all_generate_history['Date'].max() ).strftime("%Y%m%d")
-    min_recent_date = pd.to_datetime(df_all_generate_history['Date'].min() ).strftime("%Y%m%d")
-    df_all_generate_history.to_csv("d_price/wRAW_" + csv_name + "_history_" + max_recent_date + "__" + min_recent_date + ".csv", sep='\t', index=None)
+    max_recent_date ,min_recent_date = UtilsL.get_recent_dates(df_all_generate_history)
+    df_all_generate_history.to_csv("d_price/RAW/" + csv_name + "_history_" + max_recent_date + "__" + min_recent_date + ".csv", sep='\t', index=None)
 
 
     df_all = df_all.sort_values(by=['Date', 'ticker'], ascending=True)
@@ -191,7 +191,7 @@ def get_favs_SCALA_csv_stocks_history_Download_list(list_companys, csv_name, opi
     return df_all
 
 
-def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, opion, generate_csv_a_stock = True, costum_columns = None):
+def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, opion, generate_csv_a_stock = True, costum_columns = None, add_min_max_values_to_scaler = False):
     sc = MinMaxScaler(feature_range=(-100, 100))
 
 
@@ -210,6 +210,16 @@ def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, o
         df_l.at[0, c] = -100
         df_l.at[1, c] = 100
 
+    if costum_columns is None:
+        generate_pure_min_max_csv(df_l, l, "d_price/min_max/" + l + "_min_max_stock_" + str(opion.name) + ".csv")
+
+    #Se añade el maximo y el minimo de TSLA_SCALA_stock_history_MONTH_3.csv , en la primera y segunda columna , para que los varemos de sc.fit_transform(df_l)
+    #esten acordes al entrenamineto realizado por el TSLA_SCALA_stock_history_MONTH_3.csv
+    if add_min_max_values_to_scaler:
+        df_min_max = pd.read_csv("d_price/min_max/" + l + "_min_max_stock_" + str(Option_Historical.MONTH_3.name) + ".csv",  index_col=0, sep='\t')
+        df_min_max = df_min_max[df_l.columns]
+        df_l = pd.concat([df_min_max, df_l], ignore_index=True)
+
     aux_date_save = df_l['Date']  # despues se añade , hay que pasar el sc.fit_transform
     df_l['Date'] = 0
     array_stock = sc.fit_transform(df_l)
@@ -225,9 +235,17 @@ def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, o
     return df_all_generate_history, df_l
 
 
+def generate_pure_min_max_csv(df_min_max, stock_id, path):
+    df_min_max = df_min_max.agg(['min', 'max'])
+    # No deberian ser igual
+    # df_min_max.T[ df_min_max.T['min'] == df_min_max.T['max'] ].index
+    df_min_max.insert(loc=1, column='ticker', value=stock_id)
+    print("MIN_MAX file "+path+" Shape: " + str(df_min_max.shape))
+    df_min_max.to_csv(path, sep='\t', index=True)
+
+
 def get_favs_SCALA_csv_tocks_history_Local(df_his_stock, csv_name, opion):
     from sklearn.preprocessing import StandardScaler, MinMaxScaler
-    sc = StandardScaler()
     sc = MinMaxScaler(feature_range=(-100, 100))
 
     df_all = pd.DataFrame()
