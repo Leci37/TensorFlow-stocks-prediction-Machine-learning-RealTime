@@ -78,7 +78,7 @@ def select_work_buy_or_sell_point(cleaned_df, opcion : a_manage_stocks_dict.Op_b
     return cleaned_df
 
 
-def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
+def _OLD_get_buy_sell_points_Roll_OLD(df_stock, delete_aux_rows = True):
     df_stock['sell_value_POS'] = df_stock.Close.shift(-12).rolling( min_periods = 1, window=12).apply(rolling_get_sell_price_POS)
     #df_stock['PROFIT_POS'] = (df_stock['sell_value_POS'] + 100) - (df_stock['Close'] + 100)
     df_stock['per_PROFIT_POS'] = (df_stock['sell_value_POS'] * 100) / df_stock['Close'] - 100
@@ -104,6 +104,40 @@ def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
 
 
         df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','per_PROFIT_NEG', 'per_PROFIT_POS'], errors='ignore')
+    #df_stock[df_stock['Volume'] != 0].groupby(Y_TARGET).count()
+
+    return df_stock
+
+def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
+    df_stock['sell_value_POS'] = df_stock.Close.shift(-12).rolling( min_periods = 1, window=12).apply(rolling_get_sell_price_POS)
+    #df_stock['PROFIT_POS'] = (df_stock['sell_value_POS'] + 100) - (df_stock['Close'] + 100)
+    #df_stock['per_PROFIT_POS'] = ((df_stock['sell_value_POS'] * 100) / df_stock['Close'] - 100).astype(float)
+
+    df_stock['sell_value_NEG'] = df_stock.Close.shift(-12).rolling(min_periods=1, window=12).apply(rolling_get_sell_price_NEG)
+    #df_stock['PROFIT_NEG'] = (df_stock['sell_value_NEG'] + 100) - (df_stock['Close'] + 100)
+    #df_stock['per_PROFIT_NEG'] = ((df_stock['sell_value_NEG'] * 100) / df_stock['Close'] - 100).astype(float)
+
+    df_stock['profit_POS_units'] = (df_stock['sell_value_POS']+ 100)  - ( df_stock['Close']+ 100)
+    df_stock['profit_NEG_units'] = (df_stock['Close']+ 100) - (df_stock['sell_value_NEG']+ 100)
+
+    df_threshold = df_stock['profit_NEG_units'].describe(percentiles=[0.93, 0.98]).round(4)
+    Threshold_NEG_93 = df_threshold["93%"]
+    Threshold_NEG_98 = df_threshold["98%"]
+    df_threshold = df_stock['profit_POS_units'].describe(percentiles=[0.93, 0.98]).round(4)
+    Threshold_POS_93 = df_threshold["93%"]
+    Threshold_POS_98 = df_threshold["98%"]
+    Logger.logr.info("Parameters of acquisition \"buy_sell_points\" for this stock is set to POSITIVE (units) \t93%: "+ str(Threshold_NEG_93) + " \t98%: "+ str(Threshold_NEG_98) +" NEGATIVE (units) \t93%: "+ str(Threshold_POS_93) +" \t98%: "+ str(Threshold_POS_98) )
+
+
+    if Y_TARGET not in df_stock.columns:
+        df_stock.insert(loc=1, column=Y_TARGET, value=0)
+    df_stock.loc[df_stock['profit_NEG_units'] > Threshold_NEG_93, Y_TARGET] = -100 # ] >>>>>> T es distinto al metodo OLD
+    df_stock.loc[df_stock['profit_NEG_units'] > Threshold_NEG_98, Y_TARGET] = -101
+    df_stock.loc[df_stock['profit_POS_units'] > Threshold_POS_93, Y_TARGET] = 100
+    df_stock.loc[df_stock['profit_POS_units'] > Threshold_POS_98, Y_TARGET] = 101
+
+    if delete_aux_rows:
+        df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','profit_NEG_units', 'profit_POS_units'], errors='ignore')
     #df_stock[df_stock['Volume'] != 0].groupby(Y_TARGET).count()
 
     return df_stock
