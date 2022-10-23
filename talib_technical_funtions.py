@@ -65,12 +65,13 @@ def get_overlap_indicator( high, low, close):
     df = pd.DataFrame()
 
     # reliably restored by inspect Bollinger Bands
-    if cos_cols is None or "olap_BBAND_UPPER" in cos_cols or "olap_BBAND_MIDDLE" in cos_cols or "olap_BBAND_LOWER" in cos_cols or "olap_BBAND_UPPER_crash" in cos_cols or "olap_BBAND_LOWER_crash" in cos_cols :
-        df["olap_BBAND_UPPER"], df["olap_BBAND_MIDDLE"], df["olap_BBAND_LOWER"] = talib.BBANDS(close, timeperiod=5, nbdevup=2, nbdevdn=2, matype=0)
+    if cos_cols is None or "olap_BBAND_UPPER" in cos_cols or "olap_BBAND_MIDDLE" in cos_cols or "olap_BBAND_LOWER" in cos_cols or "olap_BBAND_UPPER_crash" in cos_cols or "olap_BBAND_LOWER_crash" in cos_cols or "olap_BBAND_dif" in cos_cols :
+        df["olap_BBAND_UPPER"], df["olap_BBAND_MIDDLE"], df["olap_BBAND_LOWER"] = talib.BBANDS(close, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
         df['col_cierre'] = close
         df = Utils_Yfinance.get_crash_points(df, 'olap_BBAND_UPPER', 'col_cierre', col_result="olap_BBAND_UPPER_crash")
         df = Utils_Yfinance.get_crash_points(df, 'olap_BBAND_LOWER', 'col_cierre', col_result="olap_BBAND_LOWER_crash")
         df = df.drop(columns=['col_cierre'])
+        df["olap_BBAND_dif"] = df["olap_BBAND_UPPER"] - df["olap_BBAND_LOWER"]
     #HT_TRENDLINE - Hilbert Transform - Instantaneous Trendline
     if cos_cols is None or "olap_HT_TRENDLINE" in cos_cols:
         df["olap_HT_TRENDLINE"] = talib.HT_TRENDLINE(close)
