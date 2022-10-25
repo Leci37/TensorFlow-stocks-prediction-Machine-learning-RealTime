@@ -68,8 +68,9 @@ def __get_df_Evaluation_from_all_models_model_ok_thresholdCSV(df_result_all, nam
 
 
 def get_list_good_models(df_result_all ,groupby_colum , path = None):
-    THORSHOOL_VALID_MODEL_down = 0.15 # tiene que tener mas que esto para ser valido
-    THORSHOOL_VALID_MODEL_up = 0.4
+    THORSHOOL_VALID_MODEL_down = 0.26 # tiene que tener mas que esto para ser valido
+    THORSHOOL_VALID_MODEL_TF_down = 0.06
+    THORSHOOL_VALID_MODEL_up = 0.5
 
     rows_test_in_df = int(df_result_all.shape[0] * 0.35)
     df_eval_result_paramans = df_result_all[-rows_test_in_df:].groupby(groupby_colum).mean().T
@@ -85,9 +86,9 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         df_json = df_eval_result_paramans["r_eval"][list_r_params].round(4)
         scoring_sum_only_pos = df_eval_result_paramans["r_eval"][list_r_params][ df_eval_result_paramans["r_eval"][list_r_params] > THORSHOOL_VALID_MODEL_down ].sum()
 
-        list_r_TF_params = [col for col in list_r_params if col.startswith('r_TF_')]
+        list_r_TF_params = [col for col in list_r_params if col.startswith('r_TF')]
         scoring_sum_TF = df_eval_result_paramans["r_eval"][list_r_TF_params].sum()
-        list_r_TF_not_params = [col for col in list_r_params if not col.startswith('r_TF_')]
+        list_r_TF_not_params = [col for col in list_r_params if not col.startswith('r_TF')]
         scoring_sum_not_TF = df_eval_result_paramans["r_eval"][list_r_TF_not_params].sum()
         scoring_sum = scoring_sum_TF + scoring_sum_not_TF
 
@@ -97,11 +98,13 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         dict_json["score_sum_TF"] = scoring_sum_TF.round(4)
         dict_json["score_sum_not_TF"] = scoring_sum_not_TF.round(4)
         dict_json["rows_num_eval"] = rows_test_in_df
-        dict_json["THORSHOOL_VALID_MODEL_down_up"] = str(THORSHOOL_VALID_MODEL_down) + "__"+str(THORSHOOL_VALID_MODEL_up)
+        dict_json["THORSHOOL_VALID_MODEL_down__up__TF"] = str(THORSHOOL_VALID_MODEL_down) + "__"+str(THORSHOOL_VALID_MODEL_up)+ "__"+str(THORSHOOL_VALID_MODEL_TF_down)
         path = path +"_groupby_"+groupby_colum+"_"+str(int(scoring_sum * 100))+".json"
 
-        list_valid_params_down = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= THORSHOOL_VALID_MODEL_down].index.values
-        list_valid_params_down = [col for col in list_valid_params_down if col.startswith('r_')]
+        list_valid_params_down = df_eval_result_paramans["r_eval"][list_r_TF_not_params][df_eval_result_paramans["r_eval"][list_r_TF_not_params] >= THORSHOOL_VALID_MODEL_down].index.values
+        list_valid_params_TF_down = df_eval_result_paramans["r_eval"][list_r_TF_params][df_eval_result_paramans["r_eval"][list_r_TF_params] >= THORSHOOL_VALID_MODEL_TF_down].index.values
+
+        list_valid_params_down = list(list_valid_params_down) + list(list_valid_params_TF_down)
         dict_json["list_good_params_down"] = list_valid_params_down
         list_valid_params_up = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= THORSHOOL_VALID_MODEL_up].index.values
         list_valid_params_up = [col for col in list_valid_params_up if col.startswith('r_')]
@@ -122,12 +125,13 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
 
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 #type_detect = a_manage_stocks_dict.Op_buy_sell.POS #for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
 df_final_list_stocks = pd.DataFrame()
 
 for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS]:
-    for S in list_stocks : #["SHOP", "PINS", "NIO", "UBER","U",  "TWLO", "TSLA", "SNOW",  "MELI" ]:#list_stocks:
-        path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_MONTH_3.csv"
+    for S in list_stocks : #["SHOP", "PINS", "NIO", "UBER","U",  "TWLO", "TSLA", "SNOW",  "MELI" ]:#list_stocks: CRSR_SCALA_stock_history_MONTH_3_AD.csv
+        path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
         print(" START STOCK scoring: ", S,  " type: ", type_buy_sell.value, " \t path: ", path_csv_file_SCALA)
         columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
 
