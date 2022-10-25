@@ -101,14 +101,16 @@ def get_all_pandas_TA_tecnical(df_ta, cos_cols=None):
     if cos_cols is None or "olap_SWMA_10" in cos_cols:
         df_ta.ta.swma(prefix="olap", cumulative=True, append=True)
     # Volume Weighted Average Price: vwap
-    # df.ta.vwap(prefix="olap", cumulative=True, append=True)
+    if cos_cols is None or "olap_VMAP" in cos_cols:
+        df_ta = __calculation_volume_weighted_avg_price(df_ta, "olap_VMAP")
+    #No funciona {AttributeError}'RangeIndex' object has no attribute 'to_period'  df_ta.ta.vwap(prefix="olap", cumulative=True, append=True, anchor = "D")
     # Volume Weighted Moving Average: vwma
     if cos_cols is None or "olap_VWMA_10" in cos_cols:
         df_ta.ta.vwma(prefix="olap", cumulative=True, append=True)
 
     ### Performance (3)
     # Draw Down: drawdown   It does not exist
-    # df.ta.draw_down(prefix="perf", cumulative=True, append=True)
+    # df_ta.ta.drawdown(prefix="perf", cumulative=True, append=True)
     # Log Return: log_return
     if cos_cols is None or "perf_CUMLOGRET_1" in cos_cols:
         df_ta.ta.log_return(prefix="perf", cumulative=True, append=True)
@@ -207,3 +209,7 @@ def get_all_pandas_TA_tecnical(df_ta, cos_cols=None):
     return df_ta
 
 
+#Calculation of Volume Weighted Average Price
+def __calculation_volume_weighted_avg_price(df, nom_col):
+    df[nom_col] = np.cumsum(df['Volume'] * (df['High'] + df['Low']) / 2) / np.cumsum(df['Volume'])
+    return df
