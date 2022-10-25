@@ -91,8 +91,27 @@ def train_TF_onBalance(columns_selection  , model_h5_name   , path_csv , op_buy_
         steps_per_epoch=resampled_steps_per_epoch,
         callbacks=[early_stopping],
         validation_data=val_ds)
+
+    print_csv_accuracy_loss_models(model_h5_name, resampled_history)
     resampled_model.save(MODEL_FOLDER_TF + model_h5_name)
     print(" Save model :  ", MODEL_FOLDER_TF + model_h5_name)
+
+
+def print_csv_accuracy_loss_models(model_h5_name, resampled_history):
+    # resampled_history.model.metrics_names[1] # accuracy name
+    # resampled_history.history['accuracy'][-1]
+    # resampled_history.model.metrics_names[0] #Lost name
+    # resampled_history.history['loss'][-1]
+    # resampled_history.epoch[-1]
+    # resampled_history.params['epochs'] # 160 epos
+    data_hist_model = resampled_history.model.metrics_names[1] + "_" + "{:.2f}".format(
+        resampled_history.history['accuracy'][-1] * 100) + "%__" \
+                      + resampled_history.model.metrics_names[0] + "_" + "{:.2f}".format(
+        resampled_history.history['loss'][-1]) + "__" \
+                      + "epochs_" + str(resampled_history.epoch[-1]) + "[" + str(
+        resampled_history.params['epochs']) + "]"
+    pd.DataFrame(resampled_history.history).round(3).to_csv(
+        MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv", sep="\t", index=None)
 
 
 def train_TF_onBalance_64(columns_selection, model_h5_name,path_csv, op_buy_sell : a_manage_stocks_dict.Op_buy_sell):
@@ -144,6 +163,8 @@ def train_TF_onBalance_64(columns_selection, model_h5_name,path_csv, op_buy_sell
         steps_per_epoch=resampled_steps_per_epoch,
         callbacks=[early_stopping],
         validation_data=val_ds)
+
+    print_csv_accuracy_loss_models(model_h5_name, resampled_history)
     resampled_model.save(MODEL_FOLDER_TF + model_h5_name)
     print(" Save model :  ", MODEL_FOLDER_TF + model_h5_name)
 
