@@ -38,12 +38,12 @@ def train_model_with_custom_columns(name_model, columns_list, csv_file_SCALA, op
 
 
 
-CSV_NAME = "@VOLA"
+CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
-# type_buy_sell = a_manage_stocks_dict.Op_buy_sell.POS.name
+opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 
-for S in (["@VOLA"] + list_stocks ):
-    path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_MONTH_3.csv"
+for S in  list_stocks :
+    path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
 
     for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
         print(" START STOCK: ", S,  " type: ", type_buy_sell, " \t path: ", path_csv_file_SCALA)
