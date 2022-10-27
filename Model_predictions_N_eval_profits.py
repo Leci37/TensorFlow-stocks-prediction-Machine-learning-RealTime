@@ -12,6 +12,14 @@ Y_TARGET = 'buy_sell_point'
 
 
 
+def __get_dates_min_max(df_vender,df_compar ):
+    max_recent_date, min_recent_date = "n", "n"
+    if df_vender is not None:
+        max_recent_date, min_recent_date = UtilsL.get_recent_dates(df_vender)
+    elif df_compar is not None:
+        max_recent_date, min_recent_date = UtilsL.get_recent_dates(df_compar)
+
+    return max_recent_date, min_recent_date
 
 def __get_A_sum_units_of_predict_models(df_v, profit_xxx_units):
     df_v = df_v[COLS_EVAL]
@@ -68,14 +76,13 @@ def add_stock_eval_to_df_eval_earing(stock_id , path_each_stock = None):
 
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+# list_stocks = ['UPST']
 
-opion = yhoo_history_stock.Option_Historical.MONTH_3
+opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 df_all_generate_history = pd.DataFrame()
 NUM_LAST_REGISTERS_PER_STOCK =135 #lastweekend , 135 la ultima semana
-COLS_EVAL = ['Date', 'buy_sell_point', 'Close', 'has_preMarket', 'Volume',
- 'sum_r_88', 'sum_r_93', 'sum_r_95', 'have_to_oper', 'sum_r_TF',
- 'num_models', 'have_to_oper_TF' , 'sell_value_POS', 'sell_value_NEG',
- 'profit_POS_units', 'profit_NEG_units']
+COLS_EVAL = ['Date', 'buy_sell_point', 'Close', 'has_preMarket', 'Volume','sum_r_88', 'sum_r_93', 'sum_r_95', 'have_to_oper', 'sum_r_TF',
+ 'num_models', 'have_to_oper_TF' , 'sell_value_POS', 'sell_value_NEG','profit_POS_units', 'profit_NEG_units']
 
 
 df_compar = pd.DataFrame()
@@ -87,16 +94,16 @@ df_eval_earnings = pd.DataFrame(columns=COL_GANAN)
 
 for S in list_stocks: # [ "UBER","U",  "TWLO", "TSLA", "SNOW", "SHOP", "PINS", "NIO", "MELI" ]:#list_stocks:
     try:
-        df_compar, df_vender = get_RealTime_buy_seel_points(S, yhoo_history_stock.Option_Historical.MONTH_3, NUM_LAST_REGISTERS_PER_STOCK =NUM_LAST_REGISTERS_PER_STOCK)
+        df_compar, df_vender = get_RealTime_buy_seel_points(S, opion, NUM_LAST_REGISTERS_PER_STOCK =NUM_LAST_REGISTERS_PER_STOCK)
     except Exception as e:
         df_compar = None
         df_vender = None
         print(S , " ", str(e))
 
-    add_stock_eval_to_df_eval_earing(S, path_each_stock="Models/eval_Profits/per_stock_")
+    add_stock_eval_to_df_eval_earing(S, path_each_stock="Models/eval_Profits/")
     print(S + "   ")
 
-max_recent_date ,min_recent_date = UtilsL.get_recent_dates(df_compar)
+max_recent_date, min_recent_date = __get_dates_min_max(df_vender,df_compar )
 print("Models/eval_Profits/_"+CSV_NAME+"_ALL_stock_" + max_recent_date + "__" + min_recent_date + ".csv")
 
 #Para que se pueda hacer round(2)
