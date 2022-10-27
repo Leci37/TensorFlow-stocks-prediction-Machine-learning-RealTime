@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+import os
 
 import Model_predictions_TF_sklearn_XGB
 import Utils_buy_sell_points
@@ -7,6 +8,7 @@ import Utils_model_predict
 import a_manage_stocks_dict
 
 from LogRoot.Logging import Logger
+from UtilsL import remove_column_name_repeted_last_one
 
 Y_TARGET = 'buy_sell_point'
 
@@ -23,27 +25,35 @@ MODELS_EVAL_RESULT = "Models/all_results/"
 
 
 MODEL_FOLDER_TF = "Models/TF_balance/"
-columns_aux_to_evaluate = ["Close", "per_Close", 'has_preMarket', 'Volume'] #necesario para Utils_buy_sell_points.check_buy_points_prediction
+COLS_TO_EVAL_R = ["Close", "per_Close", 'has_preMarket', 'Volume'] #necesario para Utils_buy_sell_points.check_buy_points_prediction
 
 
 
 def __prepare_df_to_predict(df_in_pure):
     df_result = df_in_pure.drop(columns=Y_TARGET).copy()
     df_result = df_result.loc[:, ~df_result.columns.duplicated()]
+
+    if not (all( x in df_in_pure.columns for x in  COLS_TO_EVAL_R) ):
+        Logger.logr.warning("Auxiliary measuring columns are NOT df.  Aux df COLS_TO_EVAL_R: " + " ".join(COLS_TO_EVAL_R))
+        raise "Auxiliary measuring columns are NOT df.  Aux df COLS_TO_EVAL_R: " + " ".join(COLS_TO_EVAL_R)
+
     # Borras desde la penultima cuatro para atras , la posicion de columns_aux_to_evaluate
-    if set(df_in_pure.columns[-5:-1]) != set(columns_aux_to_evaluate):
-        Logger.logr.warning(
-            "Auxiliary measuring columns are not in the expected position of the df. Aux df columns: " + " ".join(
-                df_in_pure.columns[-5:-1]))
-    df = df_in_pure.iloc[:, 0:len(df_in_pure.columns) - 5]  # elimina las 5 ulitmas columnas
-    df['ticker'] = df_in_pure.iloc[:,
-                   len(df_in_pure.columns) - 1]  # coge la ultima columna por indice de columna, sea cual sea el nombre
+    if set(df_in_pure.columns[-5:-1]) == set(COLS_TO_EVAL_R):
+        df = df_in_pure.iloc[:, 0:len(df_in_pure.columns) - 5]  # elimina las 5 ulitmas columnas siempre serán  "Close", "per_Close", 'has_preMarket', 'Volume', ticker
+        df['ticker'] = df_in_pure.iloc[:,len(df_in_pure.columns) - 1]  # coge la ultima columna por indice de columna, sea cual sea el nombre
+
+    else:
+        print("Multiples valores para @ticker, antes de predecir ")
+        df, num_times_is_repeted = remove_column_name_repeted_last_one(COLS_TO_EVAL_R, df_in_pure)
+        if num_times_is_repeted != 1:
+            Logger.logr.warning("Las columnas de evalución no estan presentes o están más de una vez. " + " Numero de veces: "+ str(num_times_is_repeted) + " ".join(COLS_TO_EVAL_R) )
+            raise "Las columnas de evalución no estan presentes o están más de una vez. " + " Numero de veces: "+ str(num_times_is_repeted) + " ".join(COLS_TO_EVAL_R)
+
+
     test_features, test_labels = Utils_model_predict.scaler_Raw_TF_onbalance(df.copy(), Y_TARGET)
     X = df.drop(columns=Y_TARGET)  # iloc[:,:-1] df.iloc[:,:-1] #iloc[:,:-1]
-    y = df[Y_TARGET]  # df.iloc[:,-1] #.iloc[:,-1] #.iloc[:,-1]
 
     X_test = X.copy()
-
     return X_test, df_result, test_features
 
 
@@ -132,13 +142,13 @@ def get_df_predictions_from_all_models_by_Selection(df_in_pure, model_name_type,
 
 
 def get_dict_scoring_evaluation(stockId , type_buy_sell : a_manage_stocks_dict.Op_buy_sell, folder = "Models/Scoring/", extension =".json", contains = "_" +Y_TARGET):
-    import os
+
     #TODO mejorar no me gusta , la manera de obtner el nombre del fichero , y la gestiion del error
     prefixed = [filename for filename in os.listdir(folder) if
                 filename.startswith(stockId + "_" + type_buy_sell.value) and filename.endswith(extension) and (contains in filename)]
     if len(prefixed) != 1:
-        Logger.logr.error("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion ")
-        raise ValueError("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion ")
+        Logger.logr.error("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion " + "".join(prefixed))
+        raise ValueError("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion " + "".join(prefixed))
 
     path_json = folder + prefixed[0]
     Logger.logr.info(path_json)
@@ -183,7 +193,7 @@ def is_predict_buy_point_bt_scoring_csv(df_Ab, df_threshold, list_valid_params):
         df_list_r["sum_r_" + str(THO_UPH)] = df_list_r["sum_r_" + str(THO_UPH)] + df_list_r["b" + col_r_ + "_" + str(THO_UPH)]
         count_models_eval = count_models_eval + 1
 
-    print("La evaluación del punto have_to_oper se hara por encima de Down "+ str(THO_DOWN)+ "% : "+ str(int(count_models_eval / 2 +1)) +" Up "+ str(THO_UP)+ "% : "+ str(int(count_models_eval / 2 -1 )))
+    print("La evaluación del punto have_to_oper se hará por encima de Down "+ str(THO_DOWN)+ "% : "+ str(int(count_models_eval / 2 +1)) +" Up "+ str(THO_UP)+ "% : "+ str(int(count_models_eval / 2 -1 )))
 
     df_list_r["have_to_oper"] = (df_list_r["sum_r_" + str(THO_DOWN)] > int(count_models_eval / 2) +1 ) & (df_list_r["sum_r_" + str(THO_UP)] > int(count_models_eval / 2 - 1) )
     if count_models_eval_TF > 0:
