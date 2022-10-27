@@ -268,7 +268,10 @@ def clean_dataset(df):
 
 def fill_last_values_of_colum_with_previos_value(df, colum_name):
     try:
-        df[[colum_name]] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
+        pd.options.mode.chained_assignment = None
+        df[colum_name] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
+        pd.options.mode.chained_assignment = 'warn'
+        #df.loc[:, [colum_name]] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
         df = df.sort_values(['Date', 'ticker'], ascending=True)
     except Exception as e:
         print(e)
@@ -280,3 +283,29 @@ def get_recent_dates(df_dates, format_strftime = "%Y%m%d"):
     max_recent_date = pd.to_datetime(df_dates['Date'].max()).strftime(format_strftime)
     min_recent_date = pd.to_datetime(df_dates['Date'].min()).strftime(format_strftime)
     return max_recent_date, min_recent_date
+
+
+# as per recommendation from @freylis, compile once only
+CLEANR = re.compile('<.*?>')
+def clean_html_tags(raw_html):
+  cleantext = re.sub(CLEANR, '', raw_html)
+  return cleantext
+
+import os, glob
+def remove_files_starwith(file):
+    for filename in glob.glob(file + "*"):
+        os.remove(filename)
+
+
+def remove_column_name_repeted_last_one(columnas_para_retirar, df_in_pure):
+    num_times_is_repeted  = 0
+    len_cols = len(columnas_para_retirar)
+    for i_col in range(len(df_in_pure.columns), len_cols + 1, -1):  # Tiene que ir para coger primero las ultimas
+        if set(df_in_pure.columns[(i_col - len_cols):(i_col)]) == set(columnas_para_retirar):
+            num_times_is_repeted +=  1
+            for i in range((i_col-1), (i_col - (len_cols + 1)), -1):  # Tiene que ir de arriba a abajo para no pisarse
+                # https://stackoverflow.com/questions/20297317/python-dataframe-pandas-drop-column-using-int
+                # delete colum by index, borrar columna por indice
+                df_in_pure = df_in_pure.iloc[:, [j for j, c in enumerate(df_in_pure.columns) if j != i]]
+
+    return df_in_pure , num_times_is_repeted
