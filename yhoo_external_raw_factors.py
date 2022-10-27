@@ -7,11 +7,9 @@ import yfinance as yf
 
 
 from LogRoot.Logging import Logger
-class Option_Historical(Enum):
-    YEARS_3 = 1
-    MONTH_3 = 2
+from a_manage_stocks_dict import Option_Historical
 
-dict_external_factors ={
+DICT_EXTERNAL_FACTORS ={
 	"ZW=F" : "Wheat_F",
 	"CL=F" : "Oil_F",
 	"GC=F" : "Gold_F",
@@ -21,11 +19,11 @@ dict_external_factors ={
 	#Todo EURO STOXX 50  ={ ??
 	"BTC-USD" : "BitCoin",
 	"NQ=F":"Nasdaq_F",
-	"^IXIC": "Nasdaq",
+	"^IXIC": "Nasdaq"
 	#"SPX500": "^SPX",
-	"^IBEX" : "Ibex35",
+	#"^IBEX" : "Ibex35",
 }
-list_external = list(dict_external_factors.keys())
+list_external = list(DICT_EXTERNAL_FACTORS.keys())
 
 
 def get_raw_stocks_values(opion):
@@ -41,7 +39,7 @@ def get_raw_stocks_values(opion):
 	df_data.reset_index(drop=True, inplace=True)
 	if opion == Option_Historical.YEARS_3:
 		df_data = UtilsL.remove_weekend_data_values(df_data)
-	for kcol, v in dict_external_factors.items():
+	for kcol, v in DICT_EXTERNAL_FACTORS.items():
 		#df_dataR[kcol] = df_dataR[kcol].round(2)
 		df_data = df_data.rename(columns={kcol: v})
 	df_data.to_csv("d_external_factors/external_factors_hist_" + str(opion.name) + ".csv", sep="\t")
