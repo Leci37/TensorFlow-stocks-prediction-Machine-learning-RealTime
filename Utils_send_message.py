@@ -1,3 +1,6 @@
+import pandas as pd
+
+import UtilsL
 import a_manage_stocks_dict
 
 #https://www.iemoji.com/#?category=objects&version=36&theme=appl&skintone=default
@@ -23,26 +26,14 @@ def get_text_alert(type_b_s):
 
 URL_INVESTING = "https://www.investing.com/search/?q=" #https://www.investing.com/search/?q=RIVN
 URL_WE_BULL = "https://www.webull.com/quote/nasdaq-" # "https://www.webull.com/quote/nasdaq-meli/news"
-def get_string_alert_message(S, dict_pred, modles_evaluated, modles_evaluated_TF, type_b_s, date_detect, value_detect):
+def get_string_alert_message(S, dict_pred, modles_evaluated,  type_b_s, date_detect, value_detect):
     text_alert_main_b_s, flecha_simbol = get_text_alert(type_b_s)
     url_info_inves = URL_INVESTING + S
     url_info_webull = URL_WE_BULL + S.lower()
 
-    names_models_r = ""
-    count_TF_models = 0
-    modles_evaluated.sort()
-    for k in modles_evaluated:
-        if dict_pred[k] == 1:  # dict_predict_1[k] == 1:
-            names_models_r = names_models_r + k.replace('br_', '').replace("_" + type_b_s.value, '').replace('__','_').replace("_" + S, '') + '%, '
-            if k.startswith( 'br_TF'):
-                count_TF_models = count_TF_models + 1
+    s88, s93, s95, stf, names_models_r = get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s)
 
-    s88 = "88%: " + str(dict_pred['sum_r_88']) + "/" + str(dict_pred['num_models'])
-    s93 = "93%: " + str(dict_pred['sum_r_93']) + "/" + str(dict_pred['num_models'])
-    s95 = "95%: " + str(dict_pred['sum_r_95']) + "/" + str(dict_pred['num_models'])
-    stf = "TF: " + str(dict_pred['sum_r_TF']) + "/" + str(int(count_TF_models))
-
-# **negrita** escribe el texto en negrita
+    # **negrita** escribe el texto en negrita
 # __cursiva__ escribe el texto en cursiva
 # ```monospace``` escribe el texto en monospace
 # ~~tachado~~ escribe el texto tachado
@@ -51,10 +42,36 @@ def get_string_alert_message(S, dict_pred, modles_evaluated, modles_evaluated_TF
     s1 = "<strong>"+text_alert_main_b_s + ": " + S + "</strong> "
     s2 = "<em>"+dict_pred['Date'] + "</em>" + (flecha_simbol*1) +"\nValue:<pre> "+ "{:.2f}".format(value_detect)+"</pre>\n"
     s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n  "
-    s4 = s88 + "\t  " + s93 + "\n  " + s95 + "\t  " + stf + "\n\n"
+    s4 = "88%: " + s88 + "\t  93%: " + s93 + "\n  95%: " +  s95 + "\t  TF: " + stf + "\n\n"
     s5 = "📊Model names: <pre>" + names_models_r + "</pre>\n"
     s6 = "<em>Date alert: "+date_detect + "</em>"
-    return  s1 + s2 + s3 + s4 + s5 + s6
+
+    alert_message_html =  s1 + s2 + s3 + s4 + s5 + s6
+    alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com','').replace("Confidence of models:",'').replace('Investing.com','').replace('\t',' ') #.replace('\n',' ')
+
+    return  alert_message_html , alert_message_without_tags
+
+
+def get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s):
+    names_models_r = ""
+    count_TF_models = 0
+    modles_evaluated.sort()
+    for k in modles_evaluated:
+        if dict_pred[k] == 1:  # dict_predict_1[k] == 1:
+            names_models_r = names_models_r + k.replace('br_', '').replace("_" + type_b_s.value, '').replace('__','_').replace("_" + S, '') + '%, '
+            if k.startswith('br_TF'):
+                count_TF_models = count_TF_models + 1
+    s88 = str(dict_pred['sum_r_88']) + "/" + str(dict_pred['num_models'])
+    s93 = str(dict_pred['sum_r_93']) + "/" + str(dict_pred['num_models'])
+    s95 = str(dict_pred['sum_r_95']) + "/" + str(dict_pred['num_models'])
+    stf = str(dict_pred['sum_r_TF']) + "/" + str(int(count_TF_models))
+    return  s88, s93, s95, stf , names_models_r
+
+def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s , path = "zTelegram_Registers.csv"):
+    s88, s93, s95, stf, names_models_r = get_fraciones_afirmativos_results(S, dict_predict, modles_evaluated, type_b_s)
+    df_res = pd.DataFrame([[dict_predict['Date'], S, type_b_s.name, "{:.1f}".format(dict_predict['Close']), s88, s93, s95, stf, names_models_r]],
+                          columns=['Date', 'Stock', 'buy_sell','Close', '88%', '93%', '95%', 'TF%', "Models_names"])
+    df_res.to_csv(path, sep="\t", index=None, mode='a', header=False)
 
 
 html_example = '''<b>bold</b>
