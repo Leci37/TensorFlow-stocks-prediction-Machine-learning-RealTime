@@ -16,7 +16,6 @@ from datetime import datetime
 from telegram.constants import ParseMode
 
 import UtilsL
-import a_manage_stocks_dict
 import yhoo_history_stock
 from LogRoot.Logging import Logger
 from Model_predictions_Nrows import get_RealTime_buy_seel_points
@@ -53,7 +52,7 @@ BOT = None
 
 
 CSV_NAME = "@VOLA"
-list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+list_stocks = DICT_COMPANYS[CSV_NAME]
 
 
 
@@ -70,17 +69,31 @@ def __get_runtime_value_date_by_yhoo(S):
     return date_detect, value_detect
 
 SUFFIXES_DATE_ENDS = ("00:00", "15:00", "30:00", "45:00")
-def will_send_alert(df_b_s):
+def will_send_alert(df_b_s, stotck_id_pos ):
     num_models = df_b_s.iloc[[-1]]['num_models'].values[0]
-    has_to_send_last = df_b_s.iloc[[-1]]['sum_r_93'].values[0]  >= ((num_models / 2) + 0.5) #ultima
-    has_to_send_unlast = df_b_s.iloc[[-2]]['sum_r_93'].values[0] >= ((num_models / 2) + 0.5) #penultima
-    #has_to_send_oclck =  df_b_s.iloc[[i]]['Date'].values[0].endswith(SUFFIXES_DATE_ENDS)
+    # ultima
+    has_to_send_last = df_b_s.iloc[[-1]]['sum_r_93'].values[0]  > ((num_models / 2)  )
+    # penultima
+    has_to_send_unlast = df_b_s.iloc[[-2]]['sum_r_93'].values[0] > ((num_models / 2) )
 
-    return has_to_send_last and has_to_send_unlast
-    # df_b_s.iloc[[i]]['have_to_oper'].values[0] == True or df_b_s.iloc[[i]]['sum_r_TF'].values[0] > 4 or \
-    #        df_b_s.iloc[[i]]['sum_r_88'].values[0] >= 12
+    Logger.logr.info("\tPUNTUACIONES r_93 Stock: "+stotck_id_pos+" Penultima: "+ str(df_b_s.iloc[[-2]]['sum_r_93'].values[0])
+                     +"/"+ str(num_models) +"  Ultima: "+ str(df_b_s.iloc[[-1]]['sum_r_93'].values[0]) +"/"+ str(num_models)  )
 
-COL_GANAN = ["Date", "stock", "type_buy_sell","value_start" ]
+
+    modles_evaluated_TF = [col for col in df_b_s.columns if col.startswith('br_TF') and col.endswith("_93")]
+    if len(modles_evaluated_TF) >= 2:
+        #tf_88 = df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_88$'))].sum(axis=1)
+        tf_93 = df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_93$'))].sum(axis=1)
+        #tf_95 =df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_95$'))].sum(axis=1)
+        has_to_send_last_TF = tf_93.iloc[-1] > ( len(modles_evaluated_TF) / 2 +0.1  )
+        has_to_send_unlast_TF = tf_93.iloc[-2] > ( len(modles_evaluated_TF) / 2 +0.1  )
+        Logger.logr.info("\tPUNTUACIONES TF r_93 Stock: " + stotck_id_pos + " Penultima: " + str(tf_93.iloc[-2])
+                         + "/" + str(len(modles_evaluated_TF)) + "  Ultima: " + str(tf_93.iloc[-1])+ "/" + str(len(modles_evaluated_TF)))
+
+    return (has_to_send_last and has_to_send_unlast) or (has_to_send_last_TF and has_to_send_unlast_TF)
+
+
+COL_GANAN = ["Date", "stock", "type_buy_sell","value_start", "message" ]
 df_registre = pd.DataFrame(columns=COL_GANAN)
 
 def send_alert(S, df_b_s, type_b_s):
@@ -88,18 +101,25 @@ def send_alert(S, df_b_s, type_b_s):
     modles_evaluated = [col for col in df_b_s.columns if col.startswith('br_')]
     modles_evaluated_TF = [col for col in df_b_s.columns if col.startswith('br_TF')]
     dict_predictions = df_b_s.T.to_dict()
-    df_b_s = df_b_s.drop(columns=modles_evaluated)
 
-    #for i in [-2, -1]: #ultima y penultima
+    #register data each time UNLAST
+    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-2]], modles_evaluated, type_b_s, path = "zTelegram_Registers.csv")  #unlast row
+    #LAST
+    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-1]], modles_evaluated, type_b_s, path = "zTelegram_Registers.csv")  #last row
+
     i = -1
-    if True or will_send_alert(df_b_s):
+    if will_send_alert(df_b_s, S+"_"+type_b_s.name):
+        dict_predict_last = dict_predictions[list(dict_predictions.keys())[i]]
 
         date_detect, value_detect = __get_runtime_value_date_by_yhoo(S)
-        dict_predict_1 = dict_predictions[list(dict_predictions.keys())[i]]
-        df_registre = pd.concat([df_registre, pd.DataFrame([[date_detect, S, type_b_s.name, "{:.2f}".format(value_detect) ]], columns=COL_GANAN)  ],ignore_index=True)  # añadir fila add row
-        # df_registre.to_csv("zTelegram_Registers.csv", sep="\t", index=None , mode='a', header=False)
 
-        message_aler = Utils_send_message.get_string_alert_message(S, dict_predict_1, modles_evaluated, modles_evaluated_TF, type_b_s, date_detect, value_detect)
+        message_aler , alert_message_without_tags = Utils_send_message.get_string_alert_message(S, dict_predict_last, modles_evaluated,
+                                                                   type_b_s, date_detect,value_detect)
+
+        df_registre = pd.concat([df_registre, pd.DataFrame([[date_detect, S, type_b_s.name, "{:.2f}".format(value_detect) , alert_message_without_tags ]], columns=COL_GANAN)  ],ignore_index=True)  # añadir fila add row
+        df_registre.to_csv("zSent_Telegram_Registers.csv", sep="\t", index=None , mode='a', header=False)
+
+
 
         botsUrl = f"https://api.telegram.org/bot{TOKEN}" #+ "/sendMessage?chat_id={}&text={}".format(chat_idLUISL, message_aler, parse_mode=ParseMode.HTML)
         # url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(chat_idLUISL, message_aler,parse_mode=ParseMode.MARKDOWN_V2)
@@ -118,7 +138,7 @@ def monitor_all_stocks_and_send_alerts():
     for S in DICT_COMPANYS["@FOLO3"] : #list_stocks:  # list_stocks: # [ "UBER","U",  "TWLO", "TSLA", "SNOW", "SHOP", "PINS", "NIO", "MELI" ]:#list_stocks:
         try:
             print("Company: "+S)
-            df_compar, df_vender = get_RealTime_buy_seel_points(S, Option_Historical.DAY_6, NUM_LAST_REGISTERS_PER_STOCK=6)
+            df_compar, df_vender = get_RealTime_buy_seel_points(S, Option_Historical.DAY_6, NUM_LAST_REGISTERS_PER_STOCK=3)
             # df_compar = pd.read_csv("Models/LiveTime_results/" + S + "_" + type_buy_sell.value + "_" + "_.csv",index_col=False, sep='\t')
             if df_compar is not None:
                 send_alert(S, df_compar, Op_buy_sell.POS)
@@ -133,7 +153,8 @@ def monitor_all_stocks_and_send_alerts():
             print("Enviar alerta: "+message_aler)
             print(requests.get(url).json())
 
-
+    df_res = pd.DataFrame([[datetime.today().strftime('%Y-%m-%d %H:%M:%S'), '----', '----','----', '----%', '----%', '----%', '----%', datetime.today().strftime('%Y-%m-%d %H:%M:%S')]], columns=['Date', 'Stock', 'buy_sell','Close', '88%', '93%', '95%', 'TF%', "Models_names"])
+    df_res.to_csv(path = "zTelegram_Registers.csv", sep="\t", index=None, mode='a', header=False)
     print("END ciclo ")
     print("END ciclo "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
     print("END ciclo ")
@@ -177,7 +198,7 @@ from datetime import datetime, timedelta
 #     monitor_all_stocks_and_send_alerts()
 #     time.sleep(diez_minutos) #cada_minuto = (60.0 - ((time.time() - starttime) % 60.0))
 
-monitor_all_stocks_and_send_alerts()
+#monitor_all_stocks_and_send_alerts()
 from apscheduler.schedulers.blocking import BlockingScheduler
 scheduler = BlockingScheduler()
 #https://stackoverflow.com/questions/66662408/how-can-i-run-task-every-10-minutes-on-the-5s-using-blockingscheduler
