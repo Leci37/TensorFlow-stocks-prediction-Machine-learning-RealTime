@@ -29,6 +29,44 @@ METRICS_ALL = [
       keras.metrics.AUC(name='prc', curve='PR'), # precision-recall curve
 ]
 
+#https://stackoverflow.com/questions/64556120/early-stopping-with-multiple-conditions
+class CustomEarlyStopping(keras.callbacks.Callback):
+    def __init__(self, patience=0):
+        super(CustomEarlyStopping, self).__init__()
+        self.patience = patience
+        self.best_weights = None
+
+    def on_train_begin(self, logs=None):
+        # The number of epoch it has waited when loss is no longer minimum.
+        self.wait = 0
+        # The epoch the training stops at.
+        self.stopped_epoch = 0
+        # Initialize the best as infinity.
+        self.best_v_loss = np.Inf
+        self.best_v_acc = 0
+
+    def on_epoch_end(self, epoch, logs=None):
+        v_acc = logs.get('val_accuracy')
+        v_val_acc = logs.get('val_loss')
+
+        # If BOTH the validation loss AND map10 does not improve for 'patience' epochs, stop training early.
+        if np.less(v_acc, self.best_v_loss) and np.greater(v_val_acc, self.best_v_acc):
+            self.best_v_loss = v_acc
+            self.best_v_acc = v_val_acc
+            self.wait = 0
+            # Record the best weights if current results is better (less).
+            self.best_weights = self.model.get_weights()
+        else:
+            self.wait += 1
+            if self.wait >= self.patience:
+                self.stopped_epoch = epoch
+                self.model.stop_training = True
+                print(" Restoring model weights from the end of the best epoch.")
+                self.model.set_weights(self.best_weights)
+
+    def on_train_end(self, logs=None):
+        if self.stopped_epoch > 0:
+            print("Epoch %05d: early stopping" % (self.stopped_epoch + 1))
 
 
 def load_and_clean_DF_Train_from_csv(path, op_buy_sell : a_manage_stocks_dict.Op_buy_sell, columns_selection = [], Y_TARGET ='buy_sell_point',  ):
@@ -66,7 +104,7 @@ def load_and_clean__buy_sell_atack( raw_df, columns_selection, op_buy_sell : a_m
     print("COMPRA VENTA PUNTO")
     Logger.logr.debug(" groupby(Y_TARGET).count() " + str(df[['Date', Y_TARGET]].groupby(Y_TARGET).count()))
     df = cast_Y_label_binary(df, label_name=Y_TARGET)
-    df = clean_redifine_df(df)
+    df = clean_redifine_df_dummy_ticker(df)
     return df
 
 
@@ -88,7 +126,7 @@ def cast_Y_label_binary(raw_df, label_name = 'buy_sell_point'):
     return raw_df
 
 
-def clean_redifine_df(raw_df):
+def clean_redifine_df_dummy_ticker(raw_df):
     cleaned_df = raw_df.copy()
 
     # You don't want the `Time` column.

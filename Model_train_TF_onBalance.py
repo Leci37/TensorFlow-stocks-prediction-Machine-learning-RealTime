@@ -1,9 +1,13 @@
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
+from keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
 
+import UtilsL
 import Utils_col_sele
 import Utils_model_predict
 import Utils_plotter
@@ -18,19 +22,28 @@ import a_manage_stocks_dict
 
 def get_EarlyStopping(model_h5_name):
     monitor_type = 'val_accuracy'#EarlyStopping has 4 values: 'loss','accuracy','val_loss','val_accuracy'.
-    if a_manage_stocks_dict.MODEL_TYPE_COLM.VGOOD.value in model_h5_name:
-        monitor_type = 'accuracy'
-    elif a_manage_stocks_dict.MODEL_TYPE_COLM.GOOD.value in model_h5_name:
-        monitor_type = 'val_loss'
-    elif a_manage_stocks_dict.MODEL_TYPE_COLM.REG.value in model_h5_name:
-        monitor_type = 'val_loss'
+    # if a_manage_stocks_dict.MODEL_TYPE_COLM.VGOOD.value in model_h5_name:
+    #     monitor_type = 'accuracy'
+    # elif a_manage_stocks_dict.MODEL_TYPE_COLM.GOOD.value in model_h5_name:
+    #     monitor_type = 'val_loss'
+    # elif a_manage_stocks_dict.MODEL_TYPE_COLM.REG.value in model_h5_name:
+    #     monitor_type = 'val_loss'
 
     return tf.keras.callbacks.EarlyStopping(
         monitor=monitor_type , #'monitor argument of tf.keras.callbacks.EarlyStopping has 4 values: 'loss','accuracy','val_loss','val_accuracy'.
         verbose=2,
-        patience=9,
+        patience=12,
         mode='auto',#min_delta=1 By default, any change in the performance measure, no matter how fractional, will be considered an improvement
         restore_best_weights=True)
+
+#https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/TensorBoard
+# Comando de apertura de tensorFlow board
+# tensorboard  --logdir=C:\Users\Luis\Desktop\LecTrade\LecTrade\Models\logs\TF_MELI_pos_low1_28.h5
+def get_EarlyStopping_TensorFlowBoard(model_h5_name):
+    path_tf_board = "Models/logs/" + model_h5_name
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_tf_board, histogram_freq=1, write_graph=True,
+                                                          write_images=True)
+    return tensorboard_callback
 
 
 Y_TARGET = 'buy_sell_point'
@@ -83,35 +96,22 @@ def train_TF_onBalance(columns_selection  , model_h5_name   , path_csv , op_buy_
     val_ds = tf.data.Dataset.from_tensor_slices((val_features, val_labels)).cache()
     val_ds = val_ds.batch(BATCH_SIZE).prefetch(2)
 
-    early_stopping = get_EarlyStopping(model_h5_name)
+    #early_stopping = get_EarlyStopping(model_h5_name)
+    early_stopping = Utils_model_predict.CustomEarlyStopping(patience=10)
+    #early_stopping_board = get_EarlyStopping_TensorFlowBoard(model_h5_name)
 
     resampled_history = resampled_model.fit(
         resampled_ds,
         epochs=EPOCHS,
         steps_per_epoch=resampled_steps_per_epoch,
-        callbacks=[early_stopping],
+        callbacks=[early_stopping], #callbacks=[early_stopping, early_stopping_board],
         validation_data=val_ds)
 
-    print_csv_accuracy_loss_models(model_h5_name, resampled_history)
+    __print_csv_accuracy_loss_models(model_h5_name, resampled_history)
     resampled_model.save(MODEL_FOLDER_TF + model_h5_name)
     print(" Save model :  ", MODEL_FOLDER_TF + model_h5_name)
 
 
-def print_csv_accuracy_loss_models(model_h5_name, resampled_history):
-    # resampled_history.model.metrics_names[1] # accuracy name
-    # resampled_history.history['accuracy'][-1]
-    # resampled_history.model.metrics_names[0] #Lost name
-    # resampled_history.history['loss'][-1]
-    # resampled_history.epoch[-1]
-    # resampled_history.params['epochs'] # 160 epos
-    data_hist_model = resampled_history.model.metrics_names[1] + "_" + "{:.2f}".format(
-        resampled_history.history['accuracy'][-1] * 100) + "%__" \
-                      + resampled_history.model.metrics_names[0] + "_" + "{:.2f}".format(
-        resampled_history.history['loss'][-1]) + "__" \
-                      + "epochs_" + str(resampled_history.epoch[-1]) + "[" + str(
-        resampled_history.params['epochs']) + "]"
-    pd.DataFrame(resampled_history.history).round(3).to_csv(
-        MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv", sep="\t", index=None)
 
 
 def train_TF_onBalance_64(columns_selection, model_h5_name,path_csv, op_buy_sell : a_manage_stocks_dict.Op_buy_sell):
@@ -155,16 +155,18 @@ def train_TF_onBalance_64(columns_selection, model_h5_name,path_csv, op_buy_sell
     val_ds = tf.data.Dataset.from_tensor_slices((val_features, val_labels)).cache()
     val_ds = val_ds.batch(BATCH_SIZE).prefetch(2)
 
-    early_stopping = get_EarlyStopping(model_h5_name)
+    #early_stopping = get_EarlyStopping(model_h5_name)
+    early_stopping = Utils_model_predict.CustomEarlyStopping(patience=10)
+    early_stopping_board = get_EarlyStopping_TensorFlowBoard(model_h5_name)
 
     resampled_history = resampled_model.fit(
         resampled_ds,
         epochs=EPOCHS,
         steps_per_epoch=resampled_steps_per_epoch,
-        callbacks=[early_stopping],
+        callbacks=[early_stopping], # callbacks=[early_stopping, early_stopping_board],
         validation_data=val_ds)
 
-    print_csv_accuracy_loss_models(model_h5_name, resampled_history)
+    __print_csv_accuracy_loss_models(model_h5_name, resampled_history)
     resampled_model.save(MODEL_FOLDER_TF + model_h5_name)
     print(" Save model :  ", MODEL_FOLDER_TF + model_h5_name)
 
@@ -189,5 +191,22 @@ def predict_TF_onBalance(X_test,  model_folder, model_h5_name):
     # Utils_plotter.plot_confusion_matrix(cf_matrix, model_folder + "plot_confusion_matrix.png")
     return  test_predictions_resampled
 
+
+def __print_csv_accuracy_loss_models(model_h5_name, resampled_history):
+    UtilsL.remove_files_starwith(MODEL_FOLDER_TF + model_h5_name + "_")
+    # resampled_history.model.metrics_names[1] # accuracy name
+    # resampled_history.history['accuracy'][-1]
+    # resampled_history.model.metrics_names[0] #Lost name
+    # resampled_history.history['loss'][-1]
+    # resampled_history.epoch[-1]
+    # resampled_history.params['epochs'] # 160 epos
+    data_hist_model = resampled_history.model.metrics_names[1] + "_" + "{:.2f}".format(
+        resampled_history.history['accuracy'][-1] * 100) + "%__" \
+                      + resampled_history.model.metrics_names[0] + "_" + "{:.2f}".format(
+        resampled_history.history['loss'][-1]) + "__" \
+                      + "epochs_" + str(resampled_history.epoch[-1]) + "[" + str(
+        resampled_history.params['epochs']) + "]"
+    pd.DataFrame(resampled_history.history).round(3).to_csv(
+        MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv", sep="\t", index=None)
 
 #model_h5_name = 'TF_in_balance.h5'
