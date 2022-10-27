@@ -168,7 +168,9 @@ Candle 1 appears as a bearish price candle"""
     diff_lst = np.insert(diff_lst, 0, False)
 
     #df_close.insert(loc=len(df_close.columns), column='change_is_pos', value=False)
+    pd.options.mode.chained_assignment = None
     df_close['change_is_pos'] = (df_close['Close'] - df_close['Close'].shift(1)) > 0
+    pd.options.mode.chained_assignment = 'warn'
 
     _td_sequential = [0 for _ in range(n)]
     len(df_close[n:]) #sin los n primeros
