@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import json
+import  glob, re
 
 import Feature_selection_get_columns_json
 import Model_predictions_TF_sklearn_XGB
@@ -30,7 +31,8 @@ MODELS_EVAL_RESULT = "Models/all_results/"
 
 
 MODEL_FOLDER_TF = "Models/TF_balance/"
-columns_aux_to_evaluate = ["Close", "per_Close", 'has_preMarket', 'Volume'] #necesario para Utils_buy_sell_points.check_buy_points_prediction
+ #necesario para Utils_buy_sell_points.check_buy_points_prediction
+COLS_TO_EVAL_R = ["Close", "per_Close", 'has_preMarket', 'Volume']
 columns_order_entre_to_model = []
 df_result_all = None
 df_result_all_isValid_to_buy = None
@@ -54,7 +56,7 @@ def __get_df_Evaluation_from_all_models_model_ok_thresholdCSV(df_result_all, nam
     #Responde a ¿cuantas operaciones son buenas? (solo buenas)
     get_list_good_models(df_result_all,groupby_colum =Y_TARGET ,  path= "Models/Scoring/"+name_type_result)
     # Responde a ¿cuantas operaciones no son malas? (buenas y regulares buenas)
-    get_list_good_models(df_result_all, groupby_colum="is_valid" ,  path="Models/Scoring/" + name_type_result)
+    #get_list_good_models(df_result_all, groupby_colum="is_valid" ,  path="Models/Scoring/" + name_type_result)
 
     # df_list_r = df_result_all[['Date', Y_TARGET,"is_valid"] + columns_aux_to_evaluate]
     df_threshold = df_result_all.describe(percentiles=[0.25, 0.5, 0.7, 0.8,0.88,0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98])
@@ -65,11 +67,26 @@ def __get_df_Evaluation_from_all_models_model_ok_thresholdCSV(df_result_all, nam
 
     print("Models/Scoring/"+name_type_result +"_when_model_ok.csv")
 
+def __get_r_eval_TF_accuracy_from_csv_result(df_eval):
+    for index, row in df_eval.iterrows():
+        if index.startswith('r_TF64'):
+            accuracy_per = glob.glob("Models/TF_balance/" + index.replace('r_TF64', 'TF') + "*.csv")
+            accuracy_per_64 = [tf_n for tf_n in accuracy_per if "64.h5" in tf_n][0]
+            accuracy_per_64 = float(re.search(r'accuracy_(.*)%_', accuracy_per_64, re.IGNORECASE).group(1))
+            print(index)
+            df_eval.at[index, 'r_eval'] = accuracy_per_64 / 100
+        elif index.startswith('r_TF'):
+            accuracy_per = glob.glob("Models/TF_balance/" + index.replace('r_', '') + "*.csv")
+            accuracy_per_28 = [tf_n for tf_n in accuracy_per if "28.h5" in tf_n][0]
+            accuracy_per_28 = float(re.search(r'accuracy_(.*)%_', accuracy_per_28, re.IGNORECASE).group(1))
+            print(index)
+            df_eval.at[index, 'r_eval'] = accuracy_per_28 / 100
+    return df_eval
 
 
 def get_list_good_models(df_result_all ,groupby_colum , path = None):
-    THORSHOOL_VALID_MODEL_down = 0.26 # tiene que tener mas que esto para ser valido
-    THORSHOOL_VALID_MODEL_TF_down = 0.06
+    THORSHOOL_VALID_MODEL_down = 0.32 # tiene que tener mas que esto para ser valido
+    THORSHOOL_VALID_MODEL_TF_down = 0.25 # 0.25 + 0.5 para indicar que solo se recogen los mayores de 75
     THORSHOOL_VALID_MODEL_up = 0.5
 
     rows_test_in_df = int(df_result_all.shape[0] * 0.35)
@@ -79,6 +96,8 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         Logger.logr.warn("El formato despues del group by no corresponde a 2. groupby_colum: "+ groupby_colum+ " Format: "+ str(df_eval_result_paramans.shape)+ " path: "+ path)
         return
     df_eval_result_paramans["r_eval"] = df_eval_result_paramans[1] - df_eval_result_paramans[0]
+    #Para los TF ya viene dada en el .csv de resultados
+    df_eval_result_paramans = __get_r_eval_TF_accuracy_from_csv_result(df_eval_result_paramans)
 
     #df_json.set_index('count', inplace=True)
     if path is not None:
@@ -87,7 +106,10 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         scoring_sum_only_pos = df_eval_result_paramans["r_eval"][list_r_params][ df_eval_result_paramans["r_eval"][list_r_params] > THORSHOOL_VALID_MODEL_down ].sum()
 
         list_r_TF_params = [col for col in list_r_params if col.startswith('r_TF')]
-        scoring_sum_TF = df_eval_result_paramans["r_eval"][list_r_TF_params].sum()
+
+        df_eval_result_paramans["r_eval"][list_r_TF_params] = df_eval_result_paramans["r_eval"][list_r_TF_params] - 0.5
+
+        scoring_sum_TF = (df_eval_result_paramans["r_eval"][list_r_TF_params]).sum()
         list_r_TF_not_params = [col for col in list_r_params if not col.startswith('r_TF')]
         scoring_sum_not_TF = df_eval_result_paramans["r_eval"][list_r_TF_not_params].sum()
         scoring_sum = scoring_sum_TF + scoring_sum_not_TF
@@ -99,7 +121,6 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         dict_json["score_sum_not_TF"] = scoring_sum_not_TF.round(4)
         dict_json["rows_num_eval"] = rows_test_in_df
         dict_json["THORSHOOL_VALID_MODEL_down__up__TF"] = str(THORSHOOL_VALID_MODEL_down) + "__"+str(THORSHOOL_VALID_MODEL_up)+ "__"+str(THORSHOOL_VALID_MODEL_TF_down)
-        path = path +"_groupby_"+groupby_colum+"_"+str(int(scoring_sum * 100))+".json"
 
         list_valid_params_down = df_eval_result_paramans["r_eval"][list_r_TF_not_params][df_eval_result_paramans["r_eval"][list_r_TF_not_params] >= THORSHOOL_VALID_MODEL_down].index.values
         list_valid_params_TF_down = df_eval_result_paramans["r_eval"][list_r_TF_params][df_eval_result_paramans["r_eval"][list_r_TF_params] >= THORSHOOL_VALID_MODEL_TF_down].index.values
@@ -110,14 +131,13 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         list_valid_params_up = [col for col in list_valid_params_up if col.startswith('r_')]
         dict_json["list_good_params_up"] = list_valid_params_up
 
-
+        path = path + "_groupby_" + groupby_colum + "_" + str(int(scoring_sum * 100)) + ".json"
         with open(path, 'w') as fp:
             json.dump(dict_json, fp, allow_nan=True, indent=3)
             print("\tget_json_ Scoring path: ", path)
         print(path)
 
     # return list_valid_params_down , scoring_sum
-
 
 
 
@@ -140,7 +160,7 @@ for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dic
         df_A = None
         for type_cols , funtion_cols in  columns_json.get_Dict_JsonColumns().items():
             model_name_type = S + "_" + type_buy_sell.value + type_cols
-            columns_selection_predict = ['Date', Y_TARGET] + funtion_cols + columns_aux_to_evaluate + ['ticker']
+            columns_selection_predict = ['Date', Y_TARGET] + funtion_cols + COLS_TO_EVAL_R + ['ticker']
             print("model_name_type: " + model_name_type + " Columns Selected:" + ', '.join(columns_selection_predict))
 
             df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path_csv_file_SCALA,  type_buy_sell , columns_selection_predict)
