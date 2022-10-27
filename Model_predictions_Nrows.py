@@ -7,7 +7,7 @@ import Utils_buy_sell_points
 import Utils_model_predict
 
 #https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
-import a_manage_stocks_dict
+from a_manage_stocks_dict import Op_buy_sell, DICT_COMPANYS
 import yhoo_history_stock
 from LogRoot.Logging import Logger
 
@@ -24,24 +24,29 @@ path= "d_price/@VOLA_SCALA_stock_history_MONTH_3_sep" #"FAV_SCALA_stock_history_
 columns_aux_to_evaluate = ["Close", "per_Close", 'has_preMarket', 'Volume'] #necesario para Utils_buy_sell_points.check_buy_points_prediction
 
 df_result_all_isValid_to_buy = None
-
+NUM_MIN_MODLES  = 4
+NUM_MIN_MODLES_TF = 2
 
 
 
 def get_columns_to_download(stock_id):
-    columns_json_POS = Feature_selection_get_columns_json.JsonColumns(stock_id, a_manage_stocks_dict.Op_buy_sell.POS)
-    columns_json_NEG = Feature_selection_get_columns_json.JsonColumns(stock_id, a_manage_stocks_dict.Op_buy_sell.NEG)
+    columns_json_POS = Feature_selection_get_columns_json.JsonColumns(stock_id, Op_buy_sell.POS)
+    columns_json_NEG = Feature_selection_get_columns_json.JsonColumns(stock_id, Op_buy_sell.NEG)
     custom_col_POS_NEG = set(columns_json_POS.get_ALL_Good_and_Low() + columns_json_NEG.get_ALL_Good_and_Low())
     return list(custom_col_POS_NEG)
 
 
 def get_has_to_seelBuy_by_Predictions_models(df_tech, S, type_buy_sell, path_csv_result = None):
-    list_good_models = Model_predictions_handle.get_dict_scoring_evaluation(S, type_buy_sell)['list_good_params_down']
-    if type_buy_sell == a_manage_stocks_dict.Op_buy_sell.POS and len(list_good_models) < 4:
-        Logger.logr.info("Los modelos POS presentes son menores de 4, no se realiza prediccion STOCK: "+  S + " Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
+    dict_score = Model_predictions_handle.get_dict_scoring_evaluation(S, type_buy_sell)
+    #existe list_good_params_down y list_good_params_up , la list_good_params_down contiene ambas
+    list_good_models =  dict_score['list_good_params_down']
+    list_good_models_TF = [col for col in list_good_models if col.startswith('r_TF')]
+
+    if type_buy_sell == Op_buy_sell.POS and ( len(list_good_models) <= NUM_MIN_MODLES or len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
+        Logger.logr.info("Los modelos POS presentes son menores de:"+  str(NUM_MIN_MODLES) + ", no se realiza prediccion STOCK: "+  S + " Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
         return None
-    if type_buy_sell == a_manage_stocks_dict.Op_buy_sell.NEG and len(list_good_models) < 5:
-        Logger.logr.info("Los modelos NEG presentes son menores de 5, no se realiza prediccion STOCK: "+  S + "Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
+    if type_buy_sell == Op_buy_sell.NEG and ( len(list_good_models) <= NUM_MIN_MODLES or len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
+        Logger.logr.info("Los modelos NEG presentes son menores de:"+  str(NUM_MIN_MODLES) + ", no se realiza prediccion STOCK: "+  S + "Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
         return None
 
     columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
@@ -77,20 +82,30 @@ def get_has_to_seelBuy_by_Predictions_models(df_tech, S, type_buy_sell, path_csv
 
 def get_RealTime_buy_seel_points(stock_id, opion_real_time, NUM_LAST_REGISTERS_PER_STOCK):
 
+    list_score_POS = Model_predictions_handle.get_dict_scoring_evaluation(stock_id, Op_buy_sell.POS)['list_good_params_down']
+    list_score_POS_TF = [col for col in list_score_POS if col.startswith('r_TF')]
+    list_score_NEG = Model_predictions_handle.get_dict_scoring_evaluation(stock_id, Op_buy_sell.NEG)['list_good_params_down']
+    list_score_NEG_TF = [col for col in list_score_NEG if col.startswith('r_TF')]
+    if ( len(list_score_NEG) <= NUM_MIN_MODLES and len(list_score_POS) <= NUM_MIN_MODLES ) \
+        or ( len(list_score_POS_TF) < NUM_MIN_MODLES_TF and len(list_score_NEG_TF) < NUM_MIN_MODLES_TF ):
+        Logger.logr.info("Los modelos POS-NEG presentes son menores de:"+  str(NUM_MIN_MODLES) + ", or las TF son menores de "+str(NUM_MIN_MODLES_TF)+" no se realiza prediccion STOCK: "+  stock_id  )
+        return None, None
+
+
     custom_columns_POS_NEG = get_columns_to_download(stock_id)
     df_HOLC_ign, df_tech = yhoo_history_stock.get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, stock_id,
                                                                                              opion_real_time,
                                                                                              generate_csv_a_stock=False,
                                                                                              costum_columns=custom_columns_POS_NEG, add_min_max_values_to_scaler = True)
     df_tech = df_tech[-NUM_LAST_REGISTERS_PER_STOCK:]
-    type_buy_sell = a_manage_stocks_dict.Op_buy_sell.POS
+    type_buy_sell = Op_buy_sell.POS
     #error ValueError: Found array with 0 sample(s) (shape=(0, 66)) while a minimum of 1 is required by StandardScaler.
     df_compar = get_has_to_seelBuy_by_Predictions_models(df_tech, stock_id, type_buy_sell, path_csv_result="Models/LiveTime_results/lastweek_" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
     # if df_compar is not None:
     #     Model_predictions_handle.how_much_each_entry_point_earns(df_compar,stock_id,type_buy_sell )
     print("df_compar : " + stock_id + "_" + type_buy_sell.value + "   Models/LiveTime_results/" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
 
-    type_buy_sell = a_manage_stocks_dict.Op_buy_sell.NEG
+    type_buy_sell = Op_buy_sell.NEG
     df_vender = get_has_to_seelBuy_by_Predictions_models(df_tech, stock_id, type_buy_sell, path_csv_result="Models/LiveTime_results/lastweek_" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
     print("df_vender : " + stock_id + "_" + type_buy_sell.value + "   Models/LiveTime_results/" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
 
@@ -103,11 +118,14 @@ def get_RealTime_buy_seel_points(stock_id, opion_real_time, NUM_LAST_REGISTERS_P
     return df_compar, df_vender
 
 
+import logging
+numba_logger = logging.getLogger('numba').setLevel(logging.WARNING)
+mat_logger = logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 
 CSV_NAME = "@FOLO3"
-list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+list_stocks = DICT_COMPANYS[CSV_NAME]
 
 df_all_generate_history = pd.DataFrame()
 
@@ -115,7 +133,7 @@ df_all_generate_history = pd.DataFrame()
 df_compar = pd.DataFrame()
 df_vender = pd.DataFrame()
 # for S in list_stocks: # [ "UBER","U",  "TWLO", "TSLA", "SNOW", "SHOP", "PINS", "NIO", "MELI" ]:#list_stocks:
-#     df_compar, df_vender = get_RealTime_buy_seel_points(S,yhoo_history_stock.Option_Historical.MONTH_3, NUM_LAST_REGISTERS_PER_STOCK=4 )
+#     df_compar, df_vender = get_RealTime_buy_seel_points(S,yhoo_history_stock.Option_Historical.MONTH_3_AD, NUM_LAST_REGISTERS_PER_STOCK=500 )
 #     print("End")
 
 
