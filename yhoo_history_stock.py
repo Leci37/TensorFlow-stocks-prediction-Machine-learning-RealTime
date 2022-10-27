@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -8,6 +9,7 @@ import Utils_Yfinance
 import Utils_buy_sell_points
 import Utils_col_sele
 import Utils_plotter
+import a_manage_stocks_dict
 import talib_technical_crash_points
 import talib_technical_funtions
 import talib_technical_PY_TI
@@ -16,6 +18,7 @@ import talib_technical_pandas_TU
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from a_manage_stocks_dict import Option_Historical, DICT_COMPANYS
 
 
 from LogRoot.Logging import Logger
@@ -23,10 +26,6 @@ from talib_technical_class_object import TechData
 from yhoo_external_raw_factors import DICT_EXTERNAL_FACTORS
 
 
-class Option_Historical(Enum):
-    YEARS_3 = 1
-    MONTH_3 = 2
-    DAY_6 = 3
 
 list_stocks = ["RIVN", "VWDRY", "TWLO",          "GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",]
 list_stocks = ["GE","SPOT","F","SAN.MC","TMUS","MBG.DE","INTC","TRIG.L","GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",
@@ -81,11 +80,26 @@ def get_historial_data_6_days(stockID, prepos=True, interva="15m"):
     return df_his
 
 
+def get_historial_data_1_day(stockID, prepos=False, interva="15m"):
+    yho_stk = yf.Ticker(stockID)
+    #en 15 min , 1d es 25 filas
+    hist = yho_stk.history(period="1d",prepost=prepos, interval=interva)
+
+    df_his = pd.DataFrame(hist)
+    df_his.reset_index(inplace=True)
+    df_his = df_his.drop(columns=['Dividends', 'Stock Splits'],errors='ignore')
+
+    df_his = df_his.rename(columns={'Datetime': 'Date'})
+    df_his['Date'] = df_his['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    return df_his
+
+
 
 def get_stock_history_Tech_download(stockId, opion, get_technical_data = False, prepost=True, interval="30m",
                                     add_stock_id_colum = False, costum_columns = None):
 
     df_his = __select_dowload_time_config(interval, opion, prepost, stockId)
+    df_RAW = df_his[Utils_col_sele.RAW_PURE_COLUMNS].copy()
 
     if add_stock_id_colum:
         df_his.insert(loc=1, column='ticker', value=stockId)
@@ -102,7 +116,7 @@ def get_stock_history_Tech_download(stockId, opion, get_technical_data = False, 
             df_his.to_csv("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv", sep="\t", index=None)
             Logger.logr.info("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  stock: " + stockId + " Shape: " + str(df_his.shape))
 
-    return df_his
+    return df_his, df_RAW
 
 
 def get_technical_data_and_NQ(costum_columns, df_his, interval, opion):
@@ -149,8 +163,33 @@ def __select_dowload_time_config(interval, opion, prepost, stockId):
         df_his = get_historial_data_3y(stockId, prepos=prepost)
     elif opion.value == Option_Historical.MONTH_3.value:
         df_his = get_historial_data_3_month(stockId, prepos=prepost, interva=interval)
+    elif opion.value == Option_Historical.MONTH_3_AD.value:
+        df_his = get_historial_data_3_month(stockId, prepos=prepost, interva=interval)
+
+        list_dict_comp = []
+        files_on_folder = os.listdir("d_price/RAW")
+
+        if(stockId == 'NQ=F' ):
+            paths_files = [filename for filename in files_on_folder if filename.startswith('NQ=F_') and filename.endswith(".csv")]
+            list_dict_comp = list_dict_comp + paths_files
+        else:
+            for k , v in DICT_COMPANYS.items():
+                if stockId in v:
+                    paths_files = [filename for filename in files_on_folder if filename.startswith(k + "_") and filename.endswith(".csv")]
+                    list_dict_comp = list_dict_comp + paths_files
+
+        print("MONTH_3_ADD_LO Se procede a buscar en el historico de acciones Ficheros: " + "".join(list_dict_comp))
+        for patH_raw in list_dict_comp:
+            df_path_raw = pd.read_csv("d_price/RAW/"+patH_raw,index_col=False, sep='\t')
+            if 'ticker' in df_path_raw.columns: #tiene columna ticker
+                df_path_raw = df_path_raw[ df_path_raw["ticker"] == stockId ].drop(columns= "ticker").reset_index(drop=True)
+            #unir por todas las columnas , mantener la ultima df_his , en caso de duplicado
+            df_his = pd.merge(df_path_raw, df_his, how='outer').drop_duplicates(subset=["Date"], keep="last")
+
     elif opion.value == Option_Historical.DAY_6.value:
         df_his = get_historial_data_6_days(stockId, prepos=prepost, interva=interval)
+    elif opion.value == Option_Historical.DAY_1.value:
+        df_his = get_historial_data_1_day(stockId, prepos=prepost, interva=interval)
     return df_his
 
 
@@ -195,13 +234,13 @@ def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, o
     sc = MinMaxScaler(feature_range=(-100, 100))
 
 
-    df_l = get_stock_history_Tech_download(l, opion, get_technical_data=True,
+    df_l, df_RAW = get_stock_history_Tech_download(l, opion, get_technical_data=True,
                                            prepost=True, interval="15m", add_stock_id_colum=False, costum_columns = costum_columns)
 
     if costum_columns is None:
-        df_l_generate_history = df_l[Utils_col_sele.RAW_PURE_COLUMNS]
-        df_l_generate_history.insert(loc=1, column='ticker', value=l)
-        df_all_generate_history = pd.concat([df_all_generate_history, df_l_generate_history])
+        df_RAW = df_RAW[Utils_col_sele.RAW_PURE_COLUMNS]
+        df_RAW.insert(loc=1, column='ticker', value=l)
+        df_all_generate_history = pd.concat([df_all_generate_history, df_RAW])
 
 
     df_l['buy_sell_point'].replace([101, -101], [100, -100], inplace=True)
@@ -216,7 +255,7 @@ def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, o
     #Se añade el maximo y el minimo de TSLA_SCALA_stock_history_MONTH_3.csv , en la primera y segunda columna , para que los varemos de sc.fit_transform(df_l)
     #esten acordes al entrenamineto realizado por el TSLA_SCALA_stock_history_MONTH_3.csv
     if add_min_max_values_to_scaler:
-        df_min_max = pd.read_csv("d_price/min_max/" + l + "_min_max_stock_" + str(Option_Historical.MONTH_3.name) + ".csv",  index_col=0, sep='\t')
+        df_min_max = pd.read_csv("d_price/min_max/" + l + "_min_max_stock_" + str(Option_Historical.MONTH_3_AD.name) + ".csv",  index_col=0, sep='\t')
         df_min_max = df_min_max[df_l.columns]
         df_l = pd.concat([df_min_max, df_l], ignore_index=True)
 
