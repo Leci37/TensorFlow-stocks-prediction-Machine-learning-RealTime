@@ -14,8 +14,7 @@ import pandas as pd
 #from TAcharts.utils.ohlcv import OHLCV
 from stocktrends import indicators
 
-import UtilsL
-import Utils_Yfinance
+from Utils import UtilsL, Utils_Yfinance
 
 stockId = "MSFT"
 stockId = "MELI"
@@ -96,7 +95,7 @@ def get_clould_Ichimoku(df):
     df2.loc[ ( (df2['Close'] > df2['ichi_senkou_b']) & (df2['Close'] < df2['ichi_senkou_a']) ), "ichi_isin_cloud"] = 1
     df2.loc[ ( (df2['Close'] < df2['ichi_senkou_b']) & (df2['Close']> df2['ichi_senkou_a']) ), "ichi_isin_cloud"] = -1
 
-    df2 = Utils_Yfinance.get_crash_points(df2, 'ichi_senkou_a','ichi_senkou_b', col_result = "ichi_crash" , highlight_result_in_next_cell =2)
+    df2 = Utils_Yfinance.get_crash_points(df2, 'ichi_senkou_a', 'ichi_senkou_b', col_result ="ichi_crash", highlight_result_in_next_cell =2)
     #df2.groupby('ichi_isin_cloud')['Close'].count()
 
     # The most current closing price plotted 22 time periods behind (optional)
@@ -314,10 +313,17 @@ https://raposa.trade/blog/higher-highs-lower-lows-and-calculating-price-trends-i
 '''
 def get_LowerHighs_LowerHighs(df, order=5, k=2, get_crash_point = True):
     hh = getHigherHighs(df['Close'].values, order, K=k) #- close_values
+    if not hh:
+        hh = getHigherHighs(df['Close'].values, order-1, K=k)
     hl = getHigherLows(df['Close'].values, order, K=k) #- close_values
+    if not hl:
+        hl = getHigherLows(df['Close'].values, order-1, K=k)
     ll = getLowerLows(df['Close'].values, order, K=k) #- close_values
+    if not ll:
+        ll = getLowerLows(df['Close'].values, order-1, K=k)
     lh = getLowerHighs(df['Close'].values, order, K=k) #- close_values
-
+    if not lh:
+        lh = getLowerHighs(df['Close'].values, order-1, K=k)
 
     clean_LowerHighs_LowerHighs(df, hh, prefix_name="hh")
     clean_LowerHighs_LowerHighs(df, hl, prefix_name="hl")
@@ -325,10 +331,10 @@ def get_LowerHighs_LowerHighs(df, order=5, k=2, get_crash_point = True):
     clean_LowerHighs_LowerHighs(df, lh, prefix_name="lh")
 
     if get_crash_point:
-        df = Utils_Yfinance.get_crash_points(df, 'tend_hh', 'Close', col_result="tend_hh_crash",highlight_result_in_next_cell=1)
-        df = Utils_Yfinance.get_crash_points(df, 'tend_hl', 'Close', col_result="tend_hl_crash",highlight_result_in_next_cell=1)
-        df = Utils_Yfinance.get_crash_points(df, 'tend_ll', 'Close', col_result="tend_ll_crash",highlight_result_in_next_cell=1)
-        df = Utils_Yfinance.get_crash_points(df, 'tend_lh', 'Close', col_result="tend_lh_crash",highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_hh', 'Close', col_result="tend_hh_crash", highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_hl', 'Close', col_result="tend_hl_crash", highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_ll', 'Close', col_result="tend_ll_crash", highlight_result_in_next_cell=1)
+        df = Utils_Yfinance.get_crash_points(df, 'tend_lh', 'Close', col_result="tend_lh_crash", highlight_result_in_next_cell=1)
 
     return df
 
