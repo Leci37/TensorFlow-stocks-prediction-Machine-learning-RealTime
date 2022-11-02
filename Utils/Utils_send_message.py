@@ -1,6 +1,6 @@
 import pandas as pd
 
-import UtilsL
+from Utils import  UtilsL
 import a_manage_stocks_dict
 
 #https://www.iemoji.com/#?category=objects&version=36&theme=appl&skintone=default
@@ -47,7 +47,7 @@ def get_string_alert_message(S, dict_pred, modles_evaluated,  type_b_s, date_det
     s6 = "<em>Date alert: "+date_detect + "</em>"
 
     alert_message_html =  s1 + s2 + s3 + s4 + s5 + s6
-    alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com','').replace("Confidence of models:",'').replace('Investing.com','').replace('\t',' ') #.replace('\n',' ')
+    alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com', '').replace("Confidence of models:", '').replace('Investing.com', '').replace('\t', ' ') #.replace('\n',' ')
 
     return  alert_message_html , alert_message_without_tags
 
@@ -59,8 +59,8 @@ def get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s):
     for k in modles_evaluated:
         if dict_pred[k] == 1:  # dict_predict_1[k] == 1:
             names_models_r = names_models_r + k.replace('br_', '').replace("_" + type_b_s.value, '').replace('__','_').replace("_" + S, '') + '%, '
-            if k.startswith('br_TF'):
-                count_TF_models = count_TF_models + 1
+        if k.startswith('br_TF') and k.endswith('_93'):
+            count_TF_models = count_TF_models + 1
     s88 = str(dict_pred['sum_r_88']) + "/" + str(dict_pred['num_models'])
     s93 = str(dict_pred['sum_r_93']) + "/" + str(dict_pred['num_models'])
     s95 = str(dict_pred['sum_r_95']) + "/" + str(dict_pred['num_models'])
@@ -69,9 +69,11 @@ def get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s):
 
 def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s , path = "zTelegram_Registers.csv"):
     s88, s93, s95, stf, names_models_r = get_fraciones_afirmativos_results(S, dict_predict, modles_evaluated, type_b_s)
-    df_res = pd.DataFrame([[dict_predict['Date'], S, type_b_s.name, "{:.1f}".format(dict_predict['Close']), s88, s93, s95, stf, names_models_r]],
-                          columns=['Date', 'Stock', 'buy_sell','Close', '88%', '93%', '95%', 'TF%', "Models_names"])
+    df_res = pd.DataFrame([[dict_predict['Date'], S, type_b_s.name, "{:.1f}".format(dict_predict['Close']),"{:.2f}".format(dict_predict['Volume']), s88, s93, s95, stf, names_models_r]],
+                          columns=['Date', 'Stock', 'buy_sell','Close', 'Volume','88%', '93%', '95%', 'TF%', "Models_names"])
     df_res.to_csv(path, sep="\t", index=None, mode='a', header=False)
+
+
 
 
 html_example = '''<b>bold</b>
