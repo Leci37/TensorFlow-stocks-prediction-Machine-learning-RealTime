@@ -1,8 +1,6 @@
 import itertools
 
-import pandas as pd
-
-import Utils_Yfinance
+from Utils import Utils_Yfinance
 
 list_MA_columns = ["ma_DEMA_5", "ma_EMA_5", "ma_KAMA_5", "ma_SMA_5", "ma_T3_5", "ma_TEMA_5", "ma_TRIMA_5", "ma_WMA_5", "ma_DEMA_10", "ma_EMA_10",
                   "ma_KAMA_10", "ma_SMA_10", "ma_T3_10", "ma_TEMA_10", "ma_TRIMA_10", "ma_WMA_10", "ma_DEMA_20", "ma_EMA_20", "ma_KAMA_20", "ma_SMA_20",
@@ -36,7 +34,7 @@ def gel_PP_CRASH_funtion(df):
         new_column_name = "pcrh_" + pp
 
         if cos_cols is None or new_column_name in cos_cols:
-            df = Utils_Yfinance.get_crash_points(df, "Close", pp, col_result=new_column_name,  highlight_result_in_next_cell =0)
+            df = Utils_Yfinance.get_crash_points(df, "Close", pp, col_result=new_column_name, highlight_result_in_next_cell =0)
 
     return df
 

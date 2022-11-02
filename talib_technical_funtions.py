@@ -7,7 +7,7 @@ import pandas as pd
 #Overlap Studies Functions
 #Overlap Studies Functions
 #BBANDS - Bollinger Bands
-import Utils_Yfinance
+from Utils import Utils_Yfinance
 
 
 def get_moving_average_indicator(close):

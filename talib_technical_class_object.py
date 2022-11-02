@@ -1,12 +1,11 @@
-import Utils_Yfinance
-import Utils_buy_sell_points
+from Utils import Utils_Yfinance, Utils_buy_sell_points
 
 import talib_technical_crash_points
 import talib_technical_funtions
 import talib_technical_PY_TI
 import talib_technical_pandas_TA
 import talib_technical_pandas_TU
-import pandas as pd
+
 
 class TechData:
 

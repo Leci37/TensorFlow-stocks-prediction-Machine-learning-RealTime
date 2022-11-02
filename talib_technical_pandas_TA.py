@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pandas_ta as ta
 
-import UtilsL
+from Utils import UtilsL
 
 
 def get_all_pandas_TA_tecnical(df_ta, cos_cols=None):
@@ -87,7 +87,9 @@ def get_all_pandas_TA_tecnical(df_ta, cos_cols=None):
         df_ta.ta.jma(prefix="olap", cumulative=True, append=True)
     # McGinley Dynamic: mcgd
     if cos_cols is None or "olap_MCGD_10" in cos_cols:
+        pd.options.mode.chained_assignment = None
         df_ta.ta.mcgd(prefix="olap", cumulative=True, append=True)
+        pd.options.mode.chained_assignment = 'warn'
     # Pascal's Weighted Moving Average: pwma
     if cos_cols is None or "olap_PWMA_10" in cos_cols:
         df_ta.ta.pwma(prefix="olap", cumulative=True, append=True)

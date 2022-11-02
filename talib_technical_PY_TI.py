@@ -13,7 +13,8 @@ def camarilla_pivots(df, add_col=False, return_struct='numpy'):
 #import py_ti
 import pandas as pd
 from py_ti import py_ti
-import UtilsL
+from Utils import UtilsL
+
 
 # stockId = "MSFT"
 # stockId = "MELI"
@@ -112,7 +113,7 @@ def get_py_TI_indicator(df_stocks, cos_cols = None):
     df_list = [df_acc, df_chaikin, df_chopp, df_coppock, df_donchian, df_ease_move, df_force_index, df_ma_hull, df_keltner, df_mass_index, df_supertrend, df_vortex,df_vortex2]
     df = df_stocks
     for dfi in df_list:
-        dfi = UtilsL.replace_bat_chars_in_columns_name( dfi)
+        dfi = UtilsL.replace_bat_chars_in_columns_name(dfi)
         # for c in dfi.columns.values:
         #     dfi = UtilsL.replace_bat_chars_in_columns_name(dfi, str(c))
         # dfi.columns = map(str.upper, dfi.columns)
