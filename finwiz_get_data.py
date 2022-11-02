@@ -1,5 +1,4 @@
-import UtilsL
-import Utils_Yfinance
+from Utils import UtilsL, Utils_Yfinance
 from LogRoot.Logging import Logger
 import pandas as pd
 
@@ -43,7 +42,7 @@ def get_data_finviz(stockid: str):
         df_sal.loc[df_sal['finviz_data'].str.contains("%"), 'key'] += "_per"
         df_sal = UtilsL.remove_chars_in_columns(df_sal, 'key')
         df_sal = df_sal.drop(df_sal[(df_sal.key == "Earnings")].index)#remove beacuse is string
-        df_sal = UtilsL.clean_float_columns(df_sal ,"finviz_data" )
+        df_sal = UtilsL.clean_float_columns(df_sal, "finviz_data")
         df_sal['key'] = "finviz_"+df_sal['key']
         return  df_sal
     except Exception as e:

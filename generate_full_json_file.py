@@ -1,7 +1,6 @@
 import warnings
 
-import UtilsL
-import Utils_Yfinance
+from Utils import UtilsL
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -66,7 +65,6 @@ def printDict(inDict):
 # yhoo_date_stock_date.get_all_date_info_yhoo(stockid)         #"d_info_profile/" + stockID + "_yahoo_full_data.json"
 #yhoo_history_stock.get_json_stock_values_history(stockid)     #"d_price/" + stockID + "_stock_history.json
 # yhoo_external_raw_factors.get_raw_stocks_values()            #d_external_factors/external_factors_hist.json
-from collections import defaultdict
 
 
 def clean_dict_for_Nan(dict_j):
