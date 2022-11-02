@@ -1,27 +1,31 @@
 # SuperFastPython.com
 # example of using the queue
-from time import sleep
 from threading import Thread
 import threading
-from queue import Queue
+from random import randint
+
+import requests
+import traceback
 from sklearn.preprocessing import MinMaxScaler
 
 import Model_predictions_Nrows
-import Utils_col_sele
-import yfinance as yf
+from LogRoot.Logging import Logger
+from Utils import Utils_col_sele, UtilsL
 import yhoo_history_stock
 from Model_predictions_Nrows import get_columns_to_download
-from Utils_QueueMap import QueueMap
-from a_manage_stocks_dict import Op_buy_sell, Option_Historical
+from Utils.Utils_QueueMap import QueueMap
+from a_manage_stocks_dict import Op_buy_sell, Option_Historical, DICT_WEBULL_ID, DICT_COMPANYS
 from talib_technical_class_object import TechData
 from yhoo_POOL_stocks import get_list_models_to_use
 import pandas as pd
 import numpy
 from datetime import datetime
+import yfinance as yf
+
 
 import time
 
-from ztelegram_send_message import send_alert
+from ztelegram_send_message import send_alert, send_exception
 
 list_models_pos_neg = get_list_models_to_use()
 list_pos = [x.replace("_"+Op_buy_sell.POS.name, '') for x in list_models_pos_neg.keys() if x.endswith("_" + Op_buy_sell.POS.name)]
@@ -29,9 +33,8 @@ list_neg = [x.replace("_"+Op_buy_sell.NEG.name, '') for x in list_models_pos_neg
 list_stocks =  set(list_pos +list_neg)
 
 #YAHOO API
-def crate_OLHCV_df_dor_enque_yhooApi(col_v, date_15min, int_unlast):
-    print("[PRO] La accion tiene volumen actualizado Stock: " + col_v + " Volume: " + str(
-        int_unlast) + " RealTime: " + datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+def crate_OLHCV_df_for_enque_yhooApi(col_v, date_15min, int_unlast):
+    Logger.logr.info("   La accion tiene volumen actualizado Stock: " + col_v + " Volume: " + str(int_unlast) + " RealTime: " + datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
     stock_columns = [x for x in date_15min.columns if x[1] == col_v]
     df_S_raw = date_15min[stock_columns]
 
@@ -53,10 +56,10 @@ def enque_if_has_realtime_volume_yhooApi(df_15min, list_pro, queue):
         date_int_unlast = df_15min[col_v].dropna().index[-2]
 
         if numpy.isnan(int_unlast) or int_unlast <= 0:
-            print("[PRO] El volumnen es 0 o Nan , Seguir buscando actualización en la siguiente consulta Stock: " +col_v[1] + " Date: " + str(date_int_unlast))
+            Logger.logr.info("   El volumnen es 0 o Nan , Seguir buscando actualización en la siguiente consulta Stock: " +col_v[1] + " Date: " + str(date_int_unlast))
         else:
-            df_S_raw = crate_OLHCV_df_dor_enque_yhooApi(col_v[1], df_15min, int_unlast)
-            print("[PRO] DF encolado Stock: " + col_v[1] + " Shape_DF: " + str(df_S_raw.shape) + " RealTime: " + str(date_int_unlast))
+            df_S_raw = crate_OLHCV_df_for_enque_yhooApi(col_v[1], df_15min, int_unlast)
+            Logger.logr.info("  DF encolado Stock: " + col_v[1] + " Shape_DF: " + str(df_S_raw.shape) + " RealTime: " + str(date_int_unlast))
             list_pro.remove(col_v[1])
             queue.pop(col_v[1])
             queue.set(col_v[1], df_S_raw)
@@ -91,6 +94,54 @@ def add_min_max_Scaler( df_S, S):
 
 
 #YAHOO API
+def df_yhoo_(S, inter, path = None ):
+    date_15min = yf.download(tickers=S, period='6d', interval=inter, prepos=False)
+    date_15min.reset_index(inplace=True)
+    date_15min = date_15min.rename(columns={'Datetime': 'Date'})
+    # df['Date'] = pd.DatetimeIndex(df['Date']) + pd.Timedelta(hours=4)
+    date_15min['Date'] = date_15min['Date'] + pd.Timedelta(hours=4)
+    date_15min['Date'] = date_15min['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    date_15min = date_15min.sort_values('Date', ascending=False).round(2)
+    if path is not None:
+        date_15min[['Date', 'Open', 'Close', 'High', 'Low', 'Volume']].to_csv(path, sep="\t", index=None)
+    return date_15min[['Date', 'Open', 'Close', 'High', 'Low', 'Volume']]
+#WEBULL API
+def get_df_webull_realTime(INTERVAL, S,path = None):
+    we_bull_id = DICT_WEBULL_ID[S]
+    URL = "https://quotes-gw.webullfintech.com/api/quote/charts/queryMinutes?period=" + INTERVAL + "&tickerIds=" + str(we_bull_id)
+    Logger.logr.info(S + " ================== " + datetime.today().strftime('%Y-%m-%d %H:%M:%S') + "   " + URL)
+    response = requests.get(URL).json()
+    csv_data = response[0]['data']
+    df_S_raw = pd.DataFrame([x.split(',') for x in csv_data],columns=['Date', 'Open', 'Close', 'High', 'Low', 'Close_avg', 'Volume', "Adj"])
+    df_S_raw = df_S_raw.astype(float)
+    df_S_raw['Date'] = pd.to_datetime(df_S_raw['Date'], unit="s")
+    df_S_raw = df_S_raw[['Date', 'Open', 'Close', 'High', 'Low', 'Volume']]
+
+    if path is not None:
+        Logger.logr.debug("  File: "+path)
+        df_S_raw.to_csv(path, sep="\t", index=None)
+
+    df_S_raw = df_S_raw.sort_values('Date', ascending=False)
+    df_S_raw = UtilsL.union_3last_rows_to_one_OLHLV(df_S_raw)
+
+    # df_S_raw[['Date', 'Open', 'Close', 'High', 'Low', 'Volume']].to_csv("Test/Compare_yhoo_webull/" + S + "_5m_webull.csv", sep="\t", index=None)
+    SUFFIXES_DATE_ENDS = ("00:00", "15:00", "30:00", "45:00")
+    df_S_raw['Date'] = df_S_raw['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df_primeros = df_S_raw[:2]
+    df_S_raw = df_S_raw[df_S_raw['Date'].str.endswith(SUFFIXES_DATE_ENDS)]
+    #Simepre despues de hacer la union de los 5min a 15min
+    df_S_raw = df_S_raw.sort_values('Date', ascending=False).round(2)
+    if path is not None:
+        Logger.logr.debug("  File: "+path)
+        df_S_raw.to_csv(path.replace("_d5","_d15"), sep="\t", index=None)
+    return df_S_raw, df_primeros
+
+
+
+#WEBULL API
+
+
+
 #CONSUMER MANAGE
 def scaler_and_send_predit(S, df_S, df_nasq):
     df_S = get_tech_data_nasq(S, df_S, df_nasq)
@@ -112,27 +163,44 @@ TIME_OUT_PRODUCER = 5 * 60   # [seconds]
 # generate work
 def producer():
     global queue
-    print('[PRO] Producer: Running Start '+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+    Logger.logr.info(' Producer: Running Start '+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
     while True:
-        print('[PRO] Producer: Running Start ' + datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+        Logger.logr.debug(' Producer: Running Start ' + datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
         list_pro = list_stocks.copy()
         timeout_start = time.time()
 
         while time.time() < timeout_start + TIME_OUT_PRODUCER:
-            date_15min = yf.download(tickers=list_pro, period='6d', interval='15m' ,prepos=False )
-            enque_if_has_realtime_volume_yhooApi(date_15min, list_pro, queue)
+            # date_15min = yf.download(tickers=list_pro, period='6d', interval='15m' ,prepos=False )
+            # enque_if_has_realtime_volume_yhooApi(date_15min, list_pro, queue)
+            INTERVAL = "d5"  # ""d1" #
+            for S in list_stocks:
+                try:
+                    time.sleep(randint(1, 7))#esperar en 1 y 10s , por miedo a baneo
+                    df_S_raw, df_primeros = get_df_webull_realTime(INTERVAL, S,None)# path= "d_price/weBull/weBull_"+S+"_"+INTERVAL+".csv")
+                    #retiramos las primeras 40 para que no se solapen
+                    df_yhoo = df_yhoo_(S, "15m")[5:]#, path= "d_price/weBull/yhoo_"+S+"_15m.csv")[40:] #
+                    df = (pd.concat([df_S_raw, df_yhoo], ignore_index=True, sort =False).drop_duplicates(['Date'], keep='first'))
+                    df = (pd.concat([df_primeros, df], ignore_index=True, sort=False).drop_duplicates(['Date'], keep='first'))
+                    df = df.sort_values('Date', ascending=True,ignore_index=True)
+                    Logger.logr.info(" DF encolado Stock: " + S + " Shape_DF: " + str(df.shape) + " RealTime: " + str(df.iloc[-1]['Date']) + " Volume: "+ str(df.iloc[1]['Volume']) )
+                    list_pro.remove(S)#para yhoo API
+                    queue.pop(S)
+                    queue.set(S, df)
+                except Exception as ex:
+                    Logger.logr.warning(" Exception Stock: " + S + "  Exception: " + traceback.format_exc())
+                    send_exception(ex, "[PRO] Exception Stock: " + S +"\n"+traceback.format_exc())
 
             if not list_pro:
-                print("[PRO] sleep(60 * 2) List all stock download empty")
-                time.sleep(80 )
+                Logger.logr.info(" sleep(60 * 2) List all stock download empty")
+                time.sleep( 60 * 2.5 )
                 break
             else:
-                print("[PRO] Sleep(60) Quedan Valores en la lista de encolar Valores:  "+ " ".join(list_pro))
+                Logger.logr.info(" Sleep(60) Quedan Valores en la lista de encolar Valores:  "+ " ".join(list_pro))
                 time.sleep(20)
 
-        print('[PRO]Producer: Running End '+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
-    print('[PRO] Producer: Done')
+        Logger.logr.info(' Producer: Running End '+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+    Logger.logr.info(' Producer: Done')
 
 
 sc = MinMaxScaler(feature_range=(-100, 100))
@@ -142,26 +210,30 @@ COUNT_THREAD = 4
 # consume work
 def consumer(int_thread):
     global queue
-    print("[CON] [" + str(int_thread) * 4 + "] Consumer: Running")
+    Logger.logr.debug("  Consumer: Running")
     list_pro = list_stocks.copy()
     # consume work
     while True:
         df_nasq = yhoo_history_stock.get_NASDAQ_data(exter_id_NQ = "NQ=F", interval='15m' , opion=Option_Historical.DAY_6, remove_str_in_colum = "=F")
-        print("[CON] [" + str(int_thread) * 4 + "] ciclo iniciado   Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+        Logger.logr.debug("  ciclo iniciado   Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+        # list_recorrer = list_pro.copy()
+        # if int_thread == 2:
+        #     list_recorrer = list_pro.copy()[-1]
         for S in list_pro:
             df_S = queue.pop(S)
             if df_S is not None:
-                print("[CON] [" + str(int_thread) * 4 + "] Stock: " + S + "  Volume unlast: " + str(df_S.iloc[-2]['Volume']) + " Volume last: " + str(df_S.iloc[-1]['Volume'])+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+                Logger.logr.info("  Stock: " + S + "  Volume unlast: " + str(df_S.iloc[-2]['Volume']) + " Volume last: " + str(df_S.iloc[-1]['Volume'])+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
                 try:
                     scaler_and_send_predit(S, df_S, df_nasq)
-                except Exception as e:
-                    print("[CON] [" + str(int_thread) * 4 + "]Exception Stock: " + S + "  Exception: " + str(e))
+                except Exception as ex:
+                    Logger.logr.warning(" Exception: " + traceback.format_exc())
+                    send_exception(ex, "[CON] [" + str(int_thread) * 4 + "]Exception Stock: " + S + "\n" + traceback.format_exc())
 
             # print("[CON] end " + S)
 
-        print("[CON] [" + str(int_thread) * 4 + "] ciclo finalizado " + S+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+        Logger.logr.info("  ciclo finalizado " + S+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
         time.sleep(int_thread *15)
-    print("[CON] [" + str(int_thread) * 4 + "] Consumer: Done"+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+    Logger.logr.info(" Consumer: Done"+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
 
 
@@ -171,16 +243,16 @@ def consumer(int_thread):
 # create the shared queue
 queue = QueueMap()
 # start the producer
-producer = Thread(target=producer, args=())
+producer = Thread(target=producer, args=(), name='PROD')
 producer.start()
 time.sleep(2)
 
 # start the consumer
 # Creating 3 threads that execute the same function with different parameters
-consumer_1 = threading.Thread(target=consumer, args=(1,))
-consumer_2 = threading.Thread(target=consumer, args=(2,))
-# consumer_3 = threading.Thread(target=consumer, args=("[3333]",))
-# Start the threads
+consumer_1 = threading.Thread(target=consumer, args=(1,), name='CONS_1')
+consumer_2 = threading.Thread(target=consumer, args=(2,), name='CONS_2')
+# # consumer_3 = threading.Thread(target=consumer, args=("[3333]",))
+# # Start the threads
 consumer_1.start()
 consumer_2.start()
 # consumer_3.start()
