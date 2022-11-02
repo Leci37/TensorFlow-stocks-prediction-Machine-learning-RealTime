@@ -335,9 +335,9 @@ param_grid = {'max_depth': [1,3,5],
              'min_child_weight': [1,3,5], 
              'n_estimators': [100,200,500,1000], 
              'scale_pos_weight': [1, 0.1, 0.01, fraud_ratio]}
-{'max_depth': 1, 'min_child_weight': 1, 'n_estimators': 500, 'scale_pos_weight': 1}
-[05:20:01] WARNING: C:/Users/Administrator/workspace/xgboost-win64_release_1.6.0/src/learner.cc:627:
-Parameters: { "criterion" } might not be used.
+# {'max_depth': 1, 'min_child_weight': 1, 'n_estimators': 500, 'scale_pos_weight': 1}
+# [05:20:01] WARNING: C:/Users/Administrator/workspace/xgboost-win64_release_1.6.0/src/learner.cc:627:
+# Parameters: { "criterion" } might not be used.
 CV_GBM = GridSearchCV(estimator = xgb, 
                      param_grid = param_grid,
                      scoring = 'f1', 

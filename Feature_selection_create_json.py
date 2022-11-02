@@ -3,7 +3,6 @@
 https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e
 
 '''
-from enum import Enum
 
 import pandas as pd
 import sklearn
@@ -12,11 +11,8 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2, f_regression
 from numpy import array
 
-import Utils_buy_sell_points
+from Utils import Utils_buy_sell_points, Utils_col_sele
 import a_manage_stocks_dict
-
-
-import Utils_col_sele
 
 Y_TARGET = 'buy_sell_point'
 
@@ -129,21 +125,21 @@ def generate_json_best_columns(cleaned_df, Op_buy_sell : a_manage_stocks_dict.Op
 
 
 
-CSV_NAME = "@VOLA"
+CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 a_manage_stocks_dict.Op_buy_sell.POS
 # list_stocks = ['@ROLL']
-for l in ["@VOLA"] : #list_stocks:
+for l in  [ CSV_NAME ] + list_stocks:
     CSV_NAME = l
 
 
-    NUM_BEST_PARAMS_LIST = [8, 12, 16, 32, 72]
+    NUM_BEST_PARAMS_LIST = [8, 12, 16, 32, 68]
 
-    df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3.csv",index_col=False, sep='\t')
+    df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_" + str(opion.name) + ".csv",index_col=False, sep='\t')
     #df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3_sep.csv", index_col=False, sep='\t')
-    df = df.drop(columns=Utils_col_sele.DROPS_COLUMNS +['ticker'] )
+    df = df.drop(columns=Utils_col_sele.DROPS_COLUMNS + ['ticker'])
     cleaned_df = df.copy()
-    # You don't want the `Time` column.
     cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
 
 
