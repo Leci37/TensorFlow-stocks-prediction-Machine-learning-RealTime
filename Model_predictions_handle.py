@@ -3,12 +3,11 @@ import json
 import os
 
 import Model_predictions_TF_sklearn_XGB
-import Utils_buy_sell_points
-import Utils_model_predict
+from Utils import Utils_buy_sell_points, Utils_model_predict
 import a_manage_stocks_dict
 
 from LogRoot.Logging import Logger
-from UtilsL import remove_column_name_repeted_last_one
+from Utils.UtilsL import remove_column_name_repeted_last_one
 
 Y_TARGET = 'buy_sell_point'
 
@@ -69,23 +68,23 @@ def get_df_predictions_from_all_models(df_in_pure, model_name_type, df_result_A 
     df_result['r_TF_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_h5_name)
     if plot_cm:
         p_tolerance = 1 * 2
-        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(),result_column_name='r_TF_' + model_name_type,
-                                                      path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + "_" + str(p_tolerance) + ".png",SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
+        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_TF_' + model_name_type,
+                                                          path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
 
 
     model_64_h5_name_k = "TF_" + model_name_type + '64.h5'
     df_result['r_TF64_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_64_h5_name_k)
     if plot_cm:
         p_tolerance = 1 * 2
-        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(),result_column_name='r_TF_' + model_name_type,
-                                                      path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + "_" + str(p_tolerance) + ".png",SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
+        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_TF_' + model_name_type,
+                                                          path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
 
 
     #[columns_selection_predict.remove(Y_TARGET)] el remove y la seleccion no parecen necesario pero de desea perservar el orden de las columnas al entrar al modelo
     df_result['r_gbr_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_GradientBoostingRegressor(X_test, model_name_type)
     if plot_cm:
         p_tolerance = 0.5 * 2
-        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_gbr_' + model_name_type,path_cm=MODELS_EVAL_RESULT + "_Gradient_CM_" + model_name_type + "_" + str(
+        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_gbr_' + model_name_type, path_cm=MODELS_EVAL_RESULT + "_Gradient_CM_" + model_name_type + "_" + str(
                                                           p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance)
 
 
@@ -93,14 +92,14 @@ def get_df_predictions_from_all_models(df_in_pure, model_name_type, df_result_A 
     if plot_cm:
         p_tolerance = 0.24 * 2
         Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_xgb_' + model_name_type,
-                                                      path_cm=MODELS_EVAL_RESULT + "_XGB_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance)
+                                                          path_cm=MODELS_EVAL_RESULT + "_XGB_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance)
 
 
     df_result['r_rf_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_Random_Forest(X_test, model_name_type)
     # if plot_cm:
     p_tolerance = 0.249 * 2
-    df_result['isValid_' + model_name_type] = Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(),result_column_name='r_rf_' + model_name_type,
-                                                                                  path_cm=MODELS_EVAL_RESULT + "_RamdonFo_CM_" + model_name_type + "_" + str(p_tolerance) + ".png",SUM_RESULT_2_VALID=p_tolerance)
+    df_result['isValid_' + model_name_type] = Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_rf_' + model_name_type,
+                                                                                                path_cm=MODELS_EVAL_RESULT + "_RamdonFo_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance)
 
     df_result_A[['isValid_' + model_name_type, 'r_TF_' + model_name_type, 'r_TF64_' + model_name_type,  'r_gbr_' + model_name_type,
                    'r_xgb_' + model_name_type, 'r_rf_' + model_name_type]] = df_result[

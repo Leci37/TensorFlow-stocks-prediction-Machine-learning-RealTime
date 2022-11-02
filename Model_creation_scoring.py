@@ -1,18 +1,13 @@
-import numpy as np
 import pandas as pd
 import json
 import  glob, re
 
 import Feature_selection_get_columns_json
-import Model_predictions_TF_sklearn_XGB
 import Model_predictions_handle
-import Utils_buy_sell_points
-import Utils_model_predict
-
+from Utils import Utils_model_predict
 
 #https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
 import a_manage_stocks_dict
-import yhoo_history_stock
 from LogRoot.Logging import Logger
 
 
@@ -163,7 +158,7 @@ for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dic
             columns_selection_predict = ['Date', Y_TARGET] + funtion_cols + COLS_TO_EVAL_R + ['ticker']
             print("model_name_type: " + model_name_type + " Columns Selected:" + ', '.join(columns_selection_predict))
 
-            df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path_csv_file_SCALA,  type_buy_sell , columns_selection_predict)
+            df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path_csv_file_SCALA, type_buy_sell, columns_selection_predict)
             df_result, df_A = Model_predictions_handle.get_df_predictions_from_all_models(df, model_name_type, df_result_A=df_A, plot_cm=False)
 
         __get_df_Evaluation_from_all_models_model_ok_thresholdCSV(df_A, S + "_" + type_buy_sell.value + "_")

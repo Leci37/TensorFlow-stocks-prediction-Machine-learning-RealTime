@@ -1,11 +1,8 @@
 import pandas as pd
 
-import UtilsL
-import Utils_buy_sell_points
+from Utils import UtilsL, Utils_buy_sell_points
 
 import a_manage_stocks_dict
-import yhoo_history_stock
-from LogRoot.Logging import Logger
 from Model_predictions_Nrows import get_RealTime_buy_seel_points
 
 Y_TARGET = 'buy_sell_point'
