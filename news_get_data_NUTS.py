@@ -1,7 +1,6 @@
 import pandas as pd
 
-import UtilsL
-import Utils_Yfinance
+from Utils import UtilsL, Utils_Yfinance
 import news_investing_analy_opi_sentiment
 import news_sentiment_va_and_txtBlod
 from news_sentiment import get_sentiment_news_finviz, get_avg_newsOp

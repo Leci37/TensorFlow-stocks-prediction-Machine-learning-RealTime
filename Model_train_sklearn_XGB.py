@@ -7,9 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingRegressor
 from imblearn.over_sampling import SMOTE
 
-import Utils_col_sele
-import Utils_model_predict
-import Utils_plotter
+from Utils import Utils_model_predict, Utils_plotter
 import a_manage_stocks_dict
 
 Y_TARGET = 'buy_sell_point'
@@ -17,7 +15,7 @@ model_folder = "Models/Sklearn_smote/"
 
 
 def get_x_y_train_test_sklearn_XGB( columns_selection, path ,op_buy_sell : a_manage_stocks_dict.Op_buy_sell):
-    df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path,  op_buy_sell , columns_selection)
+    df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path, op_buy_sell, columns_selection)
     Utils_plotter.plot_pie_countvalues(df, Y_TARGET, stockid="", opion="", path=model_folder)
     # print(df.isnull().sum())
     # Splitting the dataset into the Training set and Test set
@@ -67,7 +65,7 @@ def train_GradientBoost(X_train, X_test, y_train, y_test, SAV_files_surname = ''
     Utils_plotter.plot_confusion_matrix_cm_IN(y_test, y_pred,
                                               path=model_folder + "GradientBoost_"+SAV_files_surname+"_CM_" + str(
                                                   p_tolerance) + ".png", p=p_tolerance)
-    Utils_plotter.plot_average_precision_score(y_test, y_pred, path=model_folder + "GradientBoost_"+SAV_files_surname+"_aucprc_" + str(
+    Utils_plotter.plot_average_precision_score(y_test, y_pred, path=model_folder + "GradientBoost_" + SAV_files_surname + "_aucprc_" + str(
         p_tolerance) + ".png")
     # save the model to disk https://machinelearningmastery.com/save-load-machine-learning-models-python-scikit-learn/
     save_model_path = model_folder + 'GradientBoost_'+SAV_files_surname+'.sav'

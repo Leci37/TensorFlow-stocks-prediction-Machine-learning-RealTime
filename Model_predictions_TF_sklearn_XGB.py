@@ -1,6 +1,6 @@
 import pickle
 
-import Utils_plotter
+from Utils import Utils_plotter
 
 
 def __generate_CM_prediction(save_model_path, SAV_files_surname, scores, y_test, list_CM_tolerance):

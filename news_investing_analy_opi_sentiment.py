@@ -1,19 +1,12 @@
 # Import libraries
 import pandas as pd
-from bs4 import BeautifulSoup
-import matplotlib.pyplot as plt
-from urllib.request import urlopen, Request
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import numpy as np
-from statistics import *
 from datetime import datetime
 
-import Utils_Yfinance
+from Utils import Utils_Yfinance
 from LogRoot.Logging import Logger
 
 # https://towardsdatascience.com/stock-news-sentiment-analysis-with-python-193d4b4378d4
-import investing_info_csvREM
-import news_sentiment_va_and_txtBlod
 
 ANALYZAR_VA = SentimentIntensityAnalyzer()
 

@@ -1,16 +1,9 @@
-from datetime import datetime
-
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
-from keras.callbacks import TensorBoard
-from sklearn.model_selection import train_test_split
 
-import UtilsL
-import Utils_col_sele
-import Utils_model_predict
-import Utils_plotter
+from Utils import UtilsL, Utils_model_predict, Utils_plotter
 import a_manage_stocks_dict
 
 # early_stopping = tf.keras.callbacks.EarlyStopping(
@@ -187,7 +180,7 @@ def predict_TF_onBalance(X_test,  model_folder, model_h5_name):
     # for to in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:  # [0.45,0.47,0.5,0.53,0.56,0.6]:
     #     p_tolerance = to
     Utils_plotter.plot_cm_TF_imbalance(test_labels, test_predictions_resampled,
-                                           path=model_folder + "plot_TFbalance_"+model_h5_name.replace(".h5","")+"_CM_"+ str(p_tolerance) + ".png", p=p_tolerance)
+                                       path=model_folder + "plot_TFbalance_"+model_h5_name.replace(".h5","")+"_CM_"+ str(p_tolerance) + ".png", p=p_tolerance)
     # Utils_plotter.plot_confusion_matrix(cf_matrix, model_folder + "plot_confusion_matrix.png")
     return  test_predictions_resampled
 
