@@ -1,8 +1,6 @@
-import UtilsL
-import Utils_Yfinance
+from Utils import Utils_Yfinance
 import yfinance as yf
 import pandas as pd
-import numpy as np
 
 from LogRoot.Logging import Logger
 
