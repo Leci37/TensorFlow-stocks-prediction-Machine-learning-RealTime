@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 from Utils import UtilsL
 from Utils import Utils_buy_sell_points
-import Utils_col_sele
+from Utils import Utils_col_sele
 
 import a_manage_stocks_dict
 from LogRoot.Logging import Logger
