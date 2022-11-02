@@ -32,4 +32,4 @@ for s in list_stock_countries:
 
 # df = df_US._append(df_SP)
 Logger.logr.debug(df)
-df.to_csv("URL_Stocks_DONTDEL.csv", sep='|')
+df.to_csv("yfinance/URL_Stocks_DONTDEL.csv", sep='|')

@@ -4,7 +4,7 @@ import investpy
 import pandas as pd
 from datetime import datetime
 
-import UtilsL
+from Utils import UtilsL
 from LogRoot.Logging import Logger
 '''
 df = investpy.get_stock_historical_data(stock='AAPL',

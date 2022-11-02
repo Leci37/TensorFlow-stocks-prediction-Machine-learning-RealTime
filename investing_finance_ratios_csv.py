@@ -1,8 +1,6 @@
 import pandas as pd
 
-import Utils_Yfinance
-import investing_info_csvREM
-import UtilsL
+from Utils import UtilsL, Utils_Yfinance
 from LogRoot.Logging import Logger
 
 df_ratios = None
@@ -28,7 +26,7 @@ def get_df_financial_ratios(stockid, country="US"):
     global df_ratios
     try:
         #url = "https://www.investing.com/equities/apple-computer-inc-ratios"
-        url  = UtilsL.Url_stocks_pd.get_url(stockid,country) + "-ratios"
+        url  = UtilsL.Url_stocks_pd.get_url(stockid, country) + "-ratios"
         Logger.logr.info("get_df_financial_ratios: " + stockid + "Url: " + url)
         full_html = Utils_Yfinance.get_GET_root_from_url(url)
         full_html = full_html.xpath('/html/body/div/section/table[@class="genTbl reportTbl ratioTable"]')[0]

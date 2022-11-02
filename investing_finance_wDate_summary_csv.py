@@ -1,9 +1,7 @@
 import investpy
 import pandas as pd
 
-import Utils_Yfinance
-import investing_info_csvREM
-import UtilsL
+from Utils import UtilsL, Utils_Yfinance
 from LogRoot.Logging import Logger
 
 def get_wDate_summary_MRQ_TTM(stockid, country):

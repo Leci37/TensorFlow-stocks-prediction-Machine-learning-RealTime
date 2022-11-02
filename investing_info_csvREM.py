@@ -1,12 +1,9 @@
 import numpy as np
 import pandas as pd
-import requests
-import lxml.html as LH
 import investpy
 import inspect
 
-import UtilsL
-import Utils_Yfinance
+from Utils import UtilsL, Utils_Yfinance
 from LogRoot.Logging import Logger
 from lxml.etree import tostring
 import datetime

@@ -4,9 +4,7 @@ import investpy
 import pandas as pd
 import numpy as np
 
-import Utils_Yfinance
-import investing_info_csvREM
-import UtilsL
+from Utils import UtilsL, Utils_Yfinance
 from datetime import datetime
 from LogRoot.Logging import Logger
 from lxml.etree import tostring
