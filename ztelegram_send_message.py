@@ -8,32 +8,28 @@
 
 #https://medium.com/codex/using-python-to-send-telegram-messages-in-3-simple-steps-419a8b5e5e2
 import requests
-import asyncio
 import pandas as pd
-import json
 from datetime import datetime
 
 from telegram.constants import ParseMode
 
-import UtilsL
 import yhoo_history_stock
 from LogRoot.Logging import Logger
 from Model_predictions_Nrows import get_RealTime_buy_seel_points
-import Utils_send_message
+from Utils import Utils_send_message
 from a_manage_stocks_dict import Option_Historical, DICT_COMPANYS , Op_buy_sell
-
-
-from telegram import Bot , constants
 
 TOKEN = "5452553430:AAH8ARcZlQZFZHxckJuY0eWnUK08IKo6QnY"
 url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 
 
-chat_idLUISL = "5058733760"# LUIS
-chat_idIVAN = "563544091" #Ivan
-chat_idARIZT = "2073387965"
-message = "hello from your telegram bot"
+chat_idLUISL = "5058733760" # LUIS
+chat_idIVAN = "563544091"   #Ivan
+chat_idARIZT = "2073387965" # tania dosil
+chat_idTANIA= "495451714"   # tania dosil
+LIST_PEOPLE_IDS_CHAT = [chat_idLUISL, chat_idARIZT, chat_idTANIA ]
 
+message = "hello from your telegram bot"
 
 
 
@@ -54,7 +50,8 @@ BOT = None
 CSV_NAME = "@VOLA"
 list_stocks = DICT_COMPANYS[CSV_NAME]
 
-
+NUM_MIN_MODLES  = 3
+NUM_MIN_MODLES_TF = 1
 
 def __get_runtime_value_date_by_yhoo(S):
     date_detect, value_detect = "n", "n"
@@ -68,29 +65,39 @@ def __get_runtime_value_date_by_yhoo(S):
         print(message_aler)
     return date_detect, value_detect
 
-SUFFIXES_DATE_ENDS = ("00:00", "15:00", "30:00", "45:00")
+THORSHOOL_EVALUATE_NOT_TF = "93" #it could be "88" "95"
 def will_send_alert(df_b_s, stotck_id_pos ):
+    has_to_send_last_TF = False
     num_models = df_b_s.iloc[[-1]]['num_models'].values[0]
     # ultima
-    has_to_send_last = df_b_s.iloc[[-1]]['sum_r_93'].values[0]  > ((num_models / 2)  )
+    has_to_send_last = df_b_s.iloc[[-1]]['sum_r_'+THORSHOOL_EVALUATE_NOT_TF].values[0]  > ((num_models / 2) *1.1 )
+
     # penultima
-    has_to_send_unlast = df_b_s.iloc[[-2]]['sum_r_93'].values[0] > ((num_models / 2) )
+    # has_to_send_unlast = df_b_s.iloc[[-2]]['sum_r_93'].values[0] > ((num_models / 2) )
+    # has_to_send_unlast_TOP = df_b_s.iloc[[-2]]['sum_r_93'].values[0] > ((num_models / 2) * 1.1)
 
-    Logger.logr.info("\tPUNTUACIONES r_93 Stock: "+stotck_id_pos+" Penultima: "+ str(df_b_s.iloc[[-2]]['sum_r_93'].values[0])
-                     +"/"+ str(num_models) +"  Ultima: "+ str(df_b_s.iloc[[-1]]['sum_r_93'].values[0]) +"/"+ str(num_models)  )
+    Logger.logr.info("\tPUNTUACIONES r_93 Stock: "+stotck_id_pos+" Penultima: "+ str(df_b_s.iloc[[-2]]['sum_r_'+THORSHOOL_EVALUATE_NOT_TF].values[0])
+                     +"/"+ str(num_models) +"  Ultima: "+ str(df_b_s.iloc[[-1]]['sum_r_'+THORSHOOL_EVALUATE_NOT_TF].values[0]) +"/"+ str(num_models)  )
 
 
-    modles_evaluated_TF = [col for col in df_b_s.columns if col.startswith('br_TF') and col.endswith("_93")]
-    if len(modles_evaluated_TF) >= 2:
-        #tf_88 = df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_88$'))].sum(axis=1)
+    modles_evaluated_TF = [col for col in df_b_s.columns if col.startswith('br_TF') and col.endswith("_"+THORSHOOL_EVALUATE_NOT_TF)]
+    if len(modles_evaluated_TF) > NUM_MIN_MODLES_TF:
         tf_93 = df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_93$'))].sum(axis=1)
-        #tf_95 =df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_95$'))].sum(axis=1)
-        has_to_send_last_TF = tf_93.iloc[-1] > ( len(modles_evaluated_TF) / 2 +0.1  )
-        has_to_send_unlast_TF = tf_93.iloc[-2] > ( len(modles_evaluated_TF) / 2 +0.1  )
-        Logger.logr.info("\tPUNTUACIONES TF r_93 Stock: " + stotck_id_pos + " Penultima: " + str(tf_93.iloc[-2])
+        tf_95 = df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_95$'))].sum(axis=1)
+        has_to_send_last_TF = tf_93.iloc[-1] >= (len(modles_evaluated_TF) / 2) or tf_95.iloc[-1] >= 1
+        # has_to_send_unlast_TF = tf_93.iloc[-2] >= ( len(modles_evaluated_TF) / 2 )
+        Logger.logr.info("\tPUNTUACIONES multiple TF r_93 Stock: " + stotck_id_pos + " Penultima: " + str(tf_93.iloc[-2])
                          + "/" + str(len(modles_evaluated_TF)) + "  Ultima: " + str(tf_93.iloc[-1])+ "/" + str(len(modles_evaluated_TF)))
+    elif len(modles_evaluated_TF) == NUM_MIN_MODLES_TF:
+        tf_95 =df_b_s[modles_evaluated_TF][list(df_b_s[modles_evaluated_TF].filter(regex='_95$'))].sum(axis=1)
+        has_to_send_last_TF = tf_95.iloc[-1] >= ( len(modles_evaluated_TF) / 2   )
+        # has_to_send_unlast_TF = tf_95.iloc[-2] >= ( len(modles_evaluated_TF) / 2 )
+        Logger.logr.info("\tPUNTUACIONES unique TF r_95 Stock: " + stotck_id_pos + " Penultima: " + str(tf_95.iloc[-2])
+                         + "/" + str(len(modles_evaluated_TF)) + "  Ultima: " + str(tf_95.iloc[-1])+ "/" + str(len(modles_evaluated_TF)))
 
-    return (has_to_send_last and has_to_send_unlast) or (has_to_send_last_TF and has_to_send_unlast_TF)
+    return has_to_send_last  or (has_to_send_last_TF)
+    #return has_to_send_unlast_TOP or (has_to_send_last and has_to_send_unlast) or (has_to_send_unlast_TF)#  or has_to_send_unlast_TF
+
 
 
 COL_GANAN = ["Date", "stock", "type_buy_sell","value_start", "message" ]
@@ -103,9 +110,9 @@ def send_alert(S, df_b_s, type_b_s):
     dict_predictions = df_b_s.T.to_dict()
 
     #register data each time UNLAST
-    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-2]], modles_evaluated, type_b_s, path = "zTelegram_Registers.csv")  #unlast row
+    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-2]], modles_evaluated, type_b_s, path ="zTelegram_Registers.csv")  #unlast row
     #LAST
-    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-1]], modles_evaluated, type_b_s, path = "zTelegram_Registers.csv")  #last row
+    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-1]], modles_evaluated, type_b_s, path ="zTelegram_Registers.csv")  #last row
 
     i = -1
     if will_send_alert(df_b_s, S+"_"+type_b_s.name):
@@ -114,22 +121,21 @@ def send_alert(S, df_b_s, type_b_s):
         date_detect, value_detect = __get_runtime_value_date_by_yhoo(S)
 
         message_aler , alert_message_without_tags = Utils_send_message.get_string_alert_message(S, dict_predict_last, modles_evaluated,
-                                                                   type_b_s, date_detect,value_detect)
+                                                                                                type_b_s, date_detect, value_detect)
 
         df_registre = pd.concat([df_registre, pd.DataFrame([[date_detect, S, type_b_s.name, "{:.2f}".format(value_detect) , alert_message_without_tags ]], columns=COL_GANAN)  ],ignore_index=True)  # añadir fila add row
         df_registre.to_csv("zSent_Telegram_Registers.csv", sep="\t", index=None , mode='a', header=False)
 
+        send_mesage_all_people(message_aler)
 
 
-        botsUrl = f"https://api.telegram.org/bot{TOKEN}" #+ "/sendMessage?chat_id={}&text={}".format(chat_idLUISL, message_aler, parse_mode=ParseMode.HTML)
-        # url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(chat_idLUISL, message_aler,parse_mode=ParseMode.MARKDOWN_V2)
-        url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(chat_idLUISL, message_aler,parse_mode=ParseMode.HTML)
-        #url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_idLUISL}&text={message_aler}"
-        print("Enviar alerta: "+message_aler)
+def send_mesage_all_people(message_aler, parse_type = ParseMode.HTML):
+    botsUrl = f"https://api.telegram.org/bot{TOKEN}"  # + "/sendMessage?chat_id={}&text={}".format(chat_idLUISL, message_aler, parse_mode=ParseMode.HTML)
+    # url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(chat_idLUISL, message_aler,parse_mode=ParseMode.MARKDOWN_V2)
+    print("Enviar alerta todo el mundo: " + message_aler)
+    for people_id in LIST_PEOPLE_IDS_CHAT:
+        url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(people_id, message_aler,parse_mode=parse_type)
         print(requests.get(url).json())
-        url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(chat_idARIZT, message_aler, parse_mode=ParseMode.HTML)
-        print(requests.get(url).json())
-
 
 def monitor_all_stocks_and_send_alerts():
     print("START ciclo ")
@@ -147,17 +153,21 @@ def monitor_all_stocks_and_send_alerts():
             if df_vender is not None:
                 send_alert(S, df_vender, Op_buy_sell.NEG)
         except Exception as ex:
-            message_aler = "** Exception **"+str(ex)
-            print(message_aler)
-            url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_idLUISL}&text={message_aler}"
-            print("Enviar alerta: "+message_aler)
-            print(requests.get(url).json())
+            send_exception(ex)
 
-    df_res = pd.DataFrame([[datetime.today().strftime('%Y-%m-%d %H:%M:%S'), '----', '----','----', '----%', '----%', '----%', '----%', datetime.today().strftime('%Y-%m-%d %H:%M:%S')]], columns=['Date', 'Stock', 'buy_sell','Close', '88%', '93%', '95%', 'TF%', "Models_names"])
-    df_res.to_csv(path = "zTelegram_Registers.csv", sep="\t", index=None, mode='a', header=False)
+    df_res = pd.DataFrame([[datetime.today().strftime('%Y-%m-%d %H:%M:%S'), '----', '----','----','----', '----%', '----%', '----%', '----%', datetime.today().strftime('%Y-%m-%d %H:%M:%S')]], columns=['Date', 'Stock', 'buy_sell','Close', '88%', '93%', '95%', 'TF%', "Models_names"])
+    df_res.to_csv( "zTelegram_Registers.csv", sep="\t", index=None, mode='a', header=False)
     print("END ciclo ")
     print("END ciclo "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
     print("END ciclo ")
+
+
+def send_exception(ex, extra_mes = ""):
+    message_aler = extra_mes + "   ** Exception **" + str(ex)
+    print(message_aler)
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_idLUISL}&text={message_aler}"
+    print("Enviar alerta: " + message_aler)
+    print(requests.get(url).json())
 
 
 list_most_probable = ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "UBER","QCOM", "PYPL",  "RUN", "GTLB", #=['EPAM'] #
@@ -181,12 +191,11 @@ print("START ciclo ")
 print("START ciclo "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 print("START ciclo ")
 
-import time
 # starttime = time.time()
 # while True:
 #     print("tick")
 
-from datetime import datetime, timedelta
+from datetime import datetime
 #Para ejecutar algo cada 15 minutos después de la hora.
 # while 1:
 #     dt = datetime.now() + timedelta(minutes=15)
@@ -197,13 +206,13 @@ from datetime import datetime, timedelta
 #     diez_minutos = 10*60
 #     monitor_all_stocks_and_send_alerts()
 #     time.sleep(diez_minutos) #cada_minuto = (60.0 - ((time.time() - starttime) % 60.0))
-
-#monitor_all_stocks_and_send_alerts()
-from apscheduler.schedulers.blocking import BlockingScheduler
-scheduler = BlockingScheduler()
-#https://stackoverflow.com/questions/66662408/how-can-i-run-task-every-10-minutes-on-the-5s-using-blockingscheduler
-scheduler.add_job(monitor_all_stocks_and_send_alerts, trigger='cron', minute='4,19,34,49', second=1) #Next wakeup is due at 2022-10-24 16:45:58+02:00 (in 827.089182 seconds)
-scheduler.start()
+#
+# monitor_all_stocks_and_send_alerts()
+# from apscheduler.schedulers.blocking import BlockingScheduler
+# scheduler = BlockingScheduler()
+# #https://stackoverflow.com/questions/66662408/how-can-i-run-task-every-10-minutes-on-the-5s-using-blockingscheduler
+# scheduler.add_job(monitor_all_stocks_and_send_alerts, trigger='cron', minute='4,19,34,49', second=1) #Next wakeup is due at 2022-10-24 16:45:58+02:00 (in 827.089182 seconds)
+# scheduler.start()
 
 
 
