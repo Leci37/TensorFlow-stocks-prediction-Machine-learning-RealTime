@@ -70,6 +70,7 @@ def predict_Random_Forest(X_test, SAV_files_surname ,y_test = None, list_CM_tole
     return scores #> p_tolerance
 
 
+#DATOS desequilibrados https://www.tensorflow.org/tutorials/structured_data/imbalanced_data
 from tensorflow import keras
 def predict_TF_onBalance(X_test,  save_model_path, model_h5_name,y_test = None, list_CM_tolerance = [0.45,0.47,0.5,0.53,0.56,0.6] ):
     print(" \n", save_model_path + model_h5_name)
