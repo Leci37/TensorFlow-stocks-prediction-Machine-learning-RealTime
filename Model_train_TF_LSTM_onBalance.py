@@ -5,7 +5,7 @@ import tensorflow as tf
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from tensorflow import keras
 
-
+from Model_TF_definitions import ModelDefinition
 from Utils import UtilsL, Utils_model_predict, Utils_plotter, LTSM_WindowGenerator, Utils_buy_sell_points
 import a_manage_stocks_dict
 from Utils.Utils_model_predict import __print_csv_accuracy_loss_models
@@ -18,7 +18,7 @@ MODEL_FOLDER_TF = "Models/TF_balance/"
 
 
 #DATOS desequilibrados https://www.tensorflow.org/tutorials/structured_data/imbalanced_data
-def train_TF_LSTM_onBalance(columns_selection  , model_h5_name   , path_csv , op_buy_sell : a_manage_stocks_dict.Op_buy_sell):
+def train_TF_LSTM_onBalance(columns_selection, model_h5_name, path_csv, op_buy_sell : a_manage_stocks_dict.Op_buy_sell, model_type : a_manage_stocks_dict.MODEL_TF_DENSE_TYPE):
     #LOAD
     global train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
     df = Utils_model_predict.load_and_clean_DF_Train_from_csv(path_csv, op_buy_sell, columns_selection)
@@ -31,13 +31,13 @@ def train_TF_LSTM_onBalance(columns_selection  , model_h5_name   , path_csv , op
     neg, pos = np.bincount(df[Y_TARGET])
     initial_bias = np.log([pos / neg])
     imput_shape = (train_features.shape[1], train_features.shape[2])  # number_of_channels = 1
-    model = Utils_model_predict.make_model_TF_multidimension_onbalance_fine_28(input_shape_m=imput_shape, num_features=len(df.columns) )  # train_features.shape[-1])
+    model = ModelDefinition(shape_inputs_m=imput_shape, num_features_m=len(df.columns) ).get_dicts_models_multi_dimension()[model_type]
     print(model.summary())
 
     results = model.evaluate(train_features, train_labels, batch_size=BATCH_SIZE, verbose=2)
     print("Loss: {:0.4f}  without output_bias ".format(results[0]))
     # model.predict(train_features[:10])
-    model = Utils_model_predict.make_model_TF_multidimension_onbalance_fine_28(input_shape_m=imput_shape , output_bias=initial_bias, num_features=len(df.columns) )
+    model = ModelDefinition(shape_inputs_m=imput_shape , output_bias_m=initial_bias, num_features_m=len(df.columns) ).get_dicts_models_multi_dimension()[model_type]
     results = model.evaluate(train_features, train_labels, batch_size=BATCH_SIZE, verbose=2)
     print("Loss: {:0.4f} with output_bias".format(results[0]))
     # model.predict(train_features[:10])
@@ -50,7 +50,7 @@ def train_TF_LSTM_onBalance(columns_selection  , model_h5_name   , path_csv , op
     # Train on the oversampled data
     # Now try training the model with the resampled data set instead of using class weights to see how these methods compare.
     # Note: Because the data was balanced by replicating the positive examples, the total dataset size is larger, and each epoch runs for more training steps.
-    resampled_model = Utils_model_predict.make_model_TF_multidimension_onbalance_fine_28(input_shape_m=imput_shape, num_features=len(df.columns) )
+    resampled_model = ModelDefinition(shape_inputs_m=imput_shape, num_features_m=len(df.columns) ).get_dicts_models_multi_dimension()[model_type]
     resampled_model.load_weights(initial_weights)
     # Reset the bias to zero, since this dataset is balanced. TODO why?
     output_layer = resampled_model.layers[-1]
@@ -71,4 +71,4 @@ def train_TF_LSTM_onBalance(columns_selection  , model_h5_name   , path_csv , op
 
     __print_csv_accuracy_loss_models(MODEL_FOLDER_TF, model_h5_name, resampled_history)
     resampled_model.save(MODEL_FOLDER_TF + model_h5_name)
-    print(" Save model :  ", MODEL_FOLDER_TF + model_h5_name)
+    print(" Save model Type: "+model_type.value+"  Path:  ", MODEL_FOLDER_TF + model_h5_name)
