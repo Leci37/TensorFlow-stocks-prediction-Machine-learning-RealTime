@@ -1,31 +1,16 @@
 import os
-from enum import Enum
 
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
 #from predict_example import kaggle_stock_market_Tech
-import UtilsL
-import Utils_Yfinance
-import Utils_buy_sell_points
-import Utils_col_sele
-import Utils_plotter
-import a_manage_stocks_dict
-import talib_technical_crash_points
-import talib_technical_funtions
-import talib_technical_PY_TI
-import talib_technical_pandas_TA
-import talib_technical_pandas_TU
+from Utils import UtilsL, Utils_Yfinance, Utils_col_sele
 import yfinance as yf
 import pandas as pd
-import numpy as np
 from a_manage_stocks_dict import Option_Historical, DICT_COMPANYS
-
+import pandas_ta as ta
 
 from LogRoot.Logging import Logger
 from talib_technical_class_object import TechData
-from yhoo_external_raw_factors import DICT_EXTERNAL_FACTORS
-
-
 
 list_stocks = ["RIVN", "VWDRY", "TWLO",          "GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",]
 list_stocks = ["GE","SPOT","F","SAN.MC","TMUS","MBG.DE","INTC","TRIG.L","GOOG","ASML","SNOW","ADBE","LYFT","UBER","ZI", "BXP","ANET","MITK","QCOM","PYPL","JBLU","IAG.L",
@@ -106,15 +91,16 @@ def get_stock_history_Tech_download(stockId, opion, get_technical_data = False, 
 
     if df_his is None:
         Logger.logr.debug("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  is NONE stock: " + stockId)
+        raise "d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  is NONE stock: " + stockId
     else:
         if get_technical_data:
             df_his = get_technical_data_and_NQ(costum_columns, df_his, interval, opion)
 
         df_his['Date'] = df_his['Date'].astype(str)
         df_his.reset_index(drop=True, inplace=True)
-        if costum_columns is None:
-            df_his.to_csv("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv", sep="\t", index=None)
-            Logger.logr.info("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  stock: " + stockId + " Shape: " + str(df_his.shape))
+        # if costum_columns is None:
+        #     df_his.to_csv("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv", sep="\t", index=None)
+        #     Logger.logr.info("d_price/" + stockId + "_stock_history_"+str(opion.name)+".csv  stock: " + stockId + " Shape: " + str(df_his.shape))
 
     return df_his, df_RAW
 
@@ -137,17 +123,7 @@ def get_technical_data_and_NQ(costum_columns, df_his, interval, opion):
 
 
 def get_external_factor(df_his, exter_id_NQ, interval, opion, remove_str_in_colum = "=F",startswith_str_in_colum = 'NQ_'):
-    df_ext = __select_dowload_time_config(interval, opion, prepost=False, stockId=exter_id_NQ)
-
-    df_ext = Utils_Yfinance.add_variation_percentage(df_ext, prefix=exter_id_NQ + "_")
-    df_ext.ta.sma(length=20, prefix=exter_id_NQ, cumulative=True, append=True)
-    df_ext.ta.sma(length=100, prefix=exter_id_NQ, cumulative=True, append=True)
-    df_ext = df_ext.rename(columns={'Volume': exter_id_NQ + "_"'Volume', 'Close': exter_id_NQ + "_"'Close'})
-
-    names_col = [col for col in df_ext.columns if col.startswith(exter_id_NQ + "_")]
-    df_ext = df_ext[['Date'] + names_col]
-    for ncol in names_col:
-        df_ext = df_ext.rename(columns={ncol: ncol.replace(remove_str_in_colum, "")})
+    df_ext = get_NASDAQ_data(exter_id_NQ, interval, opion, remove_str_in_colum)
 
     df_his = pd.merge(df_his, df_ext, how='left')
 
@@ -155,6 +131,19 @@ def get_external_factor(df_his, exter_id_NQ, interval, opion, remove_str_in_colu
     df_his[cols_NQ] = df_his[cols_NQ].fillna(method='ffill')
     df_his[cols_NQ] = df_his[cols_NQ].fillna(method='bfill')
     return df_his
+
+
+def get_NASDAQ_data(exter_id_NQ, interval, opion, remove_str_in_colum):
+    df_ext = __select_dowload_time_config(interval, opion, prepost=False, stockId=exter_id_NQ)
+    df_ext = Utils_Yfinance.add_variation_percentage(df_ext, prefix=exter_id_NQ + "_")
+    df_ext.ta.sma(length=20, prefix=exter_id_NQ, cumulative=True, append=True)
+    df_ext.ta.sma(length=100, prefix=exter_id_NQ, cumulative=True, append=True)
+    df_ext = df_ext.rename(columns={'Volume': exter_id_NQ + "_"'Volume', 'Close': exter_id_NQ + "_"'Close'})
+    names_col = [col for col in df_ext.columns if col.startswith(exter_id_NQ + "_")]
+    df_ext = df_ext[['Date'] + names_col]
+    for ncol in names_col:
+        df_ext = df_ext.rename(columns={ncol: ncol.replace(remove_str_in_colum, "")})
+    return df_ext
 
 
 def __select_dowload_time_config(interval, opion, prepost, stockId):
@@ -185,6 +174,22 @@ def __select_dowload_time_config(interval, opion, prepost, stockId):
                 df_path_raw = df_path_raw[ df_path_raw["ticker"] == stockId ].drop(columns= "ticker").reset_index(drop=True)
             #unir por todas las columnas , mantener la ultima df_his , en caso de duplicado
             df_his = pd.merge(df_path_raw, df_his, how='outer').drop_duplicates(subset=["Date"], keep="last")
+
+
+        #ALPHA API FOLDER history Test/API_alphavantage_get_old_history.py
+        files_on_folder = os.listdir("d_price/RAW_alpha")
+        for patH_raw in files_on_folder:
+            if patH_raw.startswith("alpha_"+stockId+"_"):
+                print("Read historical data from: "+"d_price/RAW_alpha/" + patH_raw)
+                df_path_raw = pd.read_csv("d_price/RAW_alpha/" + patH_raw, index_col='Date', sep='\t')
+                df_path_raw.index = pd.to_datetime(df_path_raw.index)#Get TypeError: Index must be DatetimeIndex
+                df_path_raw = df_path_raw.between_time('09:30:00', '16:00:30')#solo las del mercado abierto
+                df_path_raw = df_path_raw.loc['2021-01-20':]
+                df_path_raw['Date'] = df_path_raw.index
+                df_path_raw['Date'] = df_path_raw['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+                df_path_raw.reset_index(drop=True, inplace=True)
+                df_his = pd.merge(df_path_raw, df_his, how='outer').drop_duplicates(subset=["Date"], keep="last")
+
 
     elif opion.value == Option_Historical.DAY_6.value:
         df_his = get_historial_data_6_days(stockId, prepos=prepost, interva=interval)
@@ -284,7 +289,7 @@ def generate_pure_min_max_csv(df_min_max, stock_id, path):
 
 
 def get_favs_SCALA_csv_tocks_history_Local(df_his_stock, csv_name, opion):
-    from sklearn.preprocessing import StandardScaler, MinMaxScaler
+    from sklearn.preprocessing import MinMaxScaler
     sc = MinMaxScaler(feature_range=(-100, 100))
 
     df_all = pd.DataFrame()
