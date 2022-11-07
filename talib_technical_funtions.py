@@ -256,6 +256,7 @@ def get_cycle_indicator(close):
 # Pattern Recognition Functions
 # Pattern Recognition Functions
 def get_candle_pattern(openS, high, low, close):
+    #  iMAGENES https://github.com/LastAncientOne/Stock_Analysis_For_Quant/tree/master/Python_Stock/Candlestick_Patterns
     df = pd.DataFrame()
 
     #CDL2CROWS - Two Crows
@@ -481,6 +482,8 @@ cos_cols = None
 def gel_all_TALIB_funtion(df, costum_columns=None):
     global cos_cols
     cos_cols = costum_columns
+    #TODOS LOS PAtrones aplicados https://github.com/LastAncientOne/Stock_Analysis_For_Quant/blob/master/Python_Stock/Technical_Indicators/1_Technical_Indicators_talib.ipynb
+    #https://github.com/LastAncientOne/Stock_Analysis_For_Quant/tree/master/Python_Stock/Technical_Indicators
     # siempre ordenada la fecha de mas a menos TODO exception
     df_o = get_overlap_indicator(df["High"], df["Low"], df["Close"])
     df = pd.concat([df, df_o], axis=1)
@@ -501,3 +504,4 @@ def gel_all_TALIB_funtion(df, costum_columns=None):
 
     #df = df.round(3)
     return df
+
