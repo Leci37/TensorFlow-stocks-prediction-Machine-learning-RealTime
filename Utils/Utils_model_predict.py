@@ -156,18 +156,41 @@ def scaler_Raw_TF_onbalance(test_df, label_name = 'buy_sell_point'):
     Logger.logr.debug('Test labels shape:'+ str( test_labels.shape) + ' Test features shape:'+ str(  test_features.shape))
     return test_features,  test_labels
 
-def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point'):
+dataX, dataY = [], []
+def df_to_df_multidimension_array(dataframe, BACHT_SIZE_LOOKBACK):
+    global dataY, dataX
+    dataX, dataY = [], []
+    # https://stackoverflow.com/questions/60736556/pandas-rolling-apply-using-multiple-columns
+    def __create_tensor_values(ser):
+        global dataY, dataX
+        y_label = dataframe.at[ser.index[-1] , Y_TARGET]  # más óptimo que .loc
+        dataY.append(y_label)
+        x_data = dataframe.loc[ser.index[0]:ser.index[-1], dataframe.columns.drop(Y_TARGET)].values
+        dataX.append(x_data)
+        return 0
+
+    dataframe[Y_TARGET].shift(-BACHT_SIZE_LOOKBACK).rolling(window=BACHT_SIZE_LOOKBACK).apply(__create_tensor_values,raw=False)
+    return_feature = np.array(dataX)
+    return_label = np.array(dataY)
+    return return_label, return_feature
+
+
+def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point', BACHT_SIZE_LOOKBACK = None, will_shuffle = False):
     # Use a utility from sklearn to split and shuffle your dataset.
-    train_df, test_df = train_test_split(cleaned_df, test_size = 0.28, shuffle=False)
-    train_df, val_df = train_test_split(train_df, test_size = 0.28, shuffle=False)
+    train_df, test_df = train_test_split(cleaned_df, test_size = 0.28, shuffle=will_shuffle)
+    train_df, val_df = train_test_split(train_df, test_size = 0.12, shuffle=will_shuffle)
+
     # Form np arrays of labels and features.
-    train_labels = np.array(train_df.pop(label_name))
-    bool_train_labels = train_labels != 0
-    val_labels = np.array(val_df.pop(label_name))
-    test_labels = np.array(test_df.pop(label_name))
-    train_features = np.array(train_df)
-    val_features = np.array(val_df)
-    test_features = np.array(test_df)
+    if BACHT_SIZE_LOOKBACK is not None:
+        train_labels,train_features = df_to_df_multidimension_array(train_df, BACHT_SIZE_LOOKBACK)
+        bool_train_labels = train_labels != 0
+        test_labels, test_features = df_to_df_multidimension_array(test_df,BACHT_SIZE_LOOKBACK)
+        val_labels, val_features = df_to_df_multidimension_array(val_df, BACHT_SIZE_LOOKBACK)
+        __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
+        return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
+
+    bool_train_labels, test_features, test_labels, train_features, train_labels, val_features, val_labels = __cast_numpy_array(label_name, test_df, train_df, val_df)
+
     scaler = StandardScaler()
     train_features = scaler.fit_transform(train_features)
     val_features = scaler.transform(val_features)
@@ -176,14 +199,35 @@ def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point'):
     val_features = np.clip(val_features, -5, 5)
     test_features = np.clip(test_features, -5, 5)
 
-    Logger.logr.info('Training labels shape:'+ str( train_labels.shape))
-    Logger.logr.debug('Validation labels shape:'+ str( val_labels.shape))
-    Logger.logr.debug('Test labels shape:'+ str( test_labels.shape))
-    Logger.logr.debug('Training features shape:'+ str( train_features.shape))
-    Logger.logr.debug('Validation features shape:'+ str( val_features.shape))
-    Logger.logr.debug('Test features shape:'+ str( test_features.shape))
-
+    __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
     return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
+
+
+def __cast_numpy_array(label_name, test_df, train_df, val_df):
+    train_labels = np.array(train_df.pop(label_name))
+    bool_train_labels = train_labels != 0
+    val_labels = np.array(val_df.pop(label_name))
+    test_labels = np.array(test_df.pop(label_name))
+    train_features = np.array(train_df)
+    val_features = np.array(val_df)
+    test_features = np.array(test_df)
+    return bool_train_labels, test_features, test_labels, train_features, train_labels, val_features, val_labels
+
+
+# root - [INFO]{MainThread} - __log_shapes_trains_val_data() - Training labels shape:(5634,)
+# root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Validation labels shape:(2192,)
+# root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Test labels shape:(3044,)
+# root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Training features shape:(5634, 57)
+# root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Validation features shape:(2192, 57)
+# root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Test features shape:(3044, 57)
+
+def __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels):
+    Logger.logr.info('Training labels shape:' + str(train_labels.shape))
+    Logger.logr.debug('Validation labels shape:' + str(val_labels.shape))
+    Logger.logr.debug('Test labels shape:' + str(test_labels.shape))
+    Logger.logr.debug('Training features shape:' + str(train_features.shape))
+    Logger.logr.debug('Validation features shape:' + str(val_features.shape))
+    Logger.logr.debug('Test features shape:' + str(test_features.shape))
 
 
 def make_model_TF_onbalance(shape_features, metrics=METRICS_ALL, output_bias=None):
@@ -205,6 +249,24 @@ def make_model_TF_onbalance(shape_features, metrics=METRICS_ALL, output_bias=Non
 
   return model
 
+#DATOS desequilibrados https://www.tensorflow.org/tutorials/structured_data/imbalanced_data
+def make_model_TF_multidimension_onbalance_fine_28(input_shape_m, metrics=METRICS_ACCU_PRE, output_bias=None, num_features =20):
+    if output_bias is not None:
+        output_bias = keras.initializers.Constant(output_bias)
+
+    model = keras.Sequential([
+      keras.layers.Dense(28, activation='relu',input_shape=input_shape_m),
+      keras.layers.Dropout(0.2),
+      keras.layers.Dense(1, activation='relu',bias_initializer=output_bias),
+    ])
+
+    model.compile(
+          optimizer=keras.optimizers.Adam(learning_rate=0.001),
+          loss=keras.losses.BinaryCrossentropy(),
+          metrics=metrics)
+
+    return model
+
 
 def make_model_TF_onbalance_fine_28(shape_features, metrics=METRICS_ACCU_PRE, output_bias=None):
   if output_bias is not None:
@@ -222,26 +284,18 @@ def make_model_TF_onbalance_fine_28(shape_features, metrics=METRICS_ACCU_PRE, ou
 
   return model
 
-def make_model_TF_onbalance_fine_64(shape_features,metrics=METRICS_ACCU_PRE, output_bias=None):
-  if output_bias is not None:
-    output_bias = keras.initializers.Constant(output_bias)
-  model = keras.Sequential([
-      keras.layers.Dense(64, activation='relu',input_shape=(shape_features,)),
-      keras.layers.Dense(32, activation='relu', input_shape=(shape_features,)),
-      keras.layers.Dropout(0.2),
-      keras.layers.Dense(4, activation='relu', input_shape=(shape_features,)),
-      keras.layers.Dense(1, activation='relu',bias_initializer=output_bias),
-  ])
 
-  model.compile(
-      optimizer=keras.optimizers.Adam(learning_rate=0.001),
-      loss=keras.losses.BinaryCrossentropy(),
-      metrics=metrics)
-
-  return model
-
+def dataset_shapes(dataset):
+    try:
+        return [x.get_shape().as_list() for x in dataset._tensors]
+    except TypeError:
+        return dataset._tensors.get_shape().as_list()
 
 def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, BATCH_SIZE):
+    #Cuantos valores de la minoria en proporcion a la mayoria van  salir
+    #Ej: si es 1 , la proporcion entre pos 50% y neg  50%
+    # si es 0.8 la proporcion será de +-40% para la minoria , y +-60% para la mayoria
+    EQUAL_FACTOR_BALANCE = 1
     # Oversample the minority class
     # A related approach would be to resample the dataset by oversampling the minority class.
     pos_features = train_features[bool_train_labels]
@@ -251,8 +305,11 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
     # You can balance the dataset manually by choosing the right number of random
     # indices from the positive examples:
     ids = np.arange(len(pos_features))
-    choices = np.random.choice(ids, len(neg_features))
+    choices = np.random.choice(ids, int(len(neg_features) * EQUAL_FACTOR_BALANCE))
     res_pos_features = pos_features[choices]
+    if pos_labels is None or len(pos_labels) == 0:
+        print("No hay valores positivos en para predecir ValueError: 'a' cannot be empty unless no samples are taken")
+        raise "No hay valores positivos en para predecir ValueError: 'a' cannot be empty unless no samples are taken"
     res_pos_labels = pos_labels[choices]
     res_pos_features.shape
     resampled_features = np.concatenate([res_pos_features, neg_features], axis=0)
@@ -263,8 +320,8 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
     resampled_labels = resampled_labels[order]
     resampled_features.shape
     """#### Using `tf.data`
-
-    If you're using `tf.data` the easiest way to produce balanced examples is to start with a `positive` and a `negative` dataset, and merge them. See [the tf.data guide](../../guide/data.ipynb) for more examples.
+    If you're using `tf.data` the easiest way to produce balanced examples is to start with a `positive` and a `negative` dataset, 
+    and merge them. See [the tf.data guide](../../guide/data.ipynb) for more examples.
     """
     BUFFER_SIZE = 100000
 
@@ -282,8 +339,8 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
     resampled_ds = tf.data.Dataset.sample_from_datasets([pos_ds, neg_ds], weights=[0.5, 0.5])
     resampled_ds = resampled_ds.batch(BATCH_SIZE).prefetch(2)
     for features, label in resampled_ds.take(1):
-        print(label.numpy().mean())
-
+        print("Resampled_ds type: "+str(resampled_ds.take(1).element_spec)  +"  mean():" + str(label.numpy().mean() ))
+    # print("tf.dataset_shape: "+dataset_shapes(resampled_ds) )
     return resampled_ds
 
 Y_TARGET = 'buy_sell_point'
@@ -324,3 +381,22 @@ def get_df_for_list_of_result(df_full):
     else:
         df_list_r = df_full[['Date', Y_TARGET, "Close", 'has_preMarket', 'Volume']].copy()
     return df_list_r
+
+
+def __print_csv_accuracy_loss_models(MODEL_FOLDER_TF, model_h5_name, resampled_history):
+    UtilsL.remove_files_starwith(MODEL_FOLDER_TF + model_h5_name + "_")
+    # resampled_history.model.metrics_names[1] # accuracy name
+    # resampled_history.history['accuracy'][-1]
+    # resampled_history.model.metrics_names[0] #Lost name
+    # resampled_history.history['loss'][-1]
+    # resampled_history.epoch[-1]
+    # resampled_history.params['epochs'] # 160 epos
+    data_hist_model = resampled_history.model.metrics_names[1] + "_" + "{:.2f}".format(
+        resampled_history.history['accuracy'][-1] * 100) + "%__" \
+                      + resampled_history.model.metrics_names[0] + "_" + "{:.2f}".format(
+        resampled_history.history['loss'][-1]) + "__" \
+                      + "epochs_" + str(resampled_history.epoch[-1]) + "[" + str(
+        resampled_history.params['epochs']) + "]"
+    pd.DataFrame(resampled_history.history).round(3).to_csv(
+        MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv", sep="\t", index=None)
+    print("Statistics: " +MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv")
