@@ -22,8 +22,14 @@ DICT_COMPANYS = {
         ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD", "ADSK", "AMZN", "BABA", "NFLX", "FFIV", "GOOG", "MSFT", "ABNB", "TSLA", "META"],
     "@FOLO2":
         ["DBX", "PTON", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
-    "@FOLO3":
-        ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD", "ADSK", "AMZN", "BABA", "NFLX", "FFIV", "GOOG", "MSFT", "ABNB", "TSLA", "META", "DBX", "PTON", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"]
+    "@FOLO3": #"META", ERROR no buy points
+        ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
+#"PTON", error callearly no se xq
+         #[  "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
+    "@CHIC":
+        [ "ATHE", "MU", "CRM", "SNPS", "DHI", "MPWR", "CZR", "NOW", "BBWI", "DXCM", "TER", "KLAC", "ALGN", "CARV", "UONE", "SPG", "STAG", "O", "PSEC"],
+    # "@CHIC3":
+    #     DICT_COMPANYS["@FOLO3"]+ DICT_COMPANYS["@CHIC3"]
     }
 
 class MODEL_TYPE_COLM(Enum):
@@ -51,9 +57,44 @@ class Op_buy_sell(ExtendedEnum):
     POS = "pos"
     NEG = "neg"
 
+class MODEL_TF_DENSE_TYPE(Enum):
+    @classmethod
+    def list_values(cls):
+        return list(map(lambda c: c.value, cls))
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c, cls))
+    SIMP_DENSE28 = "28"
+    SIMP_DENSE64 = "64"
+    SIMP_DENSE128 =  "128"
+    SIMP_CORDO	= "_simp_cordo"
+    SIMP_DENSE	= "_simp_dense"
+    # MULT_DENSE	= "_mult_dense"
+    SIMP_CONV	= "_simp_conv"
+    # MULT_LINEAR	= "_mult_linear"
+    # MULT_DENSE2	= "_mult_dense2"
+    # MULT_CONV	= "_mult_conv"
+    # MULT_LSTM	= "_mult_lstm"
+    ##### SIMPL_BIDI	= "_simpl_bidi"
+    # MULT_TIME	= "_mult_time"
+    MULT_GRU	= "_mult_gru"
 
 
-DICT_WEBULL_ID = {"UPST" : 950177837,
+class MODEL_TF_DENSE_TYPE_ONE_DIMENSI(Enum):
+    @classmethod
+    def list_values(cls):
+        return list(map(lambda c: c.value, cls))
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c, cls))
+    SIMP_28 = "s28"
+    SIMP_64 = "s64"
+    SIMP_128 =  "s128"
+
+#In case of does not have a value form webull.com , the tool to obtains news code: Test/Volume_WeBull_get_tikcers.py
+DICT_WEBULL_ID = {
+    #@FOLO3
+    "UPST" : 950177837,
     "MELI" : 913323930,
     "TWLO" : 913254831,
     "RIVN" : 950188536,
@@ -100,6 +141,27 @@ DICT_WEBULL_ID = {"UPST" : 950177837,
     "U" : 950172451,
     "GME" : 913255341,
     "RBLX" : 950178170,
-    "CRSR" : 950172441}
+    "CRSR" : 950172441,
+    #@CHIC
+    "ATHE" : 913323301,
+    "MU" : 913324077,
+    "CRM" : 913255140,
+    "SNPS" : 913323483,
+    "DHI" : 913255191,
+    "MPWR" : 913323959,
+    "CZR" : 913255942,
+    "NOW" : 913254427,
+    "BBWI" : 913255499,
+    "DXCM" : 913256616,
+    "TER" : 913324414,
+    "KLAC" : 913257399,
+    "ALGN" : 913256164,
+    "CARV" : 913253685,
+    "UONE" : 913323315,
+    "SPG" : 913324356,
+    "STAG" : 913254301,
+    "O" : 913324022,
+    "PSEC" : 913323566}
+
 
 
