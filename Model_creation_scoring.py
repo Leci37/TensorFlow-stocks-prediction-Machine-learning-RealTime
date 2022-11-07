@@ -56,33 +56,26 @@ def __get_df_Evaluation_from_all_models_model_ok_thresholdCSV(df_result_all, nam
     # df_list_r = df_result_all[['Date', Y_TARGET,"is_valid"] + columns_aux_to_evaluate]
     df_threshold = df_result_all.describe(percentiles=[0.25, 0.5, 0.7, 0.8,0.88,0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98])
     df_threshold.round(4).to_csv("Models/Scoring/"+name_type_result +"_when_model_ok_threshold.csv", sep='\t')
-
-
-    #is_predict_buy_point(df_list_r, df_result_all, df_threshold, list_valid_params)
-
     print("Models/Scoring/"+name_type_result +"_when_model_ok.csv")
 
 def __get_r_eval_TF_accuracy_from_csv_result(df_eval):
     for index, row in df_eval.iterrows():
-        if index.startswith('r_TF64'):
-            accuracy_per = glob.glob("Models/TF_balance/" + index.replace('r_TF64', 'TF') + "*.csv")
-            accuracy_per_64 = [tf_n for tf_n in accuracy_per if "64.h5" in tf_n][0]
-            accuracy_per_64 = float(re.search(r'accuracy_(.*)%_', accuracy_per_64, re.IGNORECASE).group(1))
-            print(index)
-            df_eval.at[index, 'r_eval'] = accuracy_per_64 / 100
-        elif index.startswith('r_TF'):
-            accuracy_per = glob.glob("Models/TF_balance/" + index.replace('r_', '') + "*.csv")
-            accuracy_per_28 = [tf_n for tf_n in accuracy_per if "28.h5" in tf_n][0]
-            accuracy_per_28 = float(re.search(r'accuracy_(.*)%_', accuracy_per_28, re.IGNORECASE).group(1))
-            print(index)
-            df_eval.at[index, 'r_eval'] = accuracy_per_28 / 100
+        if index.startswith('r_TF_') and index.endswith(tuple(a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_ONE_DIMENSI.list_values())):
+            h5_name = glob.glob("Models/TF_balance/" + index.replace('r_', '') + "*.csv")[0]
+            accuracy_per = float(re.search(r'accuracy_(.*)%_', h5_name, re.IGNORECASE).group(1))
+            epochs_num = float(re.search(r'epochs_(.*)\[', h5_name, re.IGNORECASE).group(1))
+            print(index + " accuracy_per: "+str(accuracy_per) + "% epochs: "+ str(epochs_num))
+            df_eval.at[index, 'r_eval'] = accuracy_per / 100
+            df_eval.at[index, 'r_epoch'] = epochs_num
+
     return df_eval
 
 
 def get_list_good_models(df_result_all ,groupby_colum , path = None):
     THORSHOOL_VALID_MODEL_down = 0.32 # tiene que tener mas que esto para ser valido
-    THORSHOOL_VALID_MODEL_TF_down = 0.25 # 0.25 + 0.5 para indicar que solo se recogen los mayores de 75
+    THORSHOOL_VALID_MODEL_TF_down = 0.18  # 0.25 + 0.5 para indicar que solo se recogen los mayores de 75
     THORSHOOL_VALID_MODEL_up = 0.5
+    THORSHOOL_VALID_MODEL_TF_epochs = 19
 
     rows_test_in_df = int(df_result_all.shape[0] * 0.35)
     df_eval_result_paramans = df_result_all[-rows_test_in_df:].groupby(groupby_colum).mean().T
@@ -91,6 +84,7 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         Logger.logr.warn("El formato despues del group by no corresponde a 2. groupby_colum: "+ groupby_colum+ " Format: "+ str(df_eval_result_paramans.shape)+ " path: "+ path)
         return
     df_eval_result_paramans["r_eval"] = df_eval_result_paramans[1] - df_eval_result_paramans[0]
+    df_eval_result_paramans["r_epoch"] = 0
     #Para los TF ya viene dada en el .csv de resultados
     df_eval_result_paramans = __get_r_eval_TF_accuracy_from_csv_result(df_eval_result_paramans)
 
@@ -119,8 +113,10 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
 
         list_valid_params_down = df_eval_result_paramans["r_eval"][list_r_TF_not_params][df_eval_result_paramans["r_eval"][list_r_TF_not_params] >= THORSHOOL_VALID_MODEL_down].index.values
         list_valid_params_TF_down = df_eval_result_paramans["r_eval"][list_r_TF_params][df_eval_result_paramans["r_eval"][list_r_TF_params] >= THORSHOOL_VALID_MODEL_TF_down].index.values
+        #si tiene muchos pasos de entrenamiento , se baja el humbral de valido .h5 model
+        list_valid_params_TF_epochs = df_eval_result_paramans["r_epoch"][list_r_TF_params][(df_eval_result_paramans["r_epoch"][list_r_TF_params] >= THORSHOOL_VALID_MODEL_TF_epochs) & (df_eval_result_paramans["r_eval"][list_r_TF_params] >= (THORSHOOL_VALID_MODEL_TF_down - 0.06))].index.values
 
-        list_valid_params_down = list(list_valid_params_down) + list(list_valid_params_TF_down)
+        list_valid_params_down = list(set(list(list_valid_params_down) + list(list_valid_params_TF_down) + list(list_valid_params_TF_epochs) ))
         dict_json["list_good_params_down"] = list_valid_params_down
         list_valid_params_up = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= THORSHOOL_VALID_MODEL_up].index.values
         list_valid_params_up = [col for col in list_valid_params_up if col.startswith('r_')]
@@ -138,6 +134,8 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
 
 
 
+CSV_NAME = "@CHIC"
+list_stocks_chic = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
@@ -145,7 +143,7 @@ opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 df_final_list_stocks = pd.DataFrame()
 
 for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS]:
-    for S in list_stocks : #["SHOP", "PINS", "NIO", "UBER","U",  "TWLO", "TSLA", "SNOW",  "MELI" ]:#list_stocks: CRSR_SCALA_stock_history_MONTH_3_AD.csv
+    for S in  list_stocks +list_stocks_chic : #["SHOP", "PINS", "NIO", "UBER","U",  "TWLO", "TSLA", "SNOW",  "MELI" ]:#list_stocks: CRSR_SCALA_stock_history_MONTH_3_AD.csv
         path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
         print(" START STOCK scoring: ", S,  " type: ", type_buy_sell.value, " \t path: ", path_csv_file_SCALA)
         columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
