@@ -24,7 +24,7 @@ path= "d_price/@VOLA_SCALA_stock_history_MONTH_3_sep" #"FAV_SCALA_stock_history_
 columns_aux_to_evaluate = ["Close", "per_Close", 'has_preMarket', 'Volume'] #necesario para Utils_buy_sell_points.check_buy_points_prediction
 
 df_result_all_isValid_to_buy = None
-NUM_MIN_MODLES  = 4
+NUM_MIN_MODLES  = 3
 NUM_MIN_MODLES_TF = 1
 
 
