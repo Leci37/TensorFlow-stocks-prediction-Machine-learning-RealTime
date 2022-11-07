@@ -63,21 +63,14 @@ def get_df_predictions_from_all_models(df_in_pure, model_name_type, df_result_A 
 
     X_test, df_result, test_features = __prepare_df_to_predict(df_in_pure)
 
-
-    model_h5_name = 'TF_' + model_name_type + '28.h5'
-    df_result['r_TF_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_h5_name)
-    if plot_cm:
-        p_tolerance = 1 * 2
-        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_TF_' + model_name_type,
-                                                          path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
-
-
-    model_64_h5_name_k = "TF_" + model_name_type + '64.h5'
-    df_result['r_TF64_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_64_h5_name_k)
-    if plot_cm:
-        p_tolerance = 1 * 2
-        Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_TF_' + model_name_type,
-                                                          path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
+    for type_mo in a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_ONE_DIMENSI.list():
+        model_h5_name_k = "TF_" + model_name_type + type_mo.value+'.h5'
+        print("\t\t "+model_h5_name_k )
+        df_result['r_TF_' + model_name_type + type_mo.value] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_h5_name_k)
+        if plot_cm:
+            p_tolerance = 1 * 2
+            Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_TF_' + model_name_type + type_mo.value ,
+                                                              path_cm=MODELS_EVAL_RESULT + "_TF_balance_CM_" + model_name_type + type_mo.value + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance, generate_CM_for_each_ticker = False)
 
 
     #[columns_selection_predict.remove(Y_TARGET)] el remove y la seleccion no parecen necesario pero de desea perservar el orden de las columnas al entrar al modelo
@@ -101,10 +94,9 @@ def get_df_predictions_from_all_models(df_in_pure, model_name_type, df_result_A 
     df_result['isValid_' + model_name_type] = Utils_buy_sell_points.check_buy_points_prediction(df_result.copy(), result_column_name='r_rf_' + model_name_type,
                                                                                                 path_cm=MODELS_EVAL_RESULT + "_RamdonFo_CM_" + model_name_type + "_" + str(p_tolerance) + ".png", SUM_RESULT_2_VALID=p_tolerance)
 
-    df_result_A[['isValid_' + model_name_type, 'r_TF_' + model_name_type, 'r_TF64_' + model_name_type,  'r_gbr_' + model_name_type,
-                   'r_xgb_' + model_name_type, 'r_rf_' + model_name_type]] = df_result[
-        ['isValid_' + model_name_type, 'r_TF_' + model_name_type, 'r_TF64_' + model_name_type, 'r_gbr_' + model_name_type,
-         'r_xgb_' + model_name_type, 'r_rf_' + model_name_type]]
+    list_TF_simple_models = ['r_TF_' + model_name_type + x for x in a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_ONE_DIMENSI.list_values()]
+    col_result = ['isValid_' + model_name_type]+ list_TF_simple_models +['r_gbr_' + model_name_type,'r_xgb_' + model_name_type, 'r_rf_' + model_name_type]
+    df_result_A[col_result] = df_result[col_result]
 
     return df_result, df_result_A
 
@@ -115,14 +107,12 @@ def get_df_predictions_from_all_models_by_Selection(df_in_pure, model_name_type,
 
     X_test, df_result, test_features = __prepare_df_to_predict(df_in_pure)
 
-
-    model_h5_name = 'TF_' + model_name_type + '28.h5'
-    if 'r_TF_' + model_name_type in list_good_models:
-        df_result['r_TF_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_h5_name)
-
-    model_64_h5_name_k = "TF_" + model_name_type + '64.h5'
-    if 'r_TF64_' + model_name_type in list_good_models:
-        df_result['r_TF64_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_64_h5_name_k)
+    if any( [co.startswith( 'r_TF_' + model_name_type )  for co in list_good_models] ) :
+        for type_mo in a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_ONE_DIMENSI.list():
+            if 'r_TF_' + model_name_type+ type_mo.value in list_good_models:
+                model_h5_name = "TF_" + model_name_type + type_mo.value+'.h5'
+                print(model_h5_name)
+                df_result['r_TF_' + model_name_type + type_mo.value] = Model_predictions_TF_sklearn_XGB.predict_TF_onBalance(test_features, MODEL_FOLDER_TF, model_h5_name)
 
     if 'r_gbr_' + model_name_type in list_good_models:
         df_result['r_gbr_' + model_name_type] = Model_predictions_TF_sklearn_XGB.predict_GradientBoostingRegressor(X_test, model_name_type)
