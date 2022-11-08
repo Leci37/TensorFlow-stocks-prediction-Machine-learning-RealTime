@@ -1,10 +1,7 @@
-import traceback
-
 import pandas as pd
 
-import Feature_selection_get_columns_json
-import Model_predictions_handle
-from Utils import Utils_model_predict, Utils_send_message
+import Model_predictions_handle_Nrows
+from Utils import Utils_send_message
 
 #https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
 from a_manage_stocks_dict import Op_buy_sell, DICT_COMPANYS
@@ -13,119 +10,10 @@ from LogRoot.Logging import Logger
 
 Y_TARGET = 'buy_sell_point'
 
-#TO CONFIGURE
-Columns =['Date', Y_TARGET, 'ticker']
-#TO CONFIGURE
-MODELS_EVAL_RESULT = "Models/all_results/"
-
-#model_folder_TF = "Models/TF_in_balance/"
-MODEL_FOLDER_TF = "Models/TF_balance/"
-path= "d_price/@VOLA_SCALA_stock_history_MONTH_3_sep" #"FAV_SCALA_stock_history_L_MONTH_3_sep.csv"#
-columns_aux_to_evaluate = ["Close", "per_Close", 'has_preMarket', 'Volume'] #necesario para Utils_buy_sell_points.check_buy_points_prediction
-
-df_result_all_isValid_to_buy = None
-NUM_MIN_MODLES  = 3
-NUM_MIN_MODLES_TF = 1
-
-
-
-def get_columns_to_download(stock_id):
-    columns_json_POS = Feature_selection_get_columns_json.JsonColumns(stock_id, Op_buy_sell.POS)
-    columns_json_NEG = Feature_selection_get_columns_json.JsonColumns(stock_id, Op_buy_sell.NEG)
-    custom_col_POS_NEG = set(columns_json_POS.get_ALL_Good_and_Low() + columns_json_NEG.get_ALL_Good_and_Low())
-    return list(custom_col_POS_NEG)
-
-
-def get_has_to_seelBuy_by_Predictions_models(df_tech, S, type_buy_sell, path_csv_result = None):
-    dict_score = Model_predictions_handle.get_dict_scoring_evaluation(S, type_buy_sell)
-    #existe list_good_params_down y list_good_params_up , la list_good_params_down contiene ambas
-    list_good_models =  dict_score['list_good_params_down']
-    list_good_models_TF = [col for col in list_good_models if col.startswith('r_TF')]
-
-    if type_buy_sell == Op_buy_sell.POS and ( len(list_good_models) <= NUM_MIN_MODLES or len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
-        Logger.logr.info("Los modelos POS presentes son menores de:"+  str(NUM_MIN_MODLES) + ", no se realiza prediccion STOCK: "+  S + " Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
-        return None
-    if type_buy_sell == Op_buy_sell.NEG and ( len(list_good_models) <= NUM_MIN_MODLES or len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
-        Logger.logr.info("Los modelos NEG presentes son menores de:"+  str(NUM_MIN_MODLES) + ", no se realiza prediccion STOCK: "+  S + "Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
-        return None
-
-    columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
-
-    df_b_s = None
-    for type_cols, funtion_cols in columns_json.get_Dict_JsonColumns().items():
-        model_name_type = S + "_" + type_buy_sell.value + type_cols
-        if any(model_name_type in co for co in list_good_models):
-
-            columns_selection_predict = ['Date', Y_TARGET] + funtion_cols + columns_aux_to_evaluate + ['ticker']
-            print("model_name_type: " + model_name_type + " Columns Selected:" + ', '.join(columns_selection_predict))
-            # try:
-            #     df_tech[columns_selection_predict ]
-            # except Exception as ex:
-            #     Logger.logr.warning(" Exception Stock: " + S + "  Exception: " + traceback.format_exc())
-
-            df_to_predict = Utils_model_predict.load_and_clean__buy_sell_atack(df_tech, columns_selection_predict, type_buy_sell, Y_TARGET)
-            df_ignore , df_b_s = Model_predictions_handle.get_df_predictions_from_all_models_by_Selection(df_to_predict, model_name_type, list_good_models, df_result_A=df_b_s)
-        else:
-            print("No hay en la lista list_good_params, modelos de clase columns_json, sufientemente optimos, se pasa al siguiente. Modeles serie: " + model_name_type)
-
-    # Model_creation_scoring.__get_df_Evaluation_from_all_models(df_A, S + "_" + type_detect + "_")
-    df_threshold = pd.read_csv("Models/Scoring/" + S + "_" + type_buy_sell.value + "_" + "_when_model_ok_threshold.csv",
-                               index_col=0,sep='\t')  # How to set in pandas the first column and row as index? index_col=0,
-
-    df_b_s = Model_predictions_handle.is_predict_buy_point_bt_scoring_csv(df_b_s, df_threshold, None)
-    df_b_s['Date'] = pd.to_datetime(df_b_s['Date'], unit='s').dt.strftime("%Y-%m-%d %H:%M:%S")
-    df_b_s.insert(loc=10, column="num_models", value=len(list_good_models))
-
-    if path_csv_result is not None:
-        print(path_csv_result )
-        df_b_s.round(4).to_csv(path_csv_result, sep='\t',index=None)
-
-    return df_b_s
-
-
-
-def get_RealTime_buy_seel_points(stock_id, opion_real_time, NUM_LAST_REGISTERS_PER_STOCK):
-
-    list_score_POS = Model_predictions_handle.get_dict_scoring_evaluation(stock_id, Op_buy_sell.POS)['list_good_params_down']
-    list_score_POS_TF = [col for col in list_score_POS if col.startswith('r_TF')]
-    list_score_NEG = Model_predictions_handle.get_dict_scoring_evaluation(stock_id, Op_buy_sell.NEG)['list_good_params_down']
-    list_score_NEG_TF = [col for col in list_score_NEG if col.startswith('r_TF')]
-    if ( len(list_score_NEG) <= NUM_MIN_MODLES and len(list_score_POS) <= NUM_MIN_MODLES ) \
-        or ( len(list_score_POS_TF) < NUM_MIN_MODLES_TF and len(list_score_NEG_TF) < NUM_MIN_MODLES_TF ):
-        Logger.logr.info("Los modelos POS-NEG presentes son menores de:"+  str(NUM_MIN_MODLES) + ", or las TF son menores de "+str(NUM_MIN_MODLES_TF)+" no se realiza prediccion STOCK: "+  stock_id  )
-        return None, None
-
-
-    custom_columns_POS_NEG = get_columns_to_download(stock_id)
-    df_HOLC_ign, df_tech = yhoo_history_stock.get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, stock_id,
-                                                                                             opion_real_time,
-                                                                                             generate_csv_a_stock=False,
-                                                                                             costum_columns=custom_columns_POS_NEG, add_min_max_values_to_scaler = True)
-    df_tech = df_tech[-NUM_LAST_REGISTERS_PER_STOCK:]
-    return get_df_comprar_vender_predictions(df_tech, stock_id)
-
-
-def get_df_comprar_vender_predictions(df_tech, stock_id):
-    type_buy_sell = Op_buy_sell.POS
-    #error ValueError: Found array with 0 sample(s) (shape=(0, 66)) while a minimum of 1 is required by StandardScaler.
-    df_compar = get_has_to_seelBuy_by_Predictions_models(df_tech, stock_id, type_buy_sell, path_csv_result="Models/LiveTime_results/lastweek_" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
-    # if df_compar is not None:
-    #     Model_predictions_handle.how_much_each_entry_point_earns(df_compar,stock_id,type_buy_sell )
-    print("df_compar : " + stock_id + "_" + type_buy_sell.value + "   Models/LiveTime_results/" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
-    type_buy_sell = Op_buy_sell.NEG
-    df_vender = get_has_to_seelBuy_by_Predictions_models(df_tech, stock_id, type_buy_sell, path_csv_result="Models/LiveTime_results/lastweek_" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
-    print("df_vender : " + stock_id + "_" + type_buy_sell.value + "   Models/LiveTime_results/" + stock_id + "_" + type_buy_sell.value + "_" + "_.csv")
-    # para evaluar en metodos
-    if df_compar is not None:
-        df_compar['Close'] = df_tech['Close']
-    if df_vender is not None:
-        df_vender['Close'] = df_tech['Close']
-    return df_compar, df_vender
-
 COL_GANAN = ["Date", "stock", "type_buy_sell","value_start", "message" ]
 df_registre = pd.DataFrame(columns=COL_GANAN)
 
-def resgister_predictions(S, df_b_s, type_b_s):
+def resgister_predictions(S, df_b_s, type_b_s, path_regis):
     global df_registre
     modles_evaluated = [col for col in df_b_s.columns if col.startswith('br_')]
     modles_evaluated_TF = [col for col in df_b_s.columns if col.startswith('br_TF')]
@@ -133,8 +21,8 @@ def resgister_predictions(S, df_b_s, type_b_s):
 
     #register data each time UNLAST
     for i in range(0,df_b_s.shape[0] -1):
-        Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[i]], modles_evaluated, type_b_s, path ="zTelegram_Registers_2022_10_21.csv")  #unlast row
-        #Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-1]], modles_evaluated, type_b_s, path = "zTelegram_Registers_2022_10_21.csv")  #last row
+        Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[i]], modles_evaluated, type_b_s, path = path_regis)  #unlast row
+
 
 
 
@@ -142,24 +30,28 @@ import logging
 numba_logger = logging.getLogger('numba').setLevel(logging.WARNING)
 mat_logger = logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
-
-
+#**DOCU**
+#5.0 make predictions for the last week Test        Optional
+# Optional
+# Run Model_predictions_Nrows.py
+# This run generates the log file d_result/prediction_results_N_rows.csv
+# Generate a sample file with predictions for the last week.
+# Check that the logs exist
 CSV_NAME = "@FOLO3"
 list_stocks = DICT_COMPANYS[CSV_NAME]
+PATH_EVAL_REGIS_BUY_SELL = "d_result/prediction_results_N_rows.csv"
 
-df_all_generate_history = pd.DataFrame()
 
+df_buy = pd.DataFrame()
+df_sell = pd.DataFrame()
+for S in list_stocks:
+    df_buy, df_sell = Model_predictions_handle_Nrows.get_RealTime_buy_seel_points(S, yhoo_history_stock.Option_Historical.MONTH_3_AD, NUM_LAST_REGISTERS_PER_STOCK=140)
+    if df_buy is not None:
+        resgister_predictions(S, df_buy, Op_buy_sell.POS, path_regis = PATH_EVAL_REGIS_BUY_SELL)
+    if df_sell is not None:
+        resgister_predictions(S, df_sell, Op_buy_sell.NEG, path_regis = PATH_EVAL_REGIS_BUY_SELL)
 
-# df_compar = pd.DataFrame()
-# df_vender = pd.DataFrame()
-# for S in list_stocks: # [ "UBER","U",  "TWLO", "TSLA", "SNOW", "SHOP", "PINS", "NIO", "MELI" ]:#list_stocks:
-#     df_compar, df_vender = get_RealTime_buy_seel_points(S,yhoo_history_stock.Option_Historical.MONTH_3_AD, NUM_LAST_REGISTERS_PER_STOCK=500 )
-#     if df_compar is not None:
-#         resgister_predictions(S, df_compar, Op_buy_sell.POS)
-#     if df_vender is not None:
-#         resgister_predictions(S, df_vender, Op_buy_sell.NEG)
-#
-#     print("End")
+    print("Ended "+S)
 
 
 
