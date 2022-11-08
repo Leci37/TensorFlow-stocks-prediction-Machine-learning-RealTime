@@ -15,15 +15,7 @@ Y_TARGET = 'buy_sell_point'
 
 #TO CONFIGURE
 Columns =['Date', Y_TARGET, 'ticker']
-#TO CONFIGURE
-
-#raw_df = raw_df[ Columns ]
-
 MODELS_EVAL_RESULT = "Models/all_results/"
-
-
-
-
 
 MODEL_FOLDER_TF = "Models/TF_balance/"
  #necesario para Utils_buy_sell_points.check_buy_points_prediction
@@ -129,21 +121,22 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         print(path)
 
     # return list_valid_params_down , scoring_sum
-
-
-
-
-
-CSV_NAME = "@CHIC"
-list_stocks_chic = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+#**DOCU**
+#4 Evaluate the quality of the predictive models
+# From the 36 models created for each OHLCV history of each action, only the best ones will be run in real time, in order to select and evaluate the best ones.
+# Run Model_creation_scoring.py
+#
+# In the Models/Scoring folder
+# AMD_yyy__groupby_buy_sell_point_000.json
+# AMD_yyy__when_model_ok_threshold.csv
+# Check that two have been generated for each action.
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
-#type_detect = a_manage_stocks_dict.Op_buy_sell.POS #for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
 df_final_list_stocks = pd.DataFrame()
 
 for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS]:
-    for S in  list_stocks +list_stocks_chic : #["SHOP", "PINS", "NIO", "UBER","U",  "TWLO", "TSLA", "SNOW",  "MELI" ]:#list_stocks: CRSR_SCALA_stock_history_MONTH_3_AD.csv
+    for S in  list_stocks :
         path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
         print(" START STOCK scoring: ", S,  " type: ", type_buy_sell.value, " \t path: ", path_csv_file_SCALA)
         columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
