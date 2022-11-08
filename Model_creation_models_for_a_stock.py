@@ -39,16 +39,29 @@ def train_model_with_custom_columns(name_model, columns_list, csv_file_SCALA, op
     print("\nRandomForestClassifier")
     Model_train_sklearn_XGB.train_RandomForestClassifier(X_train, X_test, y_train, y_test, SAV_surname)
 
-
-CSV_NAME = "@CHIC"
-list_stocks_chic = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
+#**DOCU**
+#3 train TensorFlow, XGB and Sklearn models
+# Train the models, for each action 36 different models are trained.
+# 15 minutes per action.
+# Run Model_creation_models_for_a_stock.py
+#
+# For each action the following files are generated:
+# Models/Sklearn_smote folder:
+# XGboost_AMD_yyy_xxx_.sav
+# RandomForest_AMD_yyy_xxx_.sav
+# XGboost_AMD_yyy_xxx_.sav
+# Models/TF_balance folder:
+# TF_AMD_yyy_xxx_zzz.h5
+# TF_AMD_yyy_xxx_zzz.h5_accuracy_71.08%__loss_0.59__epochs_10[160].csv
+# xxx can take value vgood16 good9 reg4 y low1
+# yyy can take value "pos" and "neg".
+# zzz can take value s28 s64 and s128
+# Check that all files have been generated for each action in the subfolders of /Models.
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
-
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
-# a_manage_stocks_dict.Op_buy_sell.POS
-# list_stocks = ['@ROLL']
-for S in   list_stocks +list_stocks_chic :  #list_stocks:
+
+for S in   list_stocks:
     path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
 
     for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
