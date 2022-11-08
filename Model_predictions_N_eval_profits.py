@@ -1,9 +1,9 @@
 import pandas as pd
 
+import Model_predictions_handle_Nrows
 from Utils import UtilsL, Utils_buy_sell_points
 
 import a_manage_stocks_dict
-from Model_predictions_Nrows import get_RealTime_buy_seel_points
 
 Y_TARGET = 'buy_sell_point'
 
@@ -77,7 +77,7 @@ list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 df_all_generate_history = pd.DataFrame()
-NUM_LAST_REGISTERS_PER_STOCK =135 #lastweekend , 135 la ultima semana
+NUM_LAST_REGISTERS_PER_STOCK =30 #lastweekend , 135 la ultima semana
 COLS_EVAL = ['Date', 'buy_sell_point', 'Close', 'has_preMarket', 'Volume','sum_r_88', 'sum_r_93', 'sum_r_95', 'have_to_oper', 'sum_r_TF',
  'num_models', 'have_to_oper_TF' , 'sell_value_POS', 'sell_value_NEG','profit_POS_units', 'profit_NEG_units']
 
@@ -91,7 +91,7 @@ df_eval_earnings = pd.DataFrame(columns=COL_GANAN)
 
 for S in list_stocks: # [ "UBER","U",  "TWLO", "TSLA", "SNOW", "SHOP", "PINS", "NIO", "MELI" ]:#list_stocks:
     try:
-        df_compar, df_vender = get_RealTime_buy_seel_points(S, opion, NUM_LAST_REGISTERS_PER_STOCK =NUM_LAST_REGISTERS_PER_STOCK)
+        df_compar, df_vender = Model_predictions_handle_Nrows.get_RealTime_buy_seel_points(S, opion, NUM_LAST_REGISTERS_PER_STOCK =NUM_LAST_REGISTERS_PER_STOCK)
     except Exception as e:
         df_compar = None
         df_vender = None
