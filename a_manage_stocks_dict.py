@@ -1,5 +1,9 @@
 from enum import Enum
 
+# **DOCU**
+# 0.3 In the file a_manage_stocks_dict.py all the configurations are stored, take a look and know where it is.
+# In it there is the dictionary DICT_COMPANYS
+# Which contains the IDs (google quotes with the ID: GOOG) of the companies to analyze can be customized and create class from the nasdaq tikers, by default will use the key @FOLO3 which will analyze these 39 companies.
 DICT_COMPANYS = {
     "@FAV":
         ["MELI", "TWLO", "RIVN", "SNOW", "UBER", "U" , "PYPL", "GTLB", "MDB", "TSLA", "DDOG"],
@@ -22,7 +26,7 @@ DICT_COMPANYS = {
         ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD", "ADSK", "AMZN", "BABA", "NFLX", "FFIV", "GOOG", "MSFT", "ABNB", "TSLA", "META"],
     "@FOLO2":
         ["DBX", "PTON", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
-    "@FOLO3": #"META", ERROR no buy points
+    "@FOLO3": #"META", ERROR no buy points "GOOG", "MSFT", "TSLA",
         ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
 #"PTON", error callearly no se xq
          #[  "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
@@ -91,7 +95,7 @@ class MODEL_TF_DENSE_TYPE_ONE_DIMENSI(Enum):
     SIMP_64 = "s64"
     SIMP_128 =  "s128"
 
-#In case of does not have a value form webull.com , the tool to obtains news code: Test/Volume_WeBull_get_tikcers.py
+#In case of does not have a value form webull.com , the tool to obtains news code: Utils/Volume_WeBull_get_tikcers.py
 DICT_WEBULL_ID = {
     #@FOLO3
     "UPST" : 950177837,
