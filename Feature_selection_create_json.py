@@ -11,7 +11,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2, f_regression
 from numpy import array
 
-from Utils import Utils_buy_sell_points, Utils_col_sele
+from Utils import Utils_buy_sell_points, Utils_col_sele, UtilsL
 import a_manage_stocks_dict
 
 Y_TARGET = 'buy_sell_point'
@@ -123,25 +123,27 @@ def generate_json_best_columns(cleaned_df, Op_buy_sell : a_manage_stocks_dict.Op
     list_all_columns = list(filter(lambda a: a != "ichi_chikou_span", list_all_columns))
     get_json_feature_selection(list_all_columns,path )
 
-
-
+#**DOCU**
+# #2 Filtering indicators
+# It is necessary to separate the technical indicators that are related to buy or sell points and those that are noise. 20 seconds per action
+# Run Model_creation_scoring.py
+# Three files are generated for each action in the folder: plots_relations , relations for buy "pos", relations for sell "neg" and relations for both "both".
+# plots_relations/best_selection_AMD_both.json
+# These files contain a ranking of which technical indicator is best for each stock.
+# Check that three .json have been generated for each stock.
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
-a_manage_stocks_dict.Op_buy_sell.POS
-# list_stocks = ['@ROLL']
-for l in  [ CSV_NAME ] + list_stocks:
+
+for l in   list_stocks:
     CSV_NAME = l
-
-
     NUM_BEST_PARAMS_LIST = [8, 12, 16, 32, 68]
 
     df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_" + str(opion.name) + ".csv",index_col=False, sep='\t')
-    #df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_MONTH_3_sep.csv", index_col=False, sep='\t')
+
     df = df.drop(columns=Utils_col_sele.DROPS_COLUMNS + ['ticker'])
     cleaned_df = df.copy()
     cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
-
 
     for option_Cat_op in a_manage_stocks_dict.Op_buy_sell.list(): # both pos neg
         path = "plots_relations/best_selection_" + CSV_NAME + "_" + option_Cat_op.value + ".json"
