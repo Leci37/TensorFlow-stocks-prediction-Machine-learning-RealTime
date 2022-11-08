@@ -45,8 +45,8 @@ def __prepare_df_to_predict(df_in_pure):
         print("Multiples valores para @ticker, antes de predecir ")
         df, num_times_is_repeted = remove_column_name_repeted_last_one(COLS_TO_EVAL_R, df_in_pure)
         if num_times_is_repeted != 1:
-            Logger.logr.warning("Las columnas de evalución no estan presentes o están más de una vez. " + " Numero de veces: "+ str(num_times_is_repeted) + " ".join(COLS_TO_EVAL_R) )
-            raise "Las columnas de evalución no estan presentes o están más de una vez. " + " Numero de veces: "+ str(num_times_is_repeted) + " ".join(COLS_TO_EVAL_R)
+            Logger.logr.warning("Evaluation columns are not present or are present more than once. Number of times:   "+ str(num_times_is_repeted) + " ".join(COLS_TO_EVAL_R) )
+            raise "Evaluation columns are not present or are present more than once. Number of times:   "+ str(num_times_is_repeted) + " ".join(COLS_TO_EVAL_R)
 
 
     test_features, test_labels = Utils_model_predict.scaler_Raw_TF_onbalance(df.copy(), Y_TARGET)
@@ -136,8 +136,8 @@ def get_dict_scoring_evaluation(stockId , type_buy_sell : a_manage_stocks_dict.O
     prefixed = [filename for filename in os.listdir(folder) if
                 filename.startswith(stockId + "_" + type_buy_sell.value) and filename.endswith(extension) and (contains in filename)]
     if len(prefixed) != 1:
-        Logger.logr.error("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion " + "".join(prefixed))
-        raise ValueError("No se encuntra UN solo (0 o más de 2)  fichero con la configuracion " + "".join(prefixed))
+        Logger.logr.error("Not found ONE (0 or more than 2) file with the following settings " + "".join(prefixed))
+        raise ValueError("Not found ONE (0 or more than 2) file with the following settings " + "".join(prefixed))
 
     path_json = folder + prefixed[0]
     Logger.logr.info(path_json)
