@@ -24,12 +24,21 @@ def generate_png_correlation(df):
         print("d_price/correlations/" + name + "_".join(a) + ".png")
 
 
+#**DOCU**
+#1.1 Data collection
+# 1.1 The OHLCV history of the stock must be generated, as well as the history of technical patterns. It takes +-1 minute per stock to calculate all technical patterns.
+# Execute yhoo_generate_big_all_csv.py
+# Once executed, the d_price folder will be filled with OHLCV historical .csv of stock prices.
+# Three types of files are generated ( Example of type name for stock: AMD):
+# AMD_SCALA_stock_history_MONTH_3_AD.csv with all technical patterns calculated and applied a fit scaler(-100, 100), i.e. stock prices are scaled (size: 30-90mb).
+# d_price/min_max/AMD_min_max_stock_MONTH_3_AD.csv with the scaling keys (size: 2-7kb)
+# AMD_stock_history_MONTH_3_AD.csv the pure history of the OHLCVs (size: 2-7mb)
+# Note: MONTH_3_AD means 3 months of API andfinance plus the history collected from alphavantage. Point 1.0
+# Check that one has been generated for each action.
 
-CSV_NAME = "@CHIC"
-list_stocks_chic = DICT_COMPANYS[CSV_NAME]
 CSV_NAME = "@FOLO3"
 list_stocks = DICT_COMPANYS[CSV_NAME]
-list_stocks = list_stocks + list_stocks_chic
+list_stocks = list_stocks
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 
 df_download = yhoo_history_stock.get_favs_SCALA_csv_stocks_history_Download_list(list_stocks, CSV_NAME, opion)
