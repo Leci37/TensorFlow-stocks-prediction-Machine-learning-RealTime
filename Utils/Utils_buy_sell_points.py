@@ -61,8 +61,8 @@ def rolling_get_sell_price_NEG(rolling_col_slection):
 def select_work_buy_or_sell_point(cleaned_df, opcion : a_manage_stocks_dict.Op_buy_sell, Y_TARGET = 'buy_sell_point'):
 
     if type(opcion) is not a_manage_stocks_dict.Op_buy_sell :
-        Logger.logr.error("la variable op_buy_sell , no es de tipo .Op_buy_sell o no tiene valor valido (solo POS y NEG son validos)")
-        raise ValueError("la variable op_buy_sell , no es de tipo .Op_buy_sell o no tiene valor valido (solo POS y NEG son validos)")
+        Logger.logr.error("the variable op_buy_sell is not of type .op_buy_sell or has no valid value (only POS and NEG are valid).")
+        raise ValueError("the variable op_buy_sell is not of type .op_buy_sell or has no valid value (only POS and NEG are valid).")
 
 
     cleaned_df[Y_TARGET].astype(int).replace([101, -101], [100, -100], inplace=True)
