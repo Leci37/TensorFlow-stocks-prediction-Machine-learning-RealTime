@@ -1,19 +1,13 @@
 # Done! Congratulations on your new bot. You will find it at t.me/Whale_Hunter_Alertbot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
 #
 # Use this token to access the HTTP API:
-# 5452553430:AAH8ARcZlQZFZHxckJuY0eWnUK08IKo6QnY
 # Keep your token secure and store it safely, it can be used by anyone to control your bot.
 #
 # For a description of the Bot API, see this page: https://core.telegram.org/bots/api
 
 #https://medium.com/codex/using-python-to-send-telegram-messages-in-3-simple-steps-419a8b5e5e2
 import requests
-
-
-TOKEN = "5452553430:AAH8ARcZlQZFZHxckJuY0eWnUK08IKo6QnY"
-url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
-
-
+from ztelegram_send_message_handle import TOKEN
 import urllib.request as request
 from urllib.error import HTTPError
 from http.client import HTTPResponse
@@ -65,7 +59,7 @@ class TelegramEcho:
                 # now sending the echo message
                 user_id = incoming["message"]["chat"]["id"]
                 user_name = incoming["message"]["from"].get("first_name", "") + " " +incoming["message"]["from"].get("last_name", "")
-                message = "You \"" +user_name +"\" send me: \n\""+ incoming["message"]["text"] + "\""
+                message = "You \"" +user_name +"\" send me: \n\""+ incoming["message"]["text"] + "\""+"\"\n ChatId: \""+ str(user_id) + "\""
                 outgoing = self.__handle_outgoing(
                     user_id ,
                     message  )
@@ -144,11 +138,27 @@ class TelegramEcho:
         print("\tText: %s" % outgoing["text"])
         print("\tFrom: %s" % outgoing["from"]["first_name"])
         print("\tMessage ID: %d" % outgoing["message_id"])
+        print("\tCHAT ID: %d" % outgoing['chat']['id'])
         print("-" *  70) #os.get_terminal_size().columns)
         pass
 
     pass
 
+#**DOCU**
+# 5.2 Configure chatID and tokes in Telegram
+# Once the token has been obtained, the chatId of the users and the administrator must be obtained.
+# The users only receive purchase and startup alerts, while the administrator receives the alerts of the users as well as possible problems.
+# To get the chatId of each user run ztelegram_send_message_UptateUser.py and then write any message to the bot, the chadID appears both in the execution console and to the user.
+# [>>> BOT] Message Send on 2022-11-08 22:30:31
+# 	Text: You "User nickname " send me:
+# "Hello world""
+#  ChatId: "5058733760"
+# 	From: Bot name
+# 	Message ID: 915
+# 	CHAT ID: 500000760
+# -----------------------------------------------
+# Pick up CHAT ID: 500000760
+# With the chatId of the desired users, add them to the list LIST_PEOPLE_IDS_CHAT
 
 if __name__ == "__main__":
     tg = TelegramEcho(TOKEN)
