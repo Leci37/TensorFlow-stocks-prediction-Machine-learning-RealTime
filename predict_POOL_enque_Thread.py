@@ -1,5 +1,3 @@
-# SuperFastPython.com
-# example of using the queue
 from threading import Thread
 import threading
 from random import randint
@@ -8,15 +6,16 @@ import requests
 import traceback
 from sklearn.preprocessing import MinMaxScaler
 
-import Model_predictions_Nrows
+import Model_predictions_handle_Nrows
+import ztelegram_send_message
 from LogRoot.Logging import Logger
 from Utils import Utils_col_sele, UtilsL
 import yhoo_history_stock
-from Model_predictions_Nrows import get_columns_to_download
 from Utils.Utils_QueueMap import QueueMap
 from a_manage_stocks_dict import Op_buy_sell, Option_Historical, DICT_WEBULL_ID, DICT_COMPANYS
+from predict_POOL_load_stocks_names import get_list_models_to_use
 from talib_technical_class_object import TechData
-from yhoo_POOL_stocks import get_list_models_to_use
+
 import pandas as pd
 import numpy
 from datetime import datetime
@@ -67,7 +66,7 @@ def enque_if_has_realtime_volume_yhooApi(df_15min, list_pro, queue):
 
 startswith_str_in_colum='NQ_'
 def get_tech_data_nasq(S, df_S, df_nasq):
-    custom_columns_POS_NEG = get_columns_to_download(S)
+    custom_columns_POS_NEG = Model_predictions_handle_Nrows.get_columns_to_download(S)
     df_his = TechData(df_S, custom_columns_POS_NEG).get_ALL_tech_data()
     df_his = pd.merge(df_his, df_nasq, how='left')
     cols_NQ = [col for col in df_his.columns if col.startswith(startswith_str_in_colum)]
@@ -147,7 +146,7 @@ def scaler_and_send_predit(S, df_S, df_nasq):
     df_S = get_tech_data_nasq(S, df_S, df_nasq)
     df_S = df_S[-NUM_LAST_REGISTERS_PER_STOCK:]
     df_tech = add_min_max_Scaler(df_S, S)
-    df_compar, df_vender = Model_predictions_Nrows.get_df_comprar_vender_predictions(df_tech, S)
+    df_compar, df_vender = Model_predictions_handle_Nrows.get_df_comprar_vender_predictions(df_tech, S)
     if df_compar is not None:
         send_alert(S, df_compar, Op_buy_sell.POS)
     if df_vender is not None:
@@ -196,10 +195,12 @@ def producer():
                 time.sleep( 60 * 2.5 )
                 break
             else:
-                Logger.logr.info(" Sleep(60) Quedan Valores en la lista de encolar Valores:  "+ " ".join(list_pro))
+                Logger.logr.info(" Sleep(60) There are still values left in the Values queue list:  "+ " ".join(list_pro))
                 time.sleep(20)
 
-        Logger.logr.info(' Producer: Running End '+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+            if  "30:00" in  datetime.today().strftime('%Y-%m-%d %H:%M:%S') or "00:00" in  datetime.today().strftime('%Y-%m-%d %H:%M:%S'):
+                ztelegram_send_message.send_mesage_all_people("<pre> RUNING it is alive: " + datetime.today().strftime('%Y-%m-%d %H:%M:%S') + "</pre>")
+        Logger.logr.info(' Producer: Running End ' + datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
     Logger.logr.info(' Producer: Done')
 
 
@@ -215,7 +216,7 @@ def consumer(int_thread):
     # consume work
     while True:
         df_nasq = yhoo_history_stock.get_NASDAQ_data(exter_id_NQ = "NQ=F", interval='15m' , opion=Option_Historical.DAY_6, remove_str_in_colum = "=F")
-        Logger.logr.debug("  ciclo iniciado   Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+        Logger.logr.debug("  cycle started   Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
         # list_recorrer = list_pro.copy()
         # if int_thread == 2:
         #     list_recorrer = list_pro.copy()[-1]
@@ -226,23 +227,34 @@ def consumer(int_thread):
                 try:
                     scaler_and_send_predit(S, df_S, df_nasq)
                 except Exception as ex:
-                    Logger.logr.warning(" Exception: " + traceback.format_exc())
-                    send_exception(ex, "[CON] [" + str(int_thread) * 4 + "]Exception Stock: " + S + "\n" + traceback.format_exc())
+                    if 'not in index' in str(ex) or 'No objects to concatenate' in str(ex)or 'inputs are all ' in str(ex): #No objects to concatenate
+                        #Todo manage this exceptions
+                        # raw_df[columns_selection] las columns_selection no han sido calculadas en el df_tech , o han desaparecido
+                        Logger.logr.warning(" Exception raw_df = raw_df[columns_selection] the columns_selection have not been calculated in the df_tech , or have disappeared  " + str(ex))
+                    else:
+                        Logger.logr.warning(" Exception: " + traceback.format_exc())
+                        send_exception(ex, "[CON] [" + str(int_thread) * 4 + "]Exception Stock: " + S + "\n <pre>" + traceback.format_exc()+"</pre>")
 
             # print("[CON] end " + S)
 
-        Logger.logr.info("  ciclo finalizado " + S+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+        Logger.logr.info(" completed cycle    Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S') + " stoks: "+ " ".join(list_pro))
         time.sleep(int_thread *15)
     Logger.logr.info(" Consumer: Done"+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
 
 
-
-
+# #**DOCU**
+# 5.3 Sending real-time alerts Telegram
+# The criteria to send alert or not , is defined in the method ztelegram_send_message.will_send_alert() .If more than half of models have a score greater than 93% or TF models have a score greater than 93%, alert is sent to the consuming users.
+# Run predict_POOL_inque_Thread.py
+# This class has 2 types of threads
+# Producer , constantly asks for OHLCV data, once it is obtained, it enters it in a queue.
+# Consumer (2 threads run simultaneously) they get the OHLCV data from the queue, calculate the technical parameters, make the prediction of the models, register them in zTelegram_Registers.csv, and if they meet the requirements they are sent by telegram.
 
 # create the shared queue
 queue = QueueMap()
 # start the producer
+ztelegram_send_message.send_mesage_all_people("<pre> START: "+datetime.today().strftime('%Y-%m-%d %H:%M:%S') +" </pre>\nStocks actions to be monitored: \n"+" ".join(list_stocks)+" ")
 producer = Thread(target=producer, args=(), name='PROD')
 producer.start()
 time.sleep(2)
