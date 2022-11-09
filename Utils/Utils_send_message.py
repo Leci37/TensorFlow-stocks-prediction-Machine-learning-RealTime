@@ -1,4 +1,5 @@
 import pandas as pd
+import os.path
 
 from Utils import  UtilsL
 import a_manage_stocks_dict
@@ -71,7 +72,12 @@ def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s 
     s88, s93, s95, stf, names_models_r = get_fraciones_afirmativos_results(S, dict_predict, modles_evaluated, type_b_s)
     df_res = pd.DataFrame([[dict_predict['Date'], S, type_b_s.name, "{:.1f}".format(dict_predict['Close']),"{:.2f}".format(dict_predict['Volume']), s88, s93, s95, stf, names_models_r]],
                           columns=['Date', 'Stock', 'buy_sell','Close', 'Volume','88%', '93%', '95%', 'TF%', "Models_names"])
-    df_res.to_csv(path, sep="\t", index=None, mode='a', header=False)
+    if os.path.isfile(path):
+        df_res.to_csv(path, sep="\t", index=None, mode='a', header=False)
+    else:
+        df_res.to_csv(path, sep="\t", index=None)
+        print("Created : " + path)
+
 
 
 
