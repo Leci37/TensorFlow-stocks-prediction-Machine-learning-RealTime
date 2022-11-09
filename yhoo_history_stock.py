@@ -167,7 +167,7 @@ def __select_dowload_time_config(interval, opion, prepost, stockId):
                     paths_files = [filename for filename in files_on_folder if filename.startswith(k + "_") and filename.endswith(".csv")]
                     list_dict_comp = list_dict_comp + paths_files
 
-        print("MONTH_3_ADD_LO Se procede a buscar en el historico de acciones Ficheros: " + "".join(list_dict_comp))
+        print("MONTH_3_ADD_LO The action history is searched for Files: " + "".join(list_dict_comp))
         for patH_raw in list_dict_comp:
             df_path_raw = pd.read_csv("d_price/RAW/"+patH_raw,index_col=False, sep='\t')
             if 'ticker' in df_path_raw.columns: #tiene columna ticker
