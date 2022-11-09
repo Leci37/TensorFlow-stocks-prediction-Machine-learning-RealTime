@@ -15,7 +15,6 @@ from datetime import datetime
 from telegram.constants import ParseMode
 
 TOKEN = "00000000xxxxxxx"
-TOKEN = "5452553430:AAH8ARcZlQZFZHxckJuY0eWnUK08IKo6QnY"
 URL_TELE = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 #**DOCU**
 # 5.2 Configure chatID and tokes in Telegram
@@ -38,7 +37,6 @@ chat_idUser1 = "563000000"
 chat_idUser2 = "207000000"
 chat_idUser3= "495000000"
 LIST_PEOPLE_IDS_CHAT = [chat_idUser1, chat_idUser2, chat_idUser2]
-
 
 
 if TOKEN == "00000000xxxxxxx":
