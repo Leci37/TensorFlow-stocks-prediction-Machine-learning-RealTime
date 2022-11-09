@@ -31,12 +31,12 @@ numba_logger = logging.getLogger('numba').setLevel(logging.WARNING)
 mat_logger = logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 #**DOCU**
-#5.0 make predictions for the last week Test        Optional
-# Optional
+# 5.0 make predictions for the last week Optional Test
 # Run Model_predictions_Nrows.py
 # This run generates the log file d_result/prediction_results_N_rows.csv
-# Generate a sample file with predictions for the last week.
+# It generates a sample file with predictions for the last week, data obtained with yfinance.
 # Check that the logs exist
+
 CSV_NAME = "@FOLO3"
 list_stocks = DICT_COMPANYS[CSV_NAME]
 PATH_EVAL_REGIS_BUY_SELL = "d_result/prediction_results_N_rows.csv"
