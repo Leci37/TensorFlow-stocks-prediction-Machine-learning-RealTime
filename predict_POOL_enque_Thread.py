@@ -1,6 +1,7 @@
 from threading import Thread
 import threading
 from random import randint
+import os.path
 
 import requests
 import traceback
@@ -24,7 +25,7 @@ import yfinance as yf
 
 import time
 
-from ztelegram_send_message import send_alert, send_exception
+from ztelegram_send_message import send_alert_and_register, send_exception
 
 list_models_pos_neg = get_list_models_to_use()
 list_pos = [x.replace("_"+Op_buy_sell.POS.name, '') for x in list_models_pos_neg.keys() if x.endswith("_" + Op_buy_sell.POS.name)]
@@ -78,7 +79,10 @@ def get_tech_data_nasq(S, df_S, df_nasq):
     return df_his
 
 def add_min_max_Scaler( df_S, S):
-    df_min_max = pd.read_csv("d_price/min_max/" + S + "_min_max_stock_" + str(Option_Historical.MONTH_3_AD.name) + ".csv", index_col=0, sep='\t')
+    if os.path.exists("d_price/min_max/" + S + "_min_max_stock_" + str(Option_Historical.MONTH_3.name) + ".csv"):
+        df_min_max = pd.read_csv("d_price/min_max/" + S + "_min_max_stock_" + str(Option_Historical.MONTH_3.name) + ".csv", index_col=0, sep='\t')
+    else:
+        df_min_max = pd.read_csv("d_price/min_max/" + S + "_min_max_stock_" + str(Option_Historical.MONTH_3_AD.name) + ".csv", index_col=0,sep='\t')
     df_min_max = df_min_max[df_S.columns]
     df_S = pd.concat([df_min_max, df_S], ignore_index=True)
 
@@ -148,9 +152,9 @@ def scaler_and_send_predit(S, df_S, df_nasq):
     df_tech = add_min_max_Scaler(df_S, S)
     df_compar, df_vender = Model_predictions_handle_Nrows.get_df_comprar_vender_predictions(df_tech, S)
     if df_compar is not None:
-        send_alert(S, df_compar, Op_buy_sell.POS)
+        send_alert_and_register(S, df_compar, Op_buy_sell.POS)
     if df_vender is not None:
-        send_alert(S, df_vender, Op_buy_sell.NEG)
+        send_alert_and_register(S, df_vender, Op_buy_sell.NEG)
 
 # timeout variable can be omitted, if you use specific value in the while condition
 TIME_OUT_PRODUCER = 5 * 60   # [seconds]
@@ -233,7 +237,7 @@ def consumer(int_thread):
                         Logger.logr.warning(" Exception raw_df = raw_df[columns_selection] the columns_selection have not been calculated in the df_tech , or have disappeared  " + str(ex))
                     else:
                         Logger.logr.warning(" Exception: " + traceback.format_exc())
-                        send_exception(ex, "[CON] [" + str(int_thread) * 4 + "]Exception Stock: " + S + "\n <pre>" + traceback.format_exc()+"</pre>")
+                        #send_exception(ex, "[CON] [" + str(int_thread) * 4 + "]Exception Stock: " + S + "\n <pre>" + traceback.format_exc()+"</pre>")
 
             # print("[CON] end " + S)
 
@@ -249,7 +253,7 @@ def consumer(int_thread):
 # Run predict_POOL_inque_Thread.py
 # This class has 2 types of threads
 # Producer , constantly asks for OHLCV data, once it is obtained, it enters it in a queue.
-# Consumer (2 threads run simultaneously) they get the OHLCV data from the queue, calculate the technical parameters, make the prediction of the models, register them in zTelegram_Registers.csv, and if they meet the requirements they are sent by telegram.
+# Consumer (2 threads run simultaneously) they get the OHLCV data from the queue, calculate the technical parameters, make the prediction of the models, register them in a_manage_stocks_dict.PATH_REGISTER_RESULT_REAL_TIME, and if they meet the requirements they are sent by telegram.
 
 # create the shared queue
 queue = QueueMap()
