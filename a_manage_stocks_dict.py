@@ -27,7 +27,7 @@ DICT_COMPANYS = {
     "@FOLO2":
         ["DBX", "PTON", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
     "@FOLO3": #"META", ERROR no buy points "GOOG", "MSFT", "TSLA",
-        ["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
+        [ "UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
 #"PTON", error callearly no se xq
          #[  "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
     "@CHIC":
@@ -35,6 +35,8 @@ DICT_COMPANYS = {
     # "@CHIC3":
     #     DICT_COMPANYS["@FOLO3"]+ DICT_COMPANYS["@CHIC3"]
     }
+
+PATH_REGISTER_RESULT_REAL_TIME = "d_result/prediction_real_time.csv"
 
 class MODEL_TYPE_COLM(Enum):
     VGOOD = "_vgood16_"
