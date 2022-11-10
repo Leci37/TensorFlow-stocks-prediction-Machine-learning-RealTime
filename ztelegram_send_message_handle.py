@@ -11,8 +11,11 @@
 import requests
 import pandas as pd
 from datetime import datetime
+from LogRoot.Logging import Logger
 
 from telegram.constants import ParseMode
+
+from a_manage_stocks_dict import PATH_REGISTER_RESULT_REAL_TIME
 
 TOKEN = "00000000xxxxxxx"
 URL_TELE = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
@@ -39,23 +42,32 @@ chat_idUser3= "495000000"
 LIST_PEOPLE_IDS_CHAT = [chat_idUser1, chat_idUser2, chat_idUser2]
 
 
-if TOKEN == "00000000xxxxxxx":
-    raise ValueError("There is no value for the telegram TOKEN, telegram is required to telegram one, see tutorial: https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token")
 
-
+def is_token_telegram_configurated():
+    if TOKEN == "00000000xxxxxxx":
+        Logger.logr.info("Results will be recorded in real time, but no alert will be sent on telegram. File: "+ PATH_REGISTER_RESULT_REAL_TIME)
+        Logger.logr.warning("There is no value for the telegram TOKEN, telegram is required to telegram one, see tutorial: https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token")
+        return False
+    return  True
 
 def send_exception(ex, extra_mes = ""):
     message_aler = extra_mes + "   ** Exception **" + str(ex)
-    print(message_aler)
+    Logger.logr.warning(message_aler)
+    if not is_token_telegram_configurated():
+        return
+
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_idADMIN}&text={message_aler}"
-    print("Enviar alerta: " + message_aler)
-    print(requests.get(url).json())
+    Logger.logr.info("Send alert : " + message_aler)
+    Logger.logr.debug(requests.get(url).json())
 
 
 def send_mesage_all_people(message_aler, parse_type = ParseMode.HTML):
     botsUrl = f"https://api.telegram.org/bot{TOKEN}"  # + "/sendMessage?chat_id={}&text={}".format(chat_idLUISL, message_aler, parse_mode=ParseMode.HTML)
     # url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(chat_idLUISL, message_aler,parse_mode=ParseMode.MARKDOWN_V2)
-    print("Enviar alerta todo el mundo: " + message_aler)
+    Logger.logr.info("send alert everybody: " + message_aler)
+    if not is_token_telegram_configurated():
+        return
+
     for people_id in LIST_PEOPLE_IDS_CHAT:
         url = botsUrl + "/sendMessage?chat_id={}&text={}&parse_mode={parse_mode}".format(people_id, message_aler,parse_mode=parse_type)
-        print(requests.get(url).json())
+        Logger.logr.debug(requests.get(url).json())
