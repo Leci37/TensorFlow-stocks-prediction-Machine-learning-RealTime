@@ -76,37 +76,13 @@ def select_work_buy_or_sell_point(cleaned_df, opcion : a_manage_stocks_dict.Op_b
 
     return cleaned_df
 
-
-def _OLD_get_buy_sell_points_Roll_OLD(df_stock, delete_aux_rows = True):
-    df_stock['sell_value_POS'] = df_stock.Close.shift(-12).rolling( min_periods = 1, window=12).apply(rolling_get_sell_price_POS)
-    #df_stock['PROFIT_POS'] = (df_stock['sell_value_POS'] + 100) - (df_stock['Close'] + 100)
-    df_stock['per_PROFIT_POS'] = (df_stock['sell_value_POS'] * 100) / df_stock['Close'] - 100
-
-    df_stock['sell_value_NEG'] = df_stock.Close.shift(-12).rolling(min_periods=1, window=12).apply(rolling_get_sell_price_NEG)
-    #df_stock['PROFIT_NEG'] = (df_stock['sell_value_NEG'] + 100) - (df_stock['Close'] + 100)
-    df_stock['per_PROFIT_NEG'] = (df_stock['sell_value_NEG'] * 100) / df_stock['Close'] - 100
-
-    df_threshold = df_stock['per_PROFIT_NEG'].describe(percentiles=[0.02, 0.06]).round(4)
-    Threshold_MIN_2 = df_threshold["2%"]
-    Threshold_MIN_5 = df_threshold["6%"]
-    df_threshold = df_stock['per_PROFIT_POS'].describe(percentiles=[ 0.94, 0.98]).round(4)
-    Threshold_MAX_95 = df_threshold["94%"]
-    Threshold_MAX_98 = df_threshold["98%"]
-    Logger.logr.info("Parameters of acquisition \"buy_sell_points\" for this stock is set to \t2%: "+ str(Threshold_MIN_2) + " \t5%: "+ str(Threshold_MIN_5) +" \t95%: "+ str(Threshold_MAX_95) +" \t98%: "+ str(Threshold_MAX_98) )
-
-    if delete_aux_rows:
-        df_stock.insert(loc=1, column=Y_TARGET, value=0)
-        df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_5, Y_TARGET] = -100
-        df_stock.loc[df_stock['per_PROFIT_NEG'] < Threshold_MIN_2, Y_TARGET] = -101
-        df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_95, Y_TARGET] = 100
-        df_stock.loc[df_stock['per_PROFIT_POS'] > Threshold_MAX_98, Y_TARGET] = 101
-
-
-        df_stock = df_stock.drop(columns=['sell_value_POS',  'sell_value_NEG','per_PROFIT_NEG', 'per_PROFIT_POS'], errors='ignore')
-    #df_stock[df_stock['Volume'] != 0].groupby(Y_TARGET).count()
-
-    return df_stock
-
+# Review the way of obtaining ground true
+# Before training the models the intervals (of 15min) are classified in buy point 100 or 101, sell point -100 or .-101 or no trade point 0,
+# these values are introduced in the column Y_TARGET = 'buy_sell_point' through the method Utils.Utils_buy_sell_points.get_buy_sell_points_Roll()
+# The variation is calculated with respect to the following 12 windows (15min * 12 = 3 hours), and from there the 8% points of highest rise and
+# highest fall are obtained, these points are assigned values different from 0.
+# To obtain the Y_TARGET there are 2 methods that are responsible for the strategy to follow once you buy and sell, in case of loss you will opt for Stop Loss.
+# rolling_get_sell_price_POS() and rolling_get_sell_price_NEG()
 def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
     df_stock['sell_value_POS'] = df_stock.Close.shift(-12).rolling( min_periods = 1, window=12).apply(rolling_get_sell_price_POS)
     #df_stock['PROFIT_POS'] = (df_stock['sell_value_POS'] + 100) - (df_stock['Close'] + 100)
@@ -141,6 +117,7 @@ def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
 
     return df_stock
 
+#obsolete method
 def get_buy_sell_points_Arcos(df_stock):
     LEN_DF = len(df_stock)
     pd.options.mode.chained_assignment = None
