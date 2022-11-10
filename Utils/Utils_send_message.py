@@ -68,7 +68,7 @@ def get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s):
     stf = str(dict_pred['sum_r_TF']) + "/" + str(int(count_TF_models))
     return  s88, s93, s95, stf , names_models_r
 
-def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s , path = "zTelegram_Registers.csv"):
+def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s , path = a_manage_stocks_dict.PATH_REGISTER_RESULT_REAL_TIME):
     s88, s93, s95, stf, names_models_r = get_fraciones_afirmativos_results(S, dict_predict, modles_evaluated, type_b_s)
     df_res = pd.DataFrame([[dict_predict['Date'], S, type_b_s.name, "{:.1f}".format(dict_predict['Close']),"{:.2f}".format(dict_predict['Volume']), s88, s93, s95, stf, names_models_r]],
                           columns=['Date', 'Stock', 'buy_sell','Close', 'Volume','88%', '93%', '95%', 'TF%', "Models_names"])

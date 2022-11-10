@@ -5,7 +5,7 @@ from datetime import datetime
 
 from telegram.constants import ParseMode
 
-
+import a_manage_stocks_dict
 import yhoo_history_stock
 from LogRoot.Logging import Logger
 from Utils import Utils_send_message
@@ -16,13 +16,6 @@ message = "hello from your telegram bot"
 
 
 
-feedback = requests.get(URL_TELE).json()
-for dict_userId in  feedback['result']:
-    print(dict_userId)
-
-
-
-print(feedback)
 # url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
 # print(requests.get(url).json())  # this sends the message
 all_cols = ['Date' 'buy_sell_point' 'Close' 'has_preMarket' 'Volume' 'sum_r_88', 'sum_r_93' 'have_to_oper' 'sum_r_TF' 'have_to_oper_TF' 'num_models']
@@ -30,8 +23,8 @@ prety_cols = ['Date' , 'sum_r_88', 'sum_r_93', 'have_to_oper', 'sum_r_TF', 'have
 BOT = None
 
 
-NUM_MIN_MODLES  = 3
-NUM_MIN_MODLES_TF = 1
+NUM_MIN_MODLES  = 4
+NUM_MIN_MODLES_TF = 2
 
 def __get_runtime_value_date_by_yhoo(S):
     date_detect, value_detect = "n", "n"
@@ -83,16 +76,16 @@ def will_send_alert(df_b_s, stotck_id_pos ):
 COL_GANAN = ["Date", "stock", "type_buy_sell","value_start", "message" ]
 df_registre = pd.DataFrame(columns=COL_GANAN)
 
-def send_alert(S, df_b_s, type_b_s):
+def send_alert_and_register(S, df_b_s, type_b_s):
     global df_registre
     modles_evaluated = [col for col in df_b_s.columns if col.startswith('br_')]
     modles_evaluated_TF = [col for col in df_b_s.columns if col.startswith('br_TF')]
     dict_predictions = df_b_s.T.to_dict()
 
     #register data each time UNLAST
-    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-2]], modles_evaluated, type_b_s, path ="zTelegram_Registers.csv")  #unlast row
+    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-2]], modles_evaluated, type_b_s, path =a_manage_stocks_dict.PATH_REGISTER_RESULT_REAL_TIME)  #unlast row
     #LAST
-    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-1]], modles_evaluated, type_b_s, path ="zTelegram_Registers.csv")  #last row
+    Utils_send_message.register_in_zTelegram_Registers(S, dict_predictions[list(dict_predictions.keys())[-1]], modles_evaluated, type_b_s, path =a_manage_stocks_dict.PATH_REGISTER_RESULT_REAL_TIME)  #last row
 
     i = -1
     if will_send_alert(df_b_s, S+"_"+type_b_s.name):
@@ -130,7 +123,7 @@ def send_alert(S, df_b_s, type_b_s):
 #             send_exception(ex)
 #
 #     df_res = pd.DataFrame([[datetime.today().strftime('%Y-%m-%d %H:%M:%S'), '----', '----','----','----', '----%', '----%', '----%', '----%', datetime.today().strftime('%Y-%m-%d %H:%M:%S')]], columns=['Date', 'Stock', 'buy_sell','Close', '88%', '93%', '95%', 'TF%', "Models_names"])
-#     df_res.to_csv( "zTelegram_Registers.csv", sep="\t", index=None, mode='a', header=False)
+#     df_res.to_csv(a_manage_stocks_dict.PATH_REGISTER_RESULT_REAL_TIME, sep="\t", index=None, mode='a', header=False)
 #     print("END ciclo ")
 #     print("END ciclo "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 #     print("END ciclo ")
