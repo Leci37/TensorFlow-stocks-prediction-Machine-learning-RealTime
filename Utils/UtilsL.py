@@ -35,7 +35,7 @@ def singleton(cls):
 # @singleton
 # class Url_stocks_pd():
 #     def __init__(self):
-#         self.pd = pd.read_csv('yfinance/URL_Stocks_DONTDEL.csv', sep='|')
+#         self.pd = pd.read_csv('Utils/URL_dict_stocks_news.csv', sep='|')
 #
 #     def get_url(self, stock, country="US"):
 #         u = ""
