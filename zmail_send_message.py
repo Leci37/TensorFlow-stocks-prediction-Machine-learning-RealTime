@@ -12,7 +12,8 @@ from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
 # https://developers.google.com/gmail/api/auth/scopes para vver todas las SCOPES
-SCOPES = ['https://mail.google.com/' ] #https://www.googleapis.com/auth/gmail.readonly','https://www.googleapis.com/auth/gmail.send']
+# En caso de caducar expirar crear cuanta de servicio https://console.developers.google.com/iam-admin/serviceaccounts NO es eso
+SCOPES = ['https://www.googleapis.com/auth/gmail.readonly' ] #https://www.googleapis.com/auth/gmail.readonly','https://www.googleapis.com/auth/gmail.send']
 #SCOPES = ['https://www.googleapis.com/auth/gmail.readonly','https://www.googleapis.com/auth/gmail.send']
 token_credential = "keys/token.json" # "keys/SendMail_test_CRE.json"
 
@@ -29,6 +30,7 @@ def get_Oauth_google_crede():
     # time.
     if os.path.exists(token_credential):
         creds = Credentials.from_authorized_user_file(token_credential, SCOPES)
+        print("In case of: missing fields refresh_token, client_secret, client_id. borrar fichero token.json , para que se refresque automaticamente Ruta: "+token_credential )
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -66,8 +68,8 @@ def gmail_send_message():
 
         message = MIMEText(text_html_mail,'html') #MIMEText('<br>This is <b>automated<b> draft mail<br><br><br>END 3','html')
 
-        message['To'] = 'dzaton96@gmail.com' # 'prueba19j97@gmail.com' #gduser1@workspacesamples.dev'
-        message['From'] = 'gduser2@workspacesamples.dev'
+        message['To'] = 'example@gmail.com' # 'prueba19j97@gmail.com' #gduser1@workspacesamples.dev'
+        message['From'] = 'example@workspacesamples.dev'
         message['Subject'] = 'Alert System Whale Hunter Trading'
 
         # encoded message
