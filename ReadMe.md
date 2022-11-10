@@ -74,7 +74,7 @@ An excellent site to see all the stock market technical indicators is webull htt
 
 Image: webull with Stochastic, MACD and RSI indicators
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.001.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.001.png)
 
 
 On the stock market graphs have been invented EVERY possible way to predict the stock market, with mixed results, making clear the difficulty of predicting human behavior.
@@ -99,7 +99,7 @@ Or it is operated when both exceed zero.
 
 **Candlestick: Morning Star** The morning star pattern is considered a hopeful sign in a bearish market trend.
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.002.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.002.png)
 
 
 These indicators are present in refuted and popular websites like investing.com to be analyzed by the market <https://es.investing.com/equities/apple-computer-inc-technical>
@@ -109,7 +109,7 @@ It is extremely difficult to predict the price of any stock. Inflation, wars, po
 Here enters the self-fulfilling prophecy principle of explained is, at first, a "false" definition of the situation, which awakens a new behavior that makes the original false conception of the situation become "true". Example:
 
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.004.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.004.png)
 
 ### OBJECTIVE
 Understanding the principle of self-fulfilling prophecy, it is possible to obtain the pattern of the same, by means of the massive collection of technical patterns, their calculation and the study of their patterns.
@@ -127,7 +127,7 @@ The image shows: MACD, RSI , Stochastic and Balance of power (Elder Ray)
 
 The alert is sent on the vertical line, during the next 4 periods the stock decreases by 2.4%. Each candlestick period in the image indicates 15 minutes.
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.005.png)![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.006.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.005.png)![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.006.png)
 
 
 
@@ -151,7 +151,7 @@ Once the historical data of the stock has been obtained and all the technical in
 
 Example of the file with the first eight indicators:
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.007.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.007.png)
 
 This data collection is customizable, you can obtain and train models of any Nasdaq stock, for other indicators or crypto-assets, it is also possible by making small changes.
 
@@ -267,7 +267,7 @@ Plots with the 3 best technical data are printed in the folder *plots\_relations
 
 Example name: *TWLO\_neg\_buy\_sell\_point\_\_ichi\_chikou\_span.png*
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.008.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.008.png)
 
 #### **3** Training TensorFlow, XGB and Sklearn models 
 Model\_creation\_models\_for\_a\_stock.py
@@ -419,7 +419,7 @@ What is displayed in DEBUG alert, is the information from *d\_result/prediction\
 
 To understand the complete information of the alert see Point 5.1 Making predictions of the last week.
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.009.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.009.png)
 
 
 
@@ -723,7 +723,7 @@ Run news\_get\_data\_NUTS.get\_json\_news\_sentimet()
 
 A .csv and .json file is generated, with action date the four models, the score and the news collected Example: *d\_sentiment/stock\_news\_DATE\_MELI.csv*
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.010.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.010.png)
 
 **Improvement**: Once the sentiment-news score file is obtained, introduce it in the predictive models together with the technical indicators, it must be done in real time.
 
@@ -780,7 +780,7 @@ Find the explanation of what indicators and values the AI model takes, to predic
 
 (green buy, red do not trade) https://stackoverflow.com/questions/40155128/plot-trees-for-a-random-forest-in-python-with-scikit-learn 
 
-![](Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.011.png)
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.011.png)
 
 
 ### Indicator names:
