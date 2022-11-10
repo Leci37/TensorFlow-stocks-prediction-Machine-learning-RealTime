@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import  glob, re
 
-import Feature_selection_get_columns_json
+import Feature_selection_json_columns
 import Model_predictions_handle
 from Utils import Utils_model_predict
 
@@ -139,7 +139,7 @@ for type_buy_sell in [a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dic
     for S in  list_stocks :
         path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
         print(" START STOCK scoring: ", S,  " type: ", type_buy_sell.value, " \t path: ", path_csv_file_SCALA)
-        columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
+        columns_json = Feature_selection_json_columns.JsonColumns(S, type_buy_sell)
 
 
         #se puede dar el caso de que se repitan columns_aux_to_evaluate , no eliminar duplicados, el codigo lo gestiona en __prepare_get_all_result_df
