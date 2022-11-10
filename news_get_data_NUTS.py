@@ -12,20 +12,21 @@ from LogRoot.Logging import Logger
 def get_news_sentiment_data(stockid):
     df_news = pd.DataFrame(columns=['Ticker', 'Date', 'Headline']).astype(float)
     Logger.logr.info("get_sentiment_data: "+ stockid)
-    u = UtilsL.Url_stocks_pd.get_url(stockid)
-    if u is None:
-        Logger.logr.info("The company stock dont have linked url.  stock: "+ stockid)
-        return None
-
-    # INVESTING.com
-    Logger.logr.info("get_sentiment_data: "+ stockid+ " url_investing: "+ u)
-    df_investing_news_opinion = news_investing_analy_opi_sentiment.get_sentiment_investing_news_opinion(u)
-    if df_investing_news_opinion is not None:
-        df_investing_news_opinion['Ticker'] = stockid
-        df_news = pd.merge(df_news, df_investing_news_opinion, on=['Ticker', 'Date', 'Headline'],
-                           how='outer')  # TODO error in case of be None in the next merge
-    else:
-        Logger.logr.warn("the dataframe News is None. DataFrame: INVESTING.com Stockid:"+ stockid)
+    # TODO API investpy  suspended https://github.com/alvarobartt/investpy
+    # u = UtilsL.Url_stocks_pd.get_url(stockid)
+    # if u is None:
+    #     Logger.logr.info("The company stock dont have linked url.  stock: "+ stockid)
+    #     return None
+    #
+    # # INVESTING.com
+    # Logger.logr.info("get_sentiment_data: "+ stockid+ " url_investing: "+ u)
+    # df_investing_news_opinion = news_investing_analy_opi_sentiment.get_sentiment_investing_news_opinion(u)
+    # if df_investing_news_opinion is not None:
+    #     df_investing_news_opinion['Ticker'] = stockid
+    #     df_news = pd.merge(df_news, df_investing_news_opinion, on=['Ticker', 'Date', 'Headline'],
+    #                        how='outer')  # TODO error in case of be None in the next merge
+    # else:
+    #     Logger.logr.warn("the dataframe News is None. DataFrame: INVESTING.com Stockid:"+ stockid)
 
     # YAHOO.com
     df_yahoo_news = Utils_Yfinance.get_news_opinion_yahoo(stockid)
@@ -104,13 +105,12 @@ tickers = ["AMD", "GE", "BA", "AMZN", "AAPL", "PYPL", "MELI"]
 tickers = ['MELI']#["MELI" ,"VWDRY"]
 
 # def ggggg():
-# Logger.logr.info("start")
-# df = None
-# get_json_news_sentimet('MELI')
-#get_json_news_sentimet("BA")
-# for s in tickers:
-#     Logger.logr.info("DO: "+ s)
-#     get_json_news_sentimet()
+Logger.logr.info("start")
+df = None
 
-# df.to_csv("d_sentiment/stock_news_DATE_FULL_.csv", sep="\t")
-# Logger.logr.info("Sentiment news filr  d_sentiment/stock_news_DATE_FULL_.csv")
+for s in tickers:
+    Logger.logr.info("DO: "+ s)
+    get_json_news_sentimet(s)
+
+df.to_csv("d_sentiment/stock_news_DATE_FULL_.csv", sep="\t")
+Logger.logr.info("Sentiment news filr  d_sentiment/stock_news_DATE_FULL_.csv")
