@@ -1,6 +1,6 @@
 import pandas as pd
 
-import Feature_selection_get_columns_json
+import Feature_selection_json_columns
 import Model_predictions_handle
 from Utils import Utils_model_predict
 
@@ -27,8 +27,8 @@ NUM_MIN_MODLES_TF = 1
 
 
 def get_columns_to_download(stock_id):
-    columns_json_POS = Feature_selection_get_columns_json.JsonColumns(stock_id, Op_buy_sell.POS)
-    columns_json_NEG = Feature_selection_get_columns_json.JsonColumns(stock_id, Op_buy_sell.NEG)
+    columns_json_POS = Feature_selection_json_columns.JsonColumns(stock_id, Op_buy_sell.POS)
+    columns_json_NEG = Feature_selection_json_columns.JsonColumns(stock_id, Op_buy_sell.NEG)
     custom_col_POS_NEG = set(columns_json_POS.get_ALL_Good_and_Low() + columns_json_NEG.get_ALL_Good_and_Low())
     return list(custom_col_POS_NEG)
 
@@ -46,7 +46,7 @@ def __get_has_to_seelBuy_by_Predictions_models(df_tech, S, type_buy_sell, path_c
         Logger.logr.info("The NEG models present are less than: "+  str(NUM_MIN_MODLES) + ", STOCK prediction is not performed: "+  S + "Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
         return None
 
-    columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
+    columns_json = Feature_selection_json_columns.JsonColumns(S, type_buy_sell)
 
     df_b_s = None
     for type_cols, funtion_cols in columns_json.get_Dict_JsonColumns().items():
