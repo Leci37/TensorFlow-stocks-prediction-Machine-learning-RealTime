@@ -1,4 +1,4 @@
-import Feature_selection_get_columns_json
+import Feature_selection_json_columns
 import Model_train_TF_onBalance
 import Model_train_sklearn_XGB
 import a_manage_stocks_dict
@@ -66,7 +66,7 @@ for S in   list_stocks:
 
     for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
         print(" START STOCK: ", S,  " type: ", type_buy_sell, " \t path: ", path_csv_file_SCALA)
-        columns_json = Feature_selection_get_columns_json.JsonColumns(S, type_buy_sell)
+        columns_json = Feature_selection_json_columns.JsonColumns(S, type_buy_sell)
 
 
         for type_cols, list_cols in columns_json.get_Dict_JsonColumns().items():
