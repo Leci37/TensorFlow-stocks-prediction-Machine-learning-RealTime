@@ -11,7 +11,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2, f_regression
 from numpy import array
 
-from Utils import Utils_buy_sell_points, Utils_col_sele, UtilsL
+from Utils import Utils_buy_sell_points, Utils_col_sele, UtilsL, Utils_plotter
 import a_manage_stocks_dict
 
 Y_TARGET = 'buy_sell_point'
@@ -91,7 +91,7 @@ def get_best_columns_to_train(cleaned_df, op_buy_sell : a_manage_stocks_dict.Op_
 
     return df_result
 
-def get_json_feature_selection(list_all_columns , path):
+def get_json_feature_selection(list_all_columns, path_json):
 
     df_aux = pd.DataFrame({"ele": list_all_columns, "count": 0})
     df_aux = df_aux.groupby("ele").count().sort_values(["count"], ascending=False)
@@ -102,26 +102,39 @@ def get_json_feature_selection(list_all_columns , path):
     df_json.set_index('count', inplace=True)
     dict_json = df_json.to_dict()
     import json
-    with open(path, 'w') as fp:
+    with open(path_json, 'w') as fp:
         json.dump(dict_json, fp, allow_nan=True, indent=3)
-        print("\tget_json_feature_selection path: ", path)
-    print(path)
+        print("\tget_json_feature_selection path: ", path_json)
+    print(path_json)
 
 
-def generate_json_best_columns(cleaned_df, Op_buy_sell : a_manage_stocks_dict.Op_buy_sell, list_columns_got = [8, 12, 16, 32, 72], path ="plots_relations/best_selection_sum_up.json"):
+
+def generate_json_best_columns(cleaned_df, Op_buy_sell: a_manage_stocks_dict.Op_buy_sell,
+                               list_columns_got=[8, 12, 16, 32, 72], path_json="plots_relations/best_selection_sum_up.json",path_imgs = None,
+                               NUM_MAX_PLOT_RELATION_IMAGE_PER_STOCK=3):
     list_all_columns = []
+    list_cols_plot = []
     for n in list_columns_got:
         print("\tget best columns Opcion: ", Op_buy_sell.value, " Number: ", n)
         df = get_best_columns_to_train(cleaned_df, Op_buy_sell, n, CSV_NAME, path=None)
 
         for c in ['chi2', 'f_regression', 'ExtraTrees', 'corrwith']:  # , ,
             list_all_columns += df[c].to_list()
+        list_cols_plot += df['corrwith'].to_list()
 
     #Remove elements not valid
     list_all_columns = list(filter(lambda a: a != Y_TARGET, list_all_columns))
     list_all_columns = list(filter(lambda a: a != "Date", list_all_columns))
     list_all_columns = list(filter(lambda a: a != "ichi_chikou_span", list_all_columns))
-    get_json_feature_selection(list_all_columns,path )
+    get_json_feature_selection(list_all_columns, path_json)
+
+    if path_imgs is not None:
+        df_aux = pd.DataFrame({"ele": list_cols_plot, "count": 0})
+        df_aux = df_aux.groupby("ele").count().sort_values(["count"], ascending=False)
+        list_most_relation_cols = df_aux.index
+        list_most_relation_cols = list_most_relation_cols[:NUM_MAX_PLOT_RELATION_IMAGE_PER_STOCK+1].tolist()
+        print("Generate plots Path: "+ path_imgs + " Best relations columns: "+ "".join(list_most_relation_cols) )
+        Utils_plotter.plot_relationdist_main_val_and_all_rest_val(cleaned_df[list_most_relation_cols], main_label = Y_TARGET, path =path_imgs)
 
 #**DOCU**
 # #2 Filtering indicators
@@ -131,6 +144,11 @@ def generate_json_best_columns(cleaned_df, Op_buy_sell : a_manage_stocks_dict.Op
 # plots_relations/best_selection_AMD_both.json
 # These files contain a ranking of which technical indicator is best for each stock.
 # Check that three .json have been generated for each stock.
+import logging
+numba_logger = logging.getLogger('numba').setLevel(logging.WARNING)
+mat_logger = logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
+
 CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
@@ -146,5 +164,6 @@ for l in   list_stocks:
     cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
 
     for option_Cat_op in a_manage_stocks_dict.Op_buy_sell.list(): # both pos neg
-        path = "plots_relations/best_selection_" + CSV_NAME + "_" + option_Cat_op.value + ".json"
-        generate_json_best_columns(cleaned_df, option_Cat_op, NUM_BEST_PARAMS_LIST, path)
+        path_json = "plots_relations/best_selection_" + CSV_NAME + "_" + option_Cat_op.value + ".json"
+        path_img = "plots_relations/plot/" + l + "_" + option_Cat_op.value+ "_"
+        generate_json_best_columns(cleaned_df, option_Cat_op, list_columns_got=NUM_BEST_PARAMS_LIST, path_json=path_json, path_imgs =path_img )
