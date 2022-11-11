@@ -25,7 +25,7 @@
 
 [Quick start-up](#_heading=h.3rdcrjn)
 
-[Commissioning](#_heading=h.26in1rg)
+[Detailed start-up](#_heading=h.26in1rg)
 
 [1 Historical data collection](#_heading=h.lnxbz9)
 
@@ -447,7 +447,7 @@ Run `predict_POOL_inque_Thread.py`
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
 
-### Commissioning 
+### Detailed start-up
 (Running times are estimated for an intel i3 and 8GB of RAM)
 
 
