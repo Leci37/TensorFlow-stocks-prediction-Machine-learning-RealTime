@@ -1,65 +1,14 @@
-
-
-
 [INTRODUCTION](#_heading=h.gjdgxs)
 
 [OBJECTIVE](#_heading=h.30j0zll)
 
 [OPERATION](#_heading=h.1fob9te)
 
-[1.1 Data collection](#_heading=h.3znysh7)
-
-[1.2 Types of indicators](#_heading=h.2et92p0)
-
-[2 Indicator filtering](#_heading=h.tyjcwt)
-
-[3 Training TensorFlow, XGB and Sklearn models](#_heading=h.3dy6vkm)
-
-[4.1 Assessing the QUALITY of these models](#_heading=h.1t3h5sf)
-
-[4.2 Evaluating those real BENEFITS of models](#_heading=h.4d34og8)
-
-[5.1 Making predictions for the past week](#_heading=h.2s8eyo1)
-
-[5.2 Sending real-time alerts](#_heading=h.17dp8vu)
-
 [Quick start-up](#_heading=h.3rdcrjn)
 
 [Detailed start-up](#_heading=h.26in1rg)
 
-[1 Historical data collection](#_heading=h.lnxbz9)
-
-[1.0 (Recommended) alphavantage API](#_heading=h.35nkun2)
-
-[1.1 The OHLCV history of the stock must be generated.](#_heading=h.1ksv4uv)
-
-[2 Filtering technical indicators](#_heading=h.44sinio)
-
-[3 Generate training of TensorFlow, XGB and Sklearn models](#_heading=h.2jxsxqh)
-
-[4 Evaluate quality of predictive models](#_heading=h.z337ya)
-
-[5 Predictions](#_heading=h.3j2qqm3)
-
-[5.0 make predictions for the last week Optional Test](#_heading=h.1y810tw)
-
-[5.1 Getting OHLCV data in real time](#_heading=h.4i7ojhp)
-
-[5.2 Setting up chatIDs and tokens in Telegram](#_heading=h.2xcytpi)
-
-[5.3 Sending real-time alerts Telegram](#_heading=h.1ci93xb)
-
 [Possible improvements](#_heading=h.3whwml4)
-
-[Improvements in predictive models, using multi-dimensional](#_heading=h.2bn6wsx)
-
-[Review the way ground true is obtained](#_heading=h.qsh70q)
-
-[Add news sentiment indicator](#_heading=h.3as4poj)
-
-[Add balance sheets](#_heading=h.1pxezwc)
-
-[List of suggested improvements:](#_heading=h.49x2ik5)
 
 [Indicator names:](#_heading=h.2p2csry)
 
@@ -118,8 +67,6 @@ Understanding the principle of self-fulfilling prophecy, it is possible to obtai
 ` `For this, techniques such as big data will be used through Pandas Python libraries, machine learning through Sklearn, XGB and neural networks through the open google Tensor Flow library. 
 
 The result will be displayed in a simple and friendly way through alerts on mobile or computer.
-
-Example of a real-time alert via telegram bot https://t.me/Whale_Hunter_Alertbot 
 
 The machine learnig models Sklearn, XGB and Tensor Flow , by means of the learning of the last months detect the point of sale. To detect this point of sale a series of indicators have been taken into account: olap_VMAP, ma_SMA_50, ichi_senkou_a, olap_BBAND_dif ,mtum_MACD_ext, olap_BBAND_MIDDLE, mtum_MACD_ext_signal, fibo_s1, volu_PVI_1, ma_KAMA_5, etcetera.
 
@@ -646,11 +593,15 @@ In this class there are 2 types of threads
 
 - Producer , constantly asks for OHLCV data, once it is obtained, it enters it into a queue. 
 - Consumer (2 threads running simultaneously) are pulling OHLCV data from the queue, calculating technical parameters, making model predictions, registering them in zTelegram_Registers.csv, and if they meet the requirements they are sent by telegram. 
+
+
+
+
 #### Possible improvements
 ##### Improvements in predictive models, using multi-dimensional 
 Improvements in TF predictive models using tensors (multiple matrices over time) and non-matrices (mono temporal, current design). 
 
-In the class Model_TF_definitions.ModelDefinition.py
+In the class `Model_TF_definitions.ModelDefinition.py`
 
 Through it, the model configurations, density, number of neurons, etc. are obtained.
 
