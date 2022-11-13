@@ -18,7 +18,7 @@
 
 **Functions:**
 
-1. Collection of historical OHLCV data for the last years and calculation of technical patterns (momentums, volatility, Japanese candlesticks, statistics...), 1068 patterns.
+1. Collection of historical **stocks** OHLCV data for the last years and calculation of technical patterns (momentums, volatility, Japanese candlesticks, statistics...), 1068 patterns.
 1. Calculations of which of the 1068 are the most valuable, and most relevant for the detection of good trading points (buy-sell).
 1. Training of several machine learning models using powerful libraries:Google Tensor Flow Sklearn and XGB
 1. Evaluation of the multiple models, to discard the less reliable ones. 
