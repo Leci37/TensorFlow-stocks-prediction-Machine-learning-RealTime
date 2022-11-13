@@ -14,6 +14,16 @@
 
 
 
+### PROGRAM DESCRIPTION
+
+**Functions:**
+
+1. Collection of historical OHLCV data for the last years and calculation of technical patterns (momentums, volatility, Japanese candlesticks, statistics...), 1068 patterns.
+1. Calculations of which of the 1068 are the most valuable, and most relevant for the detection of good trading points (buy-sell).
+1. Training of several machine learning models using powerful libraries:Google Tensor Flow Sklearn and XGB
+1. Evaluation of the multiple models, to discard the less reliable ones. 
+1. OHLCV data collection and making predictions from the models in real time, when any of the multiple predictions (buy-sell stocks) is considered valid, sending real-time alert to Telegram and Mail. 
+
 
 
 ### INTRODUCTION
@@ -708,6 +718,7 @@ Find the explanation of what indicators and values the AI model takes, to predic
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.011.png)
 
+USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS. Do not risk money which you are afraid to lose. There might be bugs in the code - this software DOES NOT come with ANY warranty.
 
 ### Indicator names:
 ```
