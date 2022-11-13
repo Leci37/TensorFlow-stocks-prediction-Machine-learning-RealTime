@@ -1,3 +1,4 @@
+"""https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 import numpy as np
 import pandas as pd
 import tensorflow as tf

@@ -1,3 +1,4 @@
+"""https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 import finplot as fplt
 from matplotlib import pyplot as plt
 # imports
@@ -298,74 +299,77 @@ df_aux = pd.DataFrame()
 
 def plot_relationdist_main_val_and_all_rest_val(df, main_label ='buy_sell_point', path ="plots_relations\plot_relationdistplot_"):
     # plt.figure(figsize=(12,IMAGES_PER_PNG_FILE*4))
-    import matplotlib.gridspec as gridspec
-    dict_corr = {}
-    features = df.iloc[:].columns.tolist()
-    if main_label in features: features.remove(main_label)
-    gs = gridspec.GridSpec(30, 1)
-    for i, ele_B in enumerate(df[features]):
-        plt.figure()
-        sns.distplot(df[ele_B][(df[main_label] == 0)], bins=50, label="Nothing", color="#FFCC33")  # amarillo huevo
-        if (df[main_label] == 100).any():
-            sns.distplot(df[ele_B][(df[main_label] == 100)], bins=50, label="Point of Buy", color="#00CC00")  # verde
-        if (df[main_label] == -100).any():
-            sns.distplot(df[ele_B][(df[main_label] == -100)], bins=50, label="Point of Sale ", color="#FF00FF")  # Magenta
-        # plt.set_xlabel('')
-        # plt.set_title(str(ele_B))
-        # Fine Line2D objects
-
-        # https://stackoverflow.com/questions/52517145/how-to-retrieve-all-data-from-seaborn-distribution-plot-with-mutliple-distributi
-        lines2D = [obj for obj in plt.findobj() if str(type(obj)) == "<class 'matplotlib.lines.Line2D'>"]
-        # Retrieving x_exex, y data
-        ls_unique = df[main_label].unique()
-        df_corr = pd.DataFrame()
-        for i_point in range(0, len(ls_unique)):
-            x_exex, y_data = lines2D[i_point].get_data()[0], lines2D[i_point].get_data()[1]
-            #df_corr["x_exex"] = x_exex
-            if (type(x_exex) is pd.core.series.Series or type(x_exex) is np.ndarray) and (type(y_data) is pd.core.series.Series or type(y_data) is np.ndarray):
-                df_corr[str(ls_unique[i_point])] = y_data * 10 ** 3  # muy pequeño el dato de y_data
-            else:
-                print("plot_relationdist ", ele_B + " column is not Series or ndarray")
-            # Store as dataframe
-            # df_aux = pd.DataFrame({'x_exex': x_exex, 'y': y})
-
-        if ("0.0" in df_corr.columns) and "100.0" in df_corr.columns:
-            #df_corr["diff_0_100"] = df_corr["100.0"] - df_corr["0.0"]
-            dict_corr[ele_B + "_0_100"] = abs(df_corr["100.0"] - df_corr["0.0"]).mean()
-        if ("0.0" in df_corr.columns) and "-100.0" in df_corr.columns:
-            #df_corr["diff_0_m100"] = df_corr["-100.0"] - df_corr["0.0"]
-            dict_corr[ele_B + "_0_m100"] = abs(df_corr["-100.0"] - df_corr["0.0"]).mean()
-            #plt.plot(x_exex, y_data, label=str(i_point) + "xxx_" + str(ls_unique[i_point]) )
-        # plt.legend(loc="upper left")
-        # print(path + main_name + "__" + ele_B + "_AUX.png")
-        # plt.savefig(path + main_name + "__" + ele_B + "_AUX.png",bbox_inches='tight',dpi=100)
-
-        if (ele_B.startswith('cdl_') or ele_B.startswith('mcrh_') or  ele_B.startswith('pcrh_')
-                or  ele_B.startswith('has_') or ('_crash' in ele_B) or ('_ticker_' in ele_B) ):
+    try:
+        import matplotlib.gridspec as gridspec
+        dict_corr = {}
+        features = df.iloc[:].columns.tolist()
+        if main_label in features: features.remove(main_label)
+        gs = gridspec.GridSpec(30, 1)
+        for i, ele_B in enumerate(df[features]):
             plt.figure()
-            x_exex, y_data = ele_B , main_label
+            sns.distplot(df[ele_B][(df[main_label] == 0)], bins=50, label="Nothing", color="#FFCC33")  # amarillo huevo
+            if (df[main_label] == 100).any():
+                sns.distplot(df[ele_B][(df[main_label] == 100)], bins=50, label="Point of Buy", color="#00CC00")  # verde
+            if (df[main_label] == -100).any():
+                sns.distplot(df[ele_B][(df[main_label] == -100)], bins=50, label="Point of Sale ", color="#FF00FF")  # Magenta
+            # plt.set_xlabel('')
+            # plt.set_title(str(ele_B))
+            # Fine Line2D objects
 
-            df1 = df.groupby(x_exex)[y_data].value_counts(normalize=True)
-            df1 = df1.mul(100)
-            df1 = df1.rename('percent').reset_index()
+            # https://stackoverflow.com/questions/52517145/how-to-retrieve-all-data-from-seaborn-distribution-plot-with-mutliple-distributi
+            lines2D = [obj for obj in plt.findobj() if str(type(obj)) == "<class 'matplotlib.lines.Line2D'>"]
+            # Retrieving x_exex, y data
+            ls_unique = df[main_label].unique()
+            df_corr = pd.DataFrame()
+            for i_point in range(0, len(ls_unique)):
+                x_exex, y_data = lines2D[i_point].get_data()[0], lines2D[i_point].get_data()[1]
+                #df_corr["x_exex"] = x_exex
+                if (type(x_exex) is pd.core.series.Series or type(x_exex) is np.ndarray) and (type(y_data) is pd.core.series.Series or type(y_data) is np.ndarray):
+                    df_corr[str(ls_unique[i_point])] = y_data * 10 ** 3  # muy pequeño el dato de y_data
+                else:
+                    print("plot_relationdist ", ele_B + " column is not Series or ndarray")
+                # Store as dataframe
+                # df_aux = pd.DataFrame({'x_exex': x_exex, 'y': y})
 
-            g = sns.catplot(x=x_exex, y='percent', hue=y_data, kind='bar', data=df1,
-                            palette=sns.color_palette([ '#FF00FF','#FFCC33', '#00CC00']))
-            g.ax.set_ylim(0, 100)
+            if ("0.0" in df_corr.columns) and "100.0" in df_corr.columns:
+                #df_corr["diff_0_100"] = df_corr["100.0"] - df_corr["0.0"]
+                dict_corr[ele_B + "_0_100"] = abs(df_corr["100.0"] - df_corr["0.0"]).mean()
+            if ("0.0" in df_corr.columns) and "-100.0" in df_corr.columns:
+                #df_corr["diff_0_m100"] = df_corr["-100.0"] - df_corr["0.0"]
+                dict_corr[ele_B + "_0_m100"] = abs(df_corr["-100.0"] - df_corr["0.0"]).mean()
+                #plt.plot(x_exex, y_data, label=str(i_point) + "xxx_" + str(ls_unique[i_point]) )
+            # plt.legend(loc="upper left")
+            # print(path + main_name + "__" + ele_B + "_AUX.png")
+            # plt.savefig(path + main_name + "__" + ele_B + "_AUX.png",bbox_inches='tight',dpi=100)
 
-            for p in g.ax.patches:
-                txt = str(p.get_height().round(2)) + '%'
-                txt_x = p.get_x()
-                txt_y = p.get_height()
-                g.ax.text(txt_x, txt_y, txt)
-        else:
-            plt.legend(loc="upper left")
-        plt.title("Relationship last 2 years :\n"  + ele_B)
-        print(main_label + "__" + ele_B + ".png")
-        if path is not None:
-            print(path + main_label + "__" + ele_B + ".png")
-            plt.savefig(path + main_label + "__" + ele_B + ".png", bbox_inches='tight', dpi=100)
+            if (ele_B.startswith('cdl_') or ele_B.startswith('mcrh_') or  ele_B.startswith('pcrh_')
+                    or  ele_B.startswith('has_') or ('_crash' in ele_B) or ('_ticker_' in ele_B) ):
+                plt.figure()
+                x_exex, y_data = ele_B , main_label
 
+                df1 = df.groupby(x_exex)[y_data].value_counts(normalize=True)
+                df1 = df1.mul(100)
+                df1 = df1.rename('percent').reset_index()
+
+                g = sns.catplot(x=x_exex, y='percent', hue=y_data, kind='bar', data=df1,
+                                palette=sns.color_palette([ '#FF00FF','#FFCC33', '#00CC00']))
+                g.ax.set_ylim(0, 100)
+
+                for p in g.ax.patches:
+                    txt = str(p.get_height().round(2)) + '%'
+                    txt_x = p.get_x()
+                    txt_y = p.get_height()
+                    g.ax.text(txt_x, txt_y, txt)
+            else:
+                plt.legend(loc="upper left")
+            plt.title("Relationship last 2 years :\n"  + ele_B)
+            print(main_label + "__" + ele_B + ".png")
+            if path is not None:
+                print(path + main_label + "__" + ele_B + ".png")
+                plt.savefig(path + main_label + "__" + ele_B + ".png", bbox_inches='tight', dpi=100)
+
+    except Exception as ex:
+        Logger.logr.debug(" Exception Stock: "+ str(ex))
     return dict_corr
 
 

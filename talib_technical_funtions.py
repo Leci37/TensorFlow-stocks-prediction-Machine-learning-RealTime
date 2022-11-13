@@ -1,3 +1,4 @@
+"""https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 #https://mrjbq7.github.io/ta-lib/func_groups/overlap_studies.html
 #https://github.com/CanerIrfanoglu/medium/blob/master/candle_stick_recognition/identify_candlestick.py
 import talib

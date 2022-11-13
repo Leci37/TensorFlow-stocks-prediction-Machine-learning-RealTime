@@ -1,3 +1,4 @@
+"""https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 import Feature_selection_json_columns
 import Model_train_TF_onBalance
 import Model_train_sklearn_XGB
