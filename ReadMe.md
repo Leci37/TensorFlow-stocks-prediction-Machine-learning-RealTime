@@ -719,6 +719,7 @@ Find the explanation of what indicators and values the AI model takes, to predic
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.011.png)
 
 USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS. Do not risk money which you are afraid to lose. There might be bugs in the code - this software DOES NOT come with ANY warranty.
+Permitted, free use and modification, but no commercialization to third parties, without authorization. All rights reserved
 
 ### Indicator names:
 ```
