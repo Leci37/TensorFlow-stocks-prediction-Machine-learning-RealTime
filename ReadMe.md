@@ -14,7 +14,7 @@
 
 
 
-### PROGRAM DESCRIPTION
+## PROGRAM DESCRIPTION
 
 **Functions:**
 
@@ -607,7 +607,9 @@ In this class there are 2 types of threads
 
 
 
-#### Possible improvements
+## Possible improvements
+would be to combine the power of https://github.com/iam-abbas/Reddit-Stock-Trends predictive models with https://github.com/Leci37/stocks-Machine-learning-RealTime-telegram/tree/develop real-time pattern calculation and alerting capabilities.
+
 ##### Improvements in predictive models, using multi-dimensional 
 Improvements in TF predictive models using tensors (multiple matrices over time) and non-matrices (mono temporal, current design). 
 
