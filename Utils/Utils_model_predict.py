@@ -69,6 +69,10 @@ class CustomEarlyStopping(keras.callbacks.Callback):
         if self.stopped_epoch > 0:
             print("Epoch %05d: early stopping" % (self.stopped_epoch + 1))
 
+def get_model_summary_format(model: tf.keras.Model) -> str:
+    string_list = []
+    model.summary(line_length=80, print_fn=lambda x: string_list.append(x))
+    return "\n".join(string_list).replace('                                                                                \n', "")
 
 def load_and_clean_DF_Train_from_csv(path, op_buy_sell : a_manage_stocks_dict.Op_buy_sell, columns_selection = [], Y_TARGET ='buy_sell_point',  ):
     # https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
@@ -172,6 +176,8 @@ def df_to_df_multidimension_array(dataframe, BACHT_SIZE_LOOKBACK):
     dataframe[Y_TARGET].shift(-BACHT_SIZE_LOOKBACK).rolling(window=BACHT_SIZE_LOOKBACK).apply(__create_tensor_values,raw=False)
     return_feature = np.array(dataX)
     return_label = np.array(dataY)
+    # Our vectorized labels https://stackoverflow.com/questions/48851558/tensorflow-estimator-valueerror-logits-and-labels-must-have-the-same-shape
+    return_label = np.asarray(return_label).astype('float32').reshape((-1, 1))
     return return_label, return_feature
 
 
@@ -183,7 +189,7 @@ def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point', BACHT_S
     # Form np arrays of labels and features.
     if BACHT_SIZE_LOOKBACK is not None:
         train_labels,train_features = df_to_df_multidimension_array(train_df, BACHT_SIZE_LOOKBACK)
-        bool_train_labels = train_labels != 0
+        bool_train_labels = (train_labels != 0).reshape((-1))
         test_labels, test_features = df_to_df_multidimension_array(test_df,BACHT_SIZE_LOOKBACK)
         val_labels, val_features = df_to_df_multidimension_array(val_df, BACHT_SIZE_LOOKBACK)
         __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
