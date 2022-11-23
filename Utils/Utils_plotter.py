@@ -392,6 +392,41 @@ def plot_average_precision_score(y_test, scores,path = None):
         print("plot Average precision-recall  " + path)
         plt.savefig(path)
 
+
+# https://es.tradingview.com/script/lLFiT3av/
+# Blai5 Koncorde by manboto copy
+def plot_konkorde_montains(azul, marron, verde,media, path, start_row_num = 0):
+    df_plot = pd.DataFrame({'azul': azul, 'marron': marron, 'verde': verde})[start_row_num:]
+    cols = ['verde', 'marron', 'verde', 'media']
+    colors = ['green', 'brown', 'cyan', 'red']
+    # df = pd.DataFrame(columns=cols, data=[verde, marron, azul, media])
+    fig, ax = plt.subplots()
+    # split dataframe df into negative only and positive only values
+    df_neg, df_pos = df_plot.clip(upper=0), df_plot.clip(lower=0)
+    # stacked area plot of positive values
+    df_pos.plot.area(ax=ax, stacked=True, linewidth=0.)
+    # reset the color cycle
+    ax.set_prop_cycle(None)
+    # stacked area plot of negative values, prepend column names with '_' such that they don't appear in the legend
+    df_neg.rename(columns=lambda x: '_' + x).plot.area(ax=ax, stacked=True, linewidth=0.)
+    # rescale the y axis
+    ax.set_ylim([df_neg.sum(axis=1).min(), df_pos.sum(axis=1).max()])
+    ax.autoscale(enable=True)
+    ax.plot(media[start_row_num:], color="red")
+    # ax.plot(df['High'][start_row_num:] * 0.4, color="black")
+    plt.savefig(path)
+
+# https://es.tradingview.com/script/lLFiT3av/
+# Blai5 Koncorde by manboto copy
+def plot_konkorde_lines(azul, marron, verde, media, path, start_row_num = 0):
+    fig, ax = plt.subplots()
+    ax.plot(azul[start_row_num:], color="cyan")
+    ax.plot(verde[start_row_num:], color="green")
+    # ax.plot(df['High'][start_row_num:] * 0.4, color="black")
+    ax.plot(marron[start_row_num:], color="brown")
+    ax.plot(media[start_row_num:], color="red")
+    plt.savefig(path)
+
 #TODO https://colab.research.google.com/drive/1940aC6X6xyeJNTP1qnfxoHhQZwGa_yOx#scrollTo=T0UYEnkwm8Fe
 def plot_candle_beatufull_proportion_values():
     df_std = (df - train_mean) / train_std
