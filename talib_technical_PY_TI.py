@@ -13,7 +13,7 @@ def camarilla_pivots(df, add_col=False, return_struct='numpy'):
 #import py_ti
 import pandas as pd
 from py_ti import py_ti
-from Utils import UtilsL
+from Utils import UtilsL, Utils_Yfinance
 
 
 # stockId = "MSFT"
@@ -80,6 +80,7 @@ def get_py_TI_indicator(df_stocks, cos_cols = None):
     df_supertrend = pd.DataFrame()
     df_vortex = pd.DataFrame()
     df_vortex2 = pd.DataFrame()
+    df_konk = pd.DataFrame()
 
     if cos_cols is None or "ti_acc_dist"  in cos_cols:
         df_acc = py_ti.acc_dist(df_stocks, return_struct='pandas') #vol This provides insight into how strong a trend is.
@@ -109,8 +110,17 @@ def get_py_TI_indicator(df_stocks, cos_cols = None):
         df_vortex = py_ti.vortex(df_stocks,n=5, return_struct='pandas')# sti El Indicador Vortex (VI) está compuesto de 2 líneas que muestran tanto el movimiento de tendencia positivo (VI+) como el negativo (VI-). El indicador se ideó fruto de una fuente de inspiración basada en ciertos movimientos del agua y fue desarrollado por Etienne Botes y Douglas Siepman. El indicador Vortex tiene una aplicación relativamente simple: los traders lo utilizan para identificar el inicio de una tendencia.
     if cos_cols is None or "ti_vortex_pos_14" in cos_cols or "ti_vortex_neg_14" in cos_cols:
         df_vortex2 = py_ti.vortex(df_stocks,n=14, return_struct='pandas')
+    # https://es.tradingview.com/script/lLFiT3av/
+    if cos_cols is None or "ti_konk_blue" in cos_cols or "ti_konk_brown" in cos_cols or "ti_konk_green" in cos_cols or "ti_konk_rest"  in cos_cols or "ti_konk_bl_avg_crash" in cos_cols or "ti_konk_gre_avg_crash" in cos_cols or "ti_konk_gre_bl_crash" in cos_cols or "ti_konk_avg":
+        val_blue, val_brown, val_green, val_avg = get_konkorde_params(df_stocks)
+        df_konk = pd.DataFrame({'konk_bl': val_blue, 'konk_bro': val_brown, 'konk_gre': val_green, 'konk_avg': val_avg})
+        df_konk['konk_rest'] =  df_konk['konk_bl'] - df_konk['konk_gre']
+        df_konk = Utils_Yfinance.get_crash_points(df_konk, 'konk_bl', 'konk_avg', col_result="konk_bl_avg_crash")
+        df_konk = Utils_Yfinance.get_crash_points(df_konk, 'konk_gre', 'konk_avg', col_result="konk_gre_avg_crash")
+        df_konk = Utils_Yfinance.get_crash_points(df_konk, 'konk_gre', 'konk_bl', col_result="konk_gre_bl_crash")
 
-    df_list = [df_acc, df_chaikin, df_chopp, df_coppock, df_donchian, df_ease_move, df_force_index, df_ma_hull, df_keltner, df_mass_index, df_supertrend, df_vortex,df_vortex2]
+
+    df_list = [df_acc, df_chaikin, df_chopp, df_coppock, df_donchian, df_ease_move, df_force_index, df_ma_hull, df_keltner, df_mass_index, df_supertrend, df_vortex,df_vortex2, df_konk]
     df = df_stocks
     for dfi in df_list:
         dfi = UtilsL.replace_bat_chars_in_columns_name(dfi)
@@ -124,3 +134,69 @@ def get_py_TI_indicator(df_stocks, cos_cols = None):
     # df.columns = map(UtilsL.replace_bat_chars_in_columns,df, df.columns)
     # [UtilsL.replace_bat_chars_in_columns(dfi, str(col)) for col in dfi.columns.values]
     return df
+
+
+
+import talib
+# https://es.tradingview.com/script/lLFiT3av/
+# Blai5 Koncorde by manboto copy
+def get_konkorde_params(df_stocks):
+    # df['calc_nvi'] =  df.ta.nvi( cumulative=True, append=False) #calc_nvi(df)
+    # tprice=ohlc4
+    tprice = (df_stocks['Open'] + df_stocks['High'] + df_stocks['Low'] + df_stocks['Close']) / 4
+    # lengthEMA = input(255, minval=1)
+    # pvi = calc_pvi()
+    # df['calc_pvi'] = df.ta.pvi( cumulative=True, append=False) #calc_pvi(df)
+    pvi = df_stocks.ta.nvi(cumulative=True, append=False)  # calc_pvi(df)
+    m = 15
+    # pvim = ema(pvi, m)
+    pvim = talib.EMA(pvi, timeperiod=m)
+    # pvimax = highest(pvim, 90)
+    # pvimax = lowest(pvim, 90)
+    pvimax = pvim.rolling(window=90).max()  # .shift(-89)
+    pvimin = pvim.rolling(window=90).min()  # .shift(-89)
+    # oscp = (pvi - pvim) * 100/ (pvimax - pvimin)
+    oscp = (pvi - pvim) * 100 / (pvimax - pvimin)
+    # nvi =calc_nvi()
+    # nvim = ema(nvi, m)
+    # nvimax = highest(nvim, 90)
+    # nvimin = lowest(nvim, 90)
+    # azul = (nvi - nvim) * 100/ (nvimax - nvimin)
+    nvi = df_stocks.ta.nvi(cumulative=True, append=False)  # calc_nvi(df)
+    nvim = talib.EMA(nvi, timeperiod=15)
+    nvimax = nvim.rolling(window=90).max()  # .shift(-89)
+    nvimin = nvim.rolling(window=90).min()  # .shift(-89)
+    val_blue = (nvi - nvim) * 100 / (nvimax - nvimin)
+    xmf = talib.MFI(df_stocks['High'], df_stocks['Low'], df_stocks['Close'], df_stocks['Volume'], timeperiod=14)
+    # mult=input(2.0)
+    basis = talib.SMA(tprice, 25)
+    dev = 2.0 * talib.STDDEV(tprice, 25)
+    upper = basis + dev
+    lower = basis - dev
+    # OB1 = (upper + lower) / 2.0
+    # OB2 = upper - lower
+    # BollOsc = ((tprice - OB1) / OB2 ) * 100
+    # xrsi = rsi(tprice, 14)
+    OB1 = (upper + lower) / 2.0
+    OB2 = upper - lower
+    BollOsc = ((tprice - OB1) / OB2) * 100
+    xrsi = talib.RSI(tprice, 14)
+
+    # calc_stoch(src, length,smoothFastD ) =>
+    #     ll = lowest(low, length)
+    #     hh = highest(high, length)
+    #     k = 100 * (src - ll) / (hh - ll)
+    #     sma(k, smoothFastD)
+    def calc_stoch(src, length, smoothFastD):
+        ll = df_stocks['Low'].rolling(window=length).min()
+        hh = df_stocks['High'].rolling(window=length).max()
+        k = 100 * (src - ll) / (hh - ll)
+        return talib.SMA(k, smoothFastD)
+
+    stoc = calc_stoch(tprice, 21, 3)
+    # stoc = py_ti.stochastic(tprice, 21, 3)
+    val_brown = (xrsi + xmf + BollOsc + (stoc / 3)) / 2
+    val_green = val_brown + oscp
+    val_avg = talib.EMA(val_brown, timeperiod=m)
+    return val_blue, val_brown, val_green,val_avg
+
