@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import  glob, re
+import os
 
 import Feature_selection_json_columns
 import Model_predictions_handle
@@ -65,7 +66,7 @@ def __get_r_eval_TF_accuracy_from_csv_result(df_eval):
 
 def get_list_good_models(df_result_all ,groupby_colum , path = None):
     THORSHOOL_VALID_MODEL_down = 0.32 # tiene que tener mas que esto para ser valido
-    THORSHOOL_VALID_MODEL_TF_down = 0.18  # 0.25 + 0.5 para indicar que solo se recogen los mayores de 75
+    THORSHOOL_VALID_MODEL_TF_down = 0.19  # 0.25 + 0.5 para indicar que solo se recogen los mayores de 75
     THORSHOOL_VALID_MODEL_up = 0.5
     THORSHOOL_VALID_MODEL_TF_epochs = 19
 
@@ -113,6 +114,11 @@ def get_list_good_models(df_result_all ,groupby_colum , path = None):
         list_valid_params_up = df_eval_result_paramans[df_eval_result_paramans["r_eval"] >= THORSHOOL_VALID_MODEL_up].index.values
         list_valid_params_up = [col for col in list_valid_params_up if col.startswith('r_')]
         dict_json["list_good_params_up"] = list_valid_params_up
+
+        #Remove files duplicates
+        splited_path = path.split('/')
+        list_files_duplicates = [filename for filename in os.listdir('/'.join(splited_path[:2])) if filename.startswith(splited_path[2]) and filename.endswith(".json") ]
+        [os.remove(os.path.join('/'.join(splited_path[:2]), f)) for f in list_files_duplicates]
 
         path = path + "_groupby_" + groupby_colum + "_" + str(int(scoring_sum * 100)) + ".json"
         with open(path, 'w') as fp:
