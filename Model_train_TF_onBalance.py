@@ -14,7 +14,7 @@ import a_manage_stocks_dict
 #     patience=9,
 #     mode='auto',#min_delta=1 By default, any change in the performance measure, no matter how fractional, will be considered an improvement
 #     restore_best_weights=True)
-from Utils.Utils_model_predict import __print_csv_accuracy_loss_models
+from Utils.Utils_model_predict import __print_csv_accuracy_loss_models, get_model_summary_format
 
 
 def get_EarlyStopping(model_h5_name):
@@ -67,7 +67,8 @@ def train_TF_onBalance_One_dimension(columns_selection  , model_h5_name   , path
     neg, pos = np.bincount(df[Y_TARGET])
     initial_bias = np.log([pos / neg])
     model = ModelDefinition(shape_inputs_m=train_features.shape[-1], num_features_m=None).get_dicts_models_One_dimension()[type_model_dime]
-    print(model.summary())
+    print(get_model_summary_format(model))
+
     results = model.evaluate(train_features, train_labels, batch_size=BATCH_SIZE, verbose=2)
     print("Loss: {:0.4f}  without output_bias ".format(results[0]))
     # model.predict(train_features[:10])
