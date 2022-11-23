@@ -27,6 +27,10 @@ class JsonColumns:
         with open(self.path) as handle:
             dict_best_feat = json.loads(handle.read())['index']  # TODO remove 'index from json
         self.low1 = dict_best_feat.pop('1', None)  # borro la primera por no saturar
+        # For wildcard files that combine multiple actions
+        if  "@" in self.path:
+            NUM_VGOOD = 26
+            NUM_GOOD = 11
 
         {k: self.vgood16.extend(v) for k, v in dict_best_feat.items() if NUM_VGOOD <= int(k)}
         {k: self.good9.extend(v) for k, v in dict_best_feat.items() if NUM_VGOOD > int(k) >= NUM_GOOD}
