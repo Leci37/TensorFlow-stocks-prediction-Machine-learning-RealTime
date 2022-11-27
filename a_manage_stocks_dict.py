@@ -1,6 +1,7 @@
 """https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 
 from enum import Enum
+Y_TARGET = 'buy_sell_point'
 
 # **DOCU**
 # 0.3 In the file a_manage_stocks_dict.py all the configurations are stored, take a look and know where it is.
@@ -30,7 +31,7 @@ DICT_COMPANYS = {
         ["DBX", "PTON", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
     "@FOLO3": #"META", ERROR no buy points "GOOG", "MSFT", "TSLA",
         [ "GOOG", "MSFT", "TSLA","UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
-#"PTON", error callearly no se xq
+                #"PTON", error callearly no se xq
          #[  "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
     "@CHIC":
         [ "ATHE", "MU", "CRM", "SNPS", "DHI", "MPWR", "CZR", "NOW", "BBWI", "DXCM", "TER", "KLAC", "ALGN", "CARV", "UONE", "SPG", "STAG", "O", "PSEC"],
@@ -39,6 +40,8 @@ DICT_COMPANYS = {
     }
 
 PATH_REGISTER_RESULT_REAL_TIME = "d_result/prediction_real_time.csv"
+MIN_SCALER = 0
+MAX_SCALER = 1
 
 class MODEL_TYPE_COLM(Enum):
     VGOOD = "_vgood16_"
@@ -65,27 +68,28 @@ class Op_buy_sell(ExtendedEnum):
     POS = "pos"
     NEG = "neg"
 
-class MODEL_TF_DENSE_TYPE(Enum):
+class MODEL_TF_DENSE_TYPE_MULTI_DIMENSI(Enum):
     @classmethod
     def list_values(cls):
         return list(map(lambda c: c.value, cls))
     @classmethod
     def list(cls):
         return list(map(lambda c: c, cls))
-    SIMP_DENSE28 = "28"
-    SIMP_DENSE64 = "64"
-    SIMP_DENSE128 =  "128"
+    SIMP_DENSE28 = "mult_28"
+    SIMP_DENSE64 = "mult_64"
+    SIMP_DENSE128 =  "mult_128"
+    SIMP_CONV2 = "mult_conv2"
+    SIMP_CONV	= "mult_conv"
     SIMP_CORDO	= "_simp_cordo"
-    SIMP_DENSE	= "_simp_dense"
-    # MULT_DENSE	= "_mult_dense"
-    SIMP_CONV	= "_simp_conv"
-    # MULT_LINEAR	= "_mult_linear"
-    # MULT_DENSE2	= "_mult_dense2"
-    # MULT_CONV	= "_mult_conv"
-    # MULT_LSTM	= "_mult_lstm"
-    ##### SIMPL_BIDI	= "_simpl_bidi"
+    #SIMP_DENSE	= "_simp_dense"
+    #MULT_DENSE	= "_mult_dense"
+    MULT_LINEAR	= "mult_linear"
+    MULT_DENSE2	= "mult_dense2"
+    #MULT_CONV	= "_mult_conv" #error al save()
+    MULT_LSTM	= "mult_lstm"  #  MAÑANA
+    ####SIMPL_BIDI	= "_simpl_bidi"
     # MULT_TIME	= "_mult_time"
-    MULT_GRU	= "_mult_gru"
+    MULT_GRU	= "_mult_gru" #  MAÑANA
 
 
 class MODEL_TF_DENSE_TYPE_ONE_DIMENSI(Enum):
@@ -101,6 +105,16 @@ class MODEL_TF_DENSE_TYPE_ONE_DIMENSI(Enum):
 
 #In case of does not have a value form webull.com , the tool to obtains news code: Utils/Volume_WeBull_get_tikcers.py
 DICT_WEBULL_ID = {
+    #@CRPTO
+    "BTC-USD" : 950160802,
+    "ETH-USD" : 950160804,
+    "DASH-USD" : 950181555,
+    "LTC-USD" : 950160801,
+    "ADA-USD" : 950185924,
+    "XLM-USD" : 950181553,
+    "ZEC-USD" : 950181635,
+    "LINK-USD" : 950188154,
+    "DOGE-USD" : 950181551,
     #@FOLO3
     "UPST" : 950177837,
     "MELI" : 913323930,
