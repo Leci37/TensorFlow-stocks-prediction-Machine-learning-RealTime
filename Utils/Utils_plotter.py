@@ -246,6 +246,7 @@ def plot_confusion_matrix_cm_OUT(cf_matrix, path = None, title_str ='Seaborn Con
     labels = np.asarray(labels).reshape(2,2)
 
     cm_sum = np.sum(cf_matrix, axis=1, keepdims=True)
+    np.seterr(divide='ignore', invalid='ignore')
     cm_perc = cf_matrix / cm_sum.astype(float) * 100
     annot = np.empty_like(cf_matrix).astype(str)
     nrows, ncols = cf_matrix.shape
@@ -450,3 +451,4 @@ def plot_weights_and_visualize():
 
     plt.title("Count times values:\n")
     plt.savefig("weights and visualize.png")
+
