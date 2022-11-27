@@ -1,8 +1,29 @@
 """https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
+import pandas as pd
+import tensorflow as tf
+from tensorflow import keras
+from keras.backend import set_session
+# Allow memory growth for the GPU
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# Assume that you have 12GB of GPU memory and want to allocate ~4GB:
+gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
+sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+
+# gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+# sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+# config = tf.ConfigProto()
+# config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+# config.log_device_placement = True  # to log device placement (on which device the operation ran)
+# sess = tf.Session(config=config)
+# set_session(sess)  # set this TensorFlow session as the default session for Keras
+
 import Feature_selection_json_columns
 import Model_train_TF_onBalance
 import Model_train_sklearn_XGB
+import Model_train_TF_multi_onBalance
 import a_manage_stocks_dict
+from Data_multidimension import Data_multidimension
 
 from Utils.UtilsL import bcolors
 
@@ -40,6 +61,34 @@ def train_model_with_custom_columns(name_model, columns_list, csv_file_SCALA, op
     print("\nRandomForestClassifier")
     Model_train_sklearn_XGB.train_RandomForestClassifier(X_train, X_test, y_train, y_test, SAV_surname)
 
+
+
+def train_MULTI_model_with_custom_columns(name_model, columns_list, csv_file_SCALA, op_buy_sell : a_manage_stocks_dict.Op_buy_sell):
+    columns_selection = ['Date', Y_TARGET, 'ticker'] + columns_list
+
+    #LOAD
+    multi_data = Data_multidimension(columns_selection, op_buy_sell, path_csv_a= csv_file_SCALA)
+
+    df_result = pd.DataFrame()
+    list_multi = a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_MULTI_DIMENSI.list()
+    # list_multi = [a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_MULTI_DIMENSI.MULT_DENSE2 , a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_MULTI_DIMENSI.SIMP_DENSE128]
+    for type_mo in list_multi : #a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_MULTI_DIMENSI.list(): #a_manage_stocks_dict.MODEL_TF_DENSE_TYPE.list():
+        model_h5_name_k = "TFm_" + name_model + type_mo.value+'.h5'
+        print(bcolors.OKBLUE + "\t\t Train "+model_h5_name_k + bcolors.ENDC)
+        try:
+            df_result_pers = Model_train_TF_multi_onBalance.train_TF_Multi_dimension_onBalance(multi_data=multi_data,model_h5_name= model_h5_name_k, model_type=type_mo)
+            df_result['TFm_' + name_model + type_mo.value] = df_result_pers[0]
+            df_result['TFm_' + name_model + type_mo.value+"_per"] = df_result_pers["per_acert"]
+        except Exception as ex:
+            df_result['r_TFm_' + name_model + type_mo.value] = -1
+            print("Exception MULTI ", ex)
+
+    df_result.to_csv("Models/TF_multi/" + name_model + "_per_score.csv", sep='\t')
+    print("Path: Models/TF_multi/" + name_model + "_per_score.csv")
+        # except Exception as ex:
+        #     print("Exception MULTI ")
+        #     print("Exception MULTI ", ex)
+    return
 #**DOCU**
 #3 train TensorFlow, XGB and Sklearn models
 # Train the models, for each action 36 different models are trained.
@@ -62,7 +111,7 @@ CSV_NAME = "@FOLO3"
 list_stocks = a_manage_stocks_dict.DICT_COMPANYS[CSV_NAME]
 opion = a_manage_stocks_dict.Option_Historical.MONTH_3_AD
 
-for S in   list_stocks:
+for S in list_stocks:
     path_csv_file_SCALA = "d_price/" + S + "_SCALA_stock_history_" + str(opion.name) + ".csv"
 
     for type_buy_sell in [ a_manage_stocks_dict.Op_buy_sell.NEG , a_manage_stocks_dict.Op_buy_sell.POS  ]:
