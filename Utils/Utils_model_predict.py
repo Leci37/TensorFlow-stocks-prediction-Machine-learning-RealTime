@@ -51,7 +51,7 @@ class CustomEarlyStopping(keras.callbacks.Callback):
         v_val_acc = logs.get('val_loss')
 
         # If BOTH the validation loss AND map10 does not improve for 'patience' epochs, stop training early.
-        if np.less(v_acc, self.best_v_loss) and np.greater(v_val_acc, self.best_v_acc):
+        if np.less(v_acc, self.best_v_loss) or np.greater(v_val_acc, self.best_v_acc):
             self.best_v_loss = v_acc
             self.best_v_acc = v_val_acc
             self.wait = 0
@@ -181,10 +181,28 @@ def df_to_df_multidimension_array(dataframe, BACHT_SIZE_LOOKBACK):
     return return_label, return_feature
 
 
+from sklearn.preprocessing import MinMaxScaler
+from imblearn.combine import SMOTETomek
+def prepare_to_split_SMOTETomek_and_scaler01(df):
+    smote_tomek = SMOTETomek('all', random_state=1)  # minority  majority
+    X_smt, y_smt = smote_tomek.fit_resample(df.drop(columns=[Y_TARGET]), df[Y_TARGET])
+    X_smt[Y_TARGET] = y_smt
+    df = X_smt
+
+    sc = MinMaxScaler(feature_range=(a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER))
+    array_stock = sc.fit_transform(df)
+    #np.clip Recorta (limita) los valores de una matriz.
+    # Dado un intervalo, los valores fuera del intervalo se recortan a
+    # los bordes del intervalo.  Por ejemplo, si se especifica un intervalo de ``[0, 1]``
+    array_stock = np.clip(array_stock, a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER)
+    df = pd.DataFrame(array_stock, columns=df.columns)
+    return df
+
 def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point', BACHT_SIZE_LOOKBACK = None, will_shuffle = False):
+
     # Use a utility from sklearn to split and shuffle your dataset.
-    train_df, test_df = train_test_split(cleaned_df, test_size = 0.28, shuffle=will_shuffle)
-    train_df, val_df = train_test_split(train_df, test_size = 0.12, shuffle=will_shuffle)
+    train_df, test_df = train_test_split(cleaned_df, test_size = 0.16, shuffle=will_shuffle)
+    train_df, val_df = train_test_split(train_df, test_size = 0.32, shuffle=will_shuffle)
 
     # Form np arrays of labels and features.
     if BACHT_SIZE_LOOKBACK is not None:
@@ -197,13 +215,6 @@ def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point', BACHT_S
 
     bool_train_labels, test_features, test_labels, train_features, train_labels, val_features, val_labels = __cast_numpy_array(label_name, test_df, train_df, val_df)
 
-    scaler = StandardScaler()
-    train_features = scaler.fit_transform(train_features)
-    val_features = scaler.transform(val_features)
-    test_features = scaler.transform(test_features)
-    train_features = np.clip(train_features, -5, 5)
-    val_features = np.clip(val_features, -5, 5)
-    test_features = np.clip(test_features, -5, 5)
 
     __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
     return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
@@ -317,7 +328,7 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
         print("No hay valores positivos en para predecir ValueError: 'a' cannot be empty unless no samples are taken")
         raise "No hay valores positivos en para predecir ValueError: 'a' cannot be empty unless no samples are taken"
     res_pos_labels = pos_labels[choices]
-    res_pos_features.shape
+    # res_pos_features.shape
     resampled_features = np.concatenate([res_pos_features, neg_features], axis=0)
     resampled_labels = np.concatenate([res_pos_labels, neg_labels], axis=0)
     order = np.arange(len(resampled_labels))
@@ -330,10 +341,9 @@ def get_resampled_ds_onBalance(train_features, train_labels, bool_train_labels, 
     and merge them. See [the tf.data guide](../../guide/data.ipynb) for more examples.
     """
     BUFFER_SIZE = 100000
-
     def make_ds(features, labels):
         ds = tf.data.Dataset.from_tensor_slices((features, labels))  # .cache()
-        ds = ds.shuffle(BUFFER_SIZE).repeat()
+        ds = ds.shuffle(BUFFER_SIZE).repeat() # esto tiene sentido??
         return ds
 
     pos_ds = make_ds(pos_features, pos_labels)
@@ -406,3 +416,9 @@ def __print_csv_accuracy_loss_models(MODEL_FOLDER_TF, model_h5_name, resampled_h
     pd.DataFrame(resampled_history.history).round(3).to_csv(
         MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv", sep="\t", index=None)
     print("Statistics: " +MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv")
+
+
+    accuracy = "{:.2f}".format(resampled_history.history['accuracy'][-1] * 100)
+    loss = "{:.2f}".format(resampled_history.history['loss'][-1])
+    epochs = str(resampled_history.epoch[-1])
+    return accuracy , loss , epochs
