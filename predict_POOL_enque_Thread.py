@@ -9,6 +9,7 @@ import traceback
 from sklearn.preprocessing import MinMaxScaler
 
 import Model_predictions_handle_Nrows
+import a_manage_stocks_dict
 import ztelegram_send_message
 from LogRoot.Logging import Logger
 from Utils import Utils_col_sele, UtilsL
@@ -209,7 +210,7 @@ def producer():
     Logger.logr.info(' Producer: Done')
 
 
-sc = MinMaxScaler(feature_range=(-100, 100))
+sc = MinMaxScaler(feature_range=(a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER))
 NUM_LAST_REGISTERS_PER_STOCK = 6
 
 COUNT_THREAD = 4
@@ -244,6 +245,7 @@ def consumer(int_thread):
 
         Logger.logr.info(" completed cycle    Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S') + " stoks: "+ " ".join(list_pro))
         time.sleep(int_thread *15)
+        UtilsL.thread_list_is_alive([producer_thr, consumer_thr_1, consumer_thr_2],producer,consumer )
     Logger.logr.info(" Consumer: Done"+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
 
@@ -260,17 +262,24 @@ def consumer(int_thread):
 queue = QueueMap()
 # start the producer
 ztelegram_send_message.send_mesage_all_people("<pre> START: "+datetime.today().strftime('%Y-%m-%d %H:%M:%S') +" </pre>\nStocks actions to be monitored: \n"+" ".join(list_stocks)+" ")
-producer = Thread(target=producer, args=(), name='PROD')
-producer.start()
+producer_thr = Thread(target=producer, args=(), name='PROD')
+producer_thr.start()
 time.sleep(2)
 
 # start the consumer
 # Creating 3 threads that execute the same function with different parameters
-consumer_1 = threading.Thread(target=consumer, args=(1,), name='CONS_1')
-consumer_2 = threading.Thread(target=consumer, args=(2,), name='CONS_2')
+consumer_thr_1 = threading.Thread(target=consumer, args=(1,), name='CONS_1')
+consumer_thr_2 = threading.Thread(target=consumer, args=(2,), name='CONS_2')
 # # consumer_3 = threading.Thread(target=consumer, args=("[3333]",))
 # # Start the threads
-consumer_1.start()
-consumer_2.start()
+consumer_thr_1.start()
+consumer_thr_2.start()
 # consumer_3.start()
 
+# while True:
+#     time.sleep(20)
+#     thread_list_is_alive([producer_thr, consumer_thr_1, consumer_thr_2])
+
+producer_thr.join()
+consumer_thr_1.join()
+consumer_thr_2.join()
