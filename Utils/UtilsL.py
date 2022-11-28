@@ -1,3 +1,5 @@
+from threading import Thread
+
 import pandas as pd
 import numpy as np
 import re
@@ -333,3 +335,21 @@ def union_3last_rows_to_one_OLHLV(df_S_raw):
     df_S_raw['Close'] = df_S_raw['Close']
     df_S_raw['Volume'] = df_S_raw['Volume'].rolling(window=3).sum().shift(-2)
     return df_S_raw
+
+
+def thread_list_is_alive(list_thread,producer,consumer ):
+    # list_is_alive = [t for t in list_thread if not t.is_alive()]
+    list_is_alive =[]
+    for thr in  list_thread:
+        if thr.is_alive():
+            list_is_alive.append(True)
+        else:
+            Logger.logr.warning(" The thread is not alive, proceed to restart.  Name: " + str(thr.name))
+            list_is_alive.append(False)
+            if thr.name.startswith("PROD"):
+                producer_thr = Thread(target=producer, args=(), name='PROD_AU')
+                producer_thr.start()
+            if thr.name.startswith("CONS"):
+                consumer_thr_1 = Thread(target=consumer, args=(1,), name='CONS_AU')
+                consumer_thr_1.start()
+    return list_is_alive
