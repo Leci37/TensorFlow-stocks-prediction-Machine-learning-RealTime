@@ -21,14 +21,14 @@ def get_a_model_to_use(stock_id):
     list_models_pos_neg = {}
     list_score_POS = Model_predictions_handle.get_dict_scoring_evaluation(stock_id, Op_buy_sell.POS)['list_good_params_down']
     list_score_POS_TF = [col for col in list_score_POS if col.startswith('r_TF')]
-    if len(list_score_POS) <= NUM_MIN_MODLES or len(list_score_POS_TF) < NUM_MIN_MODLES_TF:
+    if len(list_score_POS) <= NUM_MIN_MODLES and len(list_score_POS_TF) < NUM_MIN_MODLES_TF:
         Logger.logr.info("Los modelos POS presentes son menores de:" + str(NUM_MIN_MODLES) + ", or las TF son menores de " + str(NUM_MIN_MODLES_TF) + " no se realiza prediccion STOCK: " + stock_id)
     else:
         list_models_pos_neg[stock_id +"_"+Op_buy_sell.POS.name] = list_score_POS
 
     list_score_NEG = Model_predictions_handle.get_dict_scoring_evaluation(stock_id, Op_buy_sell.NEG)['list_good_params_down']
     list_score_NEG_TF = [col for col in list_score_NEG if col.startswith('r_TF')]
-    if len(list_score_NEG) <= NUM_MIN_MODLES or len(list_score_NEG_TF) < NUM_MIN_MODLES_TF :
+    if len(list_score_NEG) <= NUM_MIN_MODLES and len(list_score_NEG_TF) < NUM_MIN_MODLES_TF :
         Logger.logr.info("Los modelos NEG presentes son menores de:" + str(NUM_MIN_MODLES) + ", or las TF son menores de " + str(NUM_MIN_MODLES_TF) + " no se realiza prediccion STOCK: " + stock_id)
     else:
         list_models_pos_neg[stock_id +"_"+Op_buy_sell.NEG.name] = list_score_NEG
