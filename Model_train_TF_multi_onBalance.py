@@ -21,32 +21,32 @@ from Utils.Utils_model_predict import __print_csv_accuracy_loss_models, get_mode
 from Data_multidimension import Data_multidimension
 
 Y_TARGET = 'buy_sell_point'
-EPOCHS = 160
-BATCH_SIZE = 32
+EPOCHS = 90
+BATCH_SIZE = 64
 MODEL_FOLDER_TF_MULTI = "Models/TF_multi/"
 
 
 #DATOS desequilibrados https://www.tensorflow.org/tutorials/structured_data/imbalanced_data
 def train_TF_Multi_dimension_onBalance(multi_data: Data_multidimension, model_h5_name, model_type : a_manage_stocks_dict.MODEL_TF_DENSE_TYPE_MULTI_DIMENSI):
 
-    array_aux_np, train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels, columns_df = multi_data.get_all_data()
+    array_aux_np, train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels = multi_data.get_all_data()
     # TRAIN
     neg, pos = np.bincount(array_aux_np) #(df[Y_TARGET])
     initial_bias = np.log([pos / neg])
-    imput_shape = (train_features.shape[1], train_features.shape[2])
+
     resampled_steps_per_epoch = np.ceil(2.0 * neg / BATCH_SIZE)
     early_stopping = Utils_model_predict.CustomEarlyStopping(patience=8)
 
-    model = ModelDefinition(shape_inputs_m=imput_shape,num_features_m=len(columns_df)).get_dicts_models_multi_dimension()[model_type]
+    model = multi_data.get_dicts_models_multi_dimension(model_type)
     model_history = model.fit(
-          train_features, train_labels ,
-        epochs=EPOCHS,
+          x=train_features, y=train_labels ,
+          epochs=EPOCHS,
           steps_per_epoch=resampled_steps_per_epoch,
           callbacks=[early_stopping],  # callbacks=[early_stopping, early_stopping_board],
-          validation_data=(val_features, val_labels))
+          validation_data=(val_features, val_labels),  verbose=0)
 
 
-    accuracy , loss , epochs = __print_csv_accuracy_loss_models(MODEL_FOLDER_TF_MULTI, model_h5_name, model_history)
+    accuracy , loss , epochs = __print_csv_accuracy_loss_models(MODEL_FOLDER_TF_MULTI, model_h5_name, model_history, multi_data.cols_df.values)
     model.save(MODEL_FOLDER_TF_MULTI + model_h5_name)
     print(" Save model Type MULTI TF: " + model_type.value +"  Path:  ", MODEL_FOLDER_TF_MULTI + model_h5_name)
 
@@ -64,14 +64,15 @@ def train_TF_Multi_dimension_onBalance(multi_data: Data_multidimension, model_h5
 
 
 def __manage_get_per_results_from_predit_result(pre, test_labels, accuracy, loss, epochs):
-    series_c = pd.Series(pre).describe(percentiles=[0.25, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97,0.98]).round(4)
-    series_d = pd.Series({'acc_per': accuracy, 'loss': loss, 'epochs': epochs}, name=0)
+    df_ = pd.DataFrame({"validation": test_labels.reshape(-1, ), "result": pd.Series(pre)})
 
-    df_pres = pd.DataFrame( series_d.append(series_c) )
+    series_c = pd.Series(pre).describe(percentiles=a_manage_stocks_dict.PERCENTAGES_SCORE).round(4)
+    series_d = pd.Series({'acc_per': accuracy, 'loss': loss, 'epochs': epochs, 'positives':df_["validation"].value_counts()[1] }, name=0)
+    df_pres = pd.DataFrame(  pd.concat([series_d, series_c]))
     df_pres.insert(loc=len(df_pres.columns), column="predict_", value=-1)
     df_pres.insert(loc=len(df_pres.columns), column="acert_", value=-1)
     df_pres.insert(loc=len(df_pres.columns), column="per_acert", value=-1)
-    df_ = pd.DataFrame({"validation": test_labels.reshape(-1, ), "result": pd.Series(pre)})
+
     for idnx_per in [x for x in df_pres.index if x.endswith("%")]:
         rate_score = df_pres.at[idnx_per, 0]
         df_.insert(loc=len(df_.columns), column="predict_" + idnx_per, value=0)
