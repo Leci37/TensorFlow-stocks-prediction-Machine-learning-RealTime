@@ -40,8 +40,11 @@ DICT_COMPANYS = {
     }
 
 PATH_REGISTER_RESULT_REAL_TIME = "d_result/prediction_real_time.csv"
+PATH_REGISTER_RESULT_MULTI_REAL_TIME = "d_result/prediction_MULTI_real_time.csv"
 MIN_SCALER = 0
 MAX_SCALER = 1
+PATH_SCALERS_FOLDER = "Models/TF_multi/Scalers/"
+PERCENTAGES_SCORE = [0.25, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97,0.98]
 
 class MODEL_TYPE_COLM(Enum):
     VGOOD = "_vgood16_"
@@ -86,10 +89,10 @@ class MODEL_TF_DENSE_TYPE_MULTI_DIMENSI(Enum):
     MULT_LINEAR	= "mult_linear"
     MULT_DENSE2	= "mult_dense2"
     #MULT_CONV	= "_mult_conv" #error al save()
-    MULT_LSTM	= "mult_lstm"  #  MAÑANA
+    MULT_LSTM	= "mult_lstm"
     ####SIMPL_BIDI	= "_simpl_bidi"
     # MULT_TIME	= "_mult_time"
-    MULT_GRU	= "_mult_gru" #  MAÑANA
+    MULT_GRU	= "_mult_gru"
 
 
 class MODEL_TF_DENSE_TYPE_ONE_DIMENSI(Enum):
