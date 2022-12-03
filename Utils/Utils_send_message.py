@@ -10,7 +10,7 @@ BAR_DOWN = "📉"
 BAR_SIMPLE = "📊"
 FLECHA_UP = "⬆"
 FLECHA_DOWN = "⬇"
-def get_text_alert(type_b_s):
+def get_text_alert(type_b_s:a_manage_stocks_dict.Op_buy_sell):
     text_alert = " ERROR "
     flecha_simbol = ""
     if type_b_s == a_manage_stocks_dict.Op_buy_sell.POS:
@@ -52,6 +52,33 @@ def get_string_alert_message(S, dict_pred, modles_evaluated,  type_b_s, date_det
 
     return  alert_message_html , alert_message_without_tags
 
+URL_INVESTING = "https://www.investing.com/search/?q=" #https://www.investing.com/search/?q=RIVN
+URL_WE_BULL = "https://www.webull.com/quote/nasdaq-" # "https://www.webull.com/quote/nasdaq-meli/news"
+def get_MULTI_string_alert_message(S, dictR, type_b_s:a_manage_stocks_dict.Op_buy_sell, list_model):
+    text_alert_main_b_s, flecha_simbol = get_text_alert(type_b_s)
+    url_info_inves = URL_INVESTING + S
+    url_info_webull = URL_WE_BULL + S.lower()
+
+    # s88, s93, s95, stf, names_models_r = get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s)
+
+    # **negrita** escribe el texto en negrita
+# __cursiva__ escribe el texto en cursiva
+# ```monospace``` escribe el texto en monospace
+# ~~tachado~~ escribe el texto tachado
+    #https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#message-formatting-bold-italic-code-
+    #Message Formatting (bold, italic, code, ...)
+    s1 = "<strong>"+text_alert_main_b_s + ": " + S + "</strong> "
+    s2 = "<em>" + str(dictR['Date']) + "</em>" + (flecha_simbol * 1) + "\nValue:<pre> " + str(dictR['Close']) + "</pre>\n"
+    s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n"
+    s4 = "\t   POS_score: " + str(dictR['POS_score']) + "%/"+str(dictR['POS_num'])+"\n\t   NEG_score: " + str(dictR['NEG_score']) + "%/"+str(dictR['NEG_num'])+"\n"
+    s5 = "📊Model names: <pre>\n\t" + "\n\t".join(list_model).replace("Acert_TFm_",'') + "</pre>"
+
+    alert_message_html =  (s1 + s2 + s3 + s4 + s5).replace('[', '').replace(']', '').replace('\'', '')
+    alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com', '').replace("Confidence of models:", '').replace('Investing.com', '')
+    alert_message_without_tags = alert_message_without_tags.replace('\t', ' ').replace('\n', ' ')
+
+    return  alert_message_html , alert_message_without_tags
+
 
 def get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s):
     names_models_r = ""
@@ -78,6 +105,13 @@ def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s 
         df_res.to_csv(path, sep="\t", index=None)
         print("Created : " + path)
 
+
+def register_MULTI_in_zTelegram_Registers(S, df_r, path = a_manage_stocks_dict.PATH_REGISTER_RESULT_REAL_TIME):
+    if os.path.isfile(path):
+        df_r.to_csv(path, sep="\t", index=None, mode='a', header=False)
+    else:
+        df_r.to_csv(path, sep="\t", index=None)
+        print("Created MULTI : " + path)
 
 
 
