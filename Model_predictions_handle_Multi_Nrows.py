@@ -98,7 +98,7 @@ def predict_Multi_models(df_S, model_name, shape_imput_3d, scaler_name_file):
     # predict_features = predict_features[:-rows_N_original, :] #get last N rows of array
 
 
-    Logger.logr.debug(get_model_summary_format(loaded_model))
+    # Logger.logr.debug(get_model_summary_format(loaded_model))
     BATCH_SIZE = 256
     predictions_resampled = loaded_model.predict(predict_features, batch_size=BATCH_SIZE)
     # pre = loaded_model.predict(predict_features, batch_size=BATCH_SIZE).reshape(-1, )
@@ -119,7 +119,8 @@ def split_df_predict_and_df_eval(df_in_pure):
         df_eval = df_in_pure.iloc[:, :len(COLS_TO_EVAL_FIRSH + ['Date', Y_TARGET])].copy()
         df_eval = df_eval[['Date', Y_TARGET] + COLS_TO_EVAL_FIRSH]
         df_eval = df_eval[BACHT_SIZE_LOOKBACK-1:].reset_index(drop=True)
-        df_eval['Date'] = pd.to_datetime(df_eval['Date'], unit='s',  errors='coerce').dt.strftime("%Y-%m-%d %H:%M:%S")
+        if not pd.to_datetime(df_eval['Date'], unit='s',  errors='coerce').isnull().any():
+            df_eval['Date'] = pd.to_datetime(df_eval['Date'], unit='s',  errors='coerce').dt.strftime("%Y-%m-%d %H:%M:%S")
     else:
         raise ValueError("Columns have not been received in the expected order:  " + ", ".join(COLS_TO_EVAL_FIRSH + ['Date', Y_TARGET]))
 
