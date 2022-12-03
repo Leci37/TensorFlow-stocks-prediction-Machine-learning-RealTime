@@ -279,11 +279,17 @@ def clean_dataset(df):
 
 def fill_last_values_of_colum_with_previos_value(df, colum_name):
     try:
+        list_sort_columns_1 = ['ticker', 'Date']
+        list_sort_columns_2 = ['Date', 'ticker']
+        if 'ticker' not in  df.columns:
+            list_sort_columns_1 = ['Date']
+            list_sort_columns_2 = ['Date']
+
         pd.options.mode.chained_assignment = None
-        df[colum_name] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
+        df[colum_name] = df.sort_values(list_sort_columns_1, ascending=True)[[colum_name]].fillna(method='ffill')
         pd.options.mode.chained_assignment = 'warn'
         #df.loc[:, [colum_name]] = df.sort_values(['ticker', 'Date'], ascending=True)[[colum_name]].fillna(method='ffill')
-        df = df.sort_values(['Date', 'ticker'], ascending=True)
+        df = df.sort_values(list_sort_columns_2, ascending=True)
     except Exception as e:
         print(e)
     return df
