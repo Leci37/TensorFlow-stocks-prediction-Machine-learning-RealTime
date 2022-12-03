@@ -101,8 +101,62 @@ def send_alert_and_register(S, df_b_s, type_b_s):
 
         send_mesage_all_people(message_aler)
 
+DICT_SCORE_RATE = {
+    "0" : 90,
+    "1" : 90,
+    "2" : 145,
+    "3" : 205,
+    "4" : 400
+}
 
+def send_MULTI_alert_and_register(S, df_mul_r):
+    list_models_to_predict_POS = [x for x in df_mul_r.columns if x.startswith("Acert_TFm_" + S + "_" + Op_buy_sell.POS.value)]
+    list_models_to_predict_NEG = [x for x in df_mul_r.columns if x.startswith("Acert_TFm_" + S + "_" + Op_buy_sell.NEG.value)]
 
+    if (not list_models_to_predict_POS) and (not list_models_to_predict_NEG):
+        Logger.logr.warning("There are no models of class columns_json in the list_good_params list, columns_json, optimal enough, we pass to the next one. Stock: " + S)
+        return
+
+    df_mul = df_mul_r[['Date', 'buy_sell_point', 'Close', 'Volume'] + list_models_to_predict_POS + list_models_to_predict_NEG].iloc[-2:]
+    # df_mul[list_models_to_predict_POS] = df_mul[list_models_to_predict_POS].map(lambda x: x.replace("%", "").replace(" ", "0")).astype('int')
+    # df_mul[list_models_to_predict_NEG] = df_mul[list_models_to_predict_NEG].map(lambda x: x.replace("%", "").replace(" ", "0")).astype('int')
+    for c in list_models_to_predict_POS + list_models_to_predict_NEG:
+        df_mul[c] = df_mul[c].str.replace("%", "").replace(" ", "0").astype('int')
+
+    LIST_COLS_TO_CSV = ['Date',"ticker", 'buy_sell_point', 'Close', 'Volume', "POS_score","POS_num",  "NEG_score", "NEG_num", "POS_models","NEG_moldel" ]
+
+    df_mul.insert(loc=1, column="ticker", value=S)
+    df_mul['ticker'] = df_mul['ticker'].map(lambda x: x.ljust(7-len(x)) ) #all columns with 6 char
+    for L in ["NEG_moldel" , "POS_models" ,"NEG_num", "NEG_score", "POS_num","POS_score"]:
+        df_mul.insert(loc=4, column=L, value=-1)
+
+    df_mul["NEG_score"] = df_mul[list_models_to_predict_NEG].sum(axis=1)
+    df_mul["POS_score"] = df_mul[list_models_to_predict_POS].sum(axis=1)
+    df_mul["NEG_num"] = str(len(list_models_to_predict_NEG))+']'
+    df_mul["POS_num"] = str(len(list_models_to_predict_POS))+']'
+    df_mul["NEG_moldel"] = ", ".join(list_models_to_predict_NEG).replace("Acert_TFm_",'')
+    df_mul["POS_models"] = ", ".join(list_models_to_predict_POS).replace("Acert_TFm_",'')
+    # df_mul["NEG_score"] = str(df_mul[list_models_to_predict_NEG].sum(axis=1)) + "/" + str(len(list_models_to_predict_NEG))
+    # ['Date', 'buy_sell_point', 'Close', 'Volume', "POS_score", "NEG_score"]
+
+    Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV], path = a_manage_stocks_dict.PATH_REGISTER_RESULT_MULTI_REAL_TIME)
+
+    if len(list_models_to_predict_POS) > 0:
+        score_POS = DICT_SCORE_RATE[str(len(list_models_to_predict_POS))]
+        if (df_mul["POS_score"][1:] >= score_POS).any() or (df_mul["POS_score"][1:] >= score_POS).any() :# or 1 == 1 :
+            message_aler , alert_message_without_tags = Utils_send_message.get_MULTI_string_alert_message(S,df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.POS, list_models_to_predict_POS )
+            Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV],path="zSent_MULTI_Telegram_Registers.csv")
+            send_mesage_all_people(message_aler)
+
+    if len(list_models_to_predict_NEG) > 0:
+        score_NEG = DICT_SCORE_RATE[str(len(list_models_to_predict_NEG))]
+        if (df_mul["NEG_score"][1:] >= score_NEG).any() or (df_mul["NEG_score"][1:] >= score_NEG).any() :# or 1 == 1 :
+            message_aler , alert_message_without_tags = Utils_send_message.get_MULTI_string_alert_message(S, df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.NEG, list_models_to_predict_NEG )
+            # df_registre = pd.concat([df_registre, pd.DataFrame([[date_detect, S, type_b_s.name, "{:.2f}".format(value_detect) , alert_message_without_tags ]], columns=COL_GANAN)  ],ignore_index=True)  # añadir fila add row
+            Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV],path="zSent_MULTI_Telegram_Registers.csv")
+            send_mesage_all_people(message_aler)
+
+    print("START ciclo ")
 
 # def monitor_all_stocks_and_send_alerts():
 #     print("START ciclo ")
