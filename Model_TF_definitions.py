@@ -76,9 +76,9 @@ class ModelDefinition:
             self.output_bias_k = keras.initializers.Constant(self.output_bias)
         model = keras.Sequential([
             keras.layers.Dense(28, activation=ACTIVATION_1, input_shape=self.shape_inputs),
-            Flatten(),
             keras.layers.Dense(8, activation=ACTIVATION_2_ReLU),
             keras.layers.Dropout(0.2),
+            Flatten(),
             keras.layers.Dense(1, activation='sigmoid', bias_initializer=self.output_bias_k),
         ])
         return self.__compiler_multi_dimensions(model)
@@ -89,10 +89,10 @@ class ModelDefinition:
         model = keras.Sequential([
             keras.layers.Dense(64, activation=ACTIVATION_1, input_shape=self.shape_inputs),
             keras.layers.Dense(32, activation=ACTIVATION_2_ReLU),
-            Flatten(),
             keras.layers.Dropout(0.2),
             keras.layers.Dense(8, activation=ACTIVATION_1),
             keras.layers.Dropout(0.2),
+            Flatten(),
             keras.layers.Dense(1, activation='sigmoid', bias_initializer=self.output_bias_k),
         ])
         return self.__compiler_multi_dimensions(model)
@@ -104,11 +104,11 @@ class ModelDefinition:
             keras.layers.Dense(128, activation=ACTIVATION_1, input_shape=self.shape_inputs),
             keras.layers.Dropout(0.1),
             keras.layers.Dense(64, activation=ACTIVATION_2_ReLU),
-            Flatten(),
             keras.layers.Dropout(0.2),
             keras.layers.Dense(32, activation=ACTIVATION_1),
             keras.layers.Dense(16, activation=ACTIVATION_1),
             keras.layers.Dropout(0.2),
+            Flatten(),
             keras.layers.Dense(1, activation='sigmoid', bias_initializer=self.output_bias_k),
         ])
         return self.__compiler_multi_dimensions(model)
@@ -122,7 +122,8 @@ class ModelDefinition:
         # * units = add 100 neurons is the dimensionality of the output space
         # * return_sequences = True to stack LSTM layers so the next LSTM layer has a three-dimensional sequence input
         # * input_shape => Shape of the training dataset
-        model.add(tf.keras.layers.LSTM(units=64, return_sequences=True, input_shape=self.shape_inputs))
+        model.add(tf.keras.layers.Lambda(lambda x: x[:, -1:, :], input_shape=self.shape_inputs) )
+        model.add(tf.keras.layers.LSTM(units=64, return_sequences=True))
         # 20% of the layers will be dropped
         # model.add( tf.keras.layers.Dense(self.OUT_STEPS * self.num_features, kernel_initializer=tf.initializers.zeros(), activation=ACTIVATION_2_ReLU) )
         model.add(tf.keras.layers.Dropout(0.2))
@@ -132,7 +133,7 @@ class ModelDefinition:
         # 2nd LSTM layer
         # * units = add 50 neurons is the dimensionality of the output space
         # * return_sequences = True to stack LSTM layers so the next LSTM layer has a three-dimensional sequence input
-        model.add(tf.keras.layers.LSTM(units=32, return_sequences=True))
+        model.add(tf.keras.layers.LSTM(units=32, return_sequences=True ))
         # 20% of the layers will be dropped
         model.add(tf.keras.layers.Dropout(0.2))
         # 3rd LSTM layer
@@ -172,9 +173,10 @@ class ModelDefinition:
             self.output_bias_k = keras.initializers.Constant(self.output_bias)
         multi_step_dense = tf.keras.Sequential([
             # Shape: (time, features) => (time*features)
-            tf.keras.layers.Flatten(),
+
             tf.keras.layers.Dense(units=32, activation=ACTIVATION_1, input_shape=self.shape_inputs),
             tf.keras.layers.Dense(units=32, activation=ACTIVATION_2_ReLU),
+            tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(units=1, activation='sigmoid', bias_initializer=self.output_bias_k),
             # Add back the time dimension.
             # Shape: (outputs) => (1, outputs)
@@ -201,16 +203,16 @@ class ModelDefinition:
 
         # input_shape = keras.layers.Input(batch_shape=[self.shape_inputs, ]).input_shape()[0]
         model = Sequential()
-        model.add(keras.layers.Conv2D(64, (8, 8), input_shape=(self.shape_inputs[0], self.shape_inputs[1], 1))),
-        model.add(Flatten())
+        model.add(keras.layers.Conv2D(256, (16, 16), input_shape=(self.shape_inputs[0], self.shape_inputs[1], 1)  ,padding='same')),
         model.add(keras.layers.Activation(ACTIVATION_1))
         # model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
         model.add(keras.layers.Dense(32, activation=ACTIVATION_1)),
         # model.add(keras.layers.Conv2D(32, (1, 1)))
         model.add(keras.layers.Activation(ACTIVATION_2_ReLU))
         # model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-        #
+
         # model.add(keras.layers.Conv2D(64, (3, 3)))
+        model.add(Flatten())
         # model.add(keras.layers.Activation(ACTIVATION_1))
         # model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
         # model.add(keras.layers.Flatten())  # this converts our 3D feature maps to 1D feature vectors
@@ -285,7 +287,7 @@ class ModelDefinition:
         multi_lstm_model = tf.keras.Sequential([
             # Shape [batch, time, features] => [batch, lstm_units].
             # Adding more `lstm_units` just overfits more quickly.
-            tf.keras.layers.LSTM(64, return_sequences=False, input_shape=self.shape_inputs),
+            tf.keras.layers.LSTM(128, return_sequences=False, input_shape=self.shape_inputs),
             # Shape => [batch, out_steps*features].
             tf.keras.layers.Dense(self.OUT_STEPS * self.num_features,
                                   kernel_initializer=tf.initializers.zeros(), activation=ACTIVATION_2_ReLU),
@@ -320,10 +322,11 @@ class ModelDefinition:
         model.add(TimeDistributed(MaxPooling1D(2)))
         model.add(TimeDistributed(Conv1D(512, kernel_size=1, activation=ACTIVATION_1)))
         model.add(TimeDistributed(MaxPooling1D(2)))
-        model.add(TimeDistributed(Flatten()))
+
         model.add(Bidirectional(LSTM(200, return_sequences=True)))
         model.add(Dropout(0.25))
         model.add(Bidirectional(LSTM(200, return_sequences=False)))
+        model.add(TimeDistributed(Flatten()))
         model.add(Dropout(0.5))
         model.add(Dense(1, activation="sigmoid", bias_initializer=self.output_bias_k))
         # model.compile(optimizer='RMSprop', loss='mse')
