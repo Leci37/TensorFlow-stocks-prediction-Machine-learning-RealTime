@@ -161,7 +161,7 @@ def scaler_Raw_TF_onbalance(test_df, label_name = 'buy_sell_point'):
     return test_features,  test_labels
 
 dataX, dataY = [], []
-def df_to_df_multidimension_array(dataframe, BACHT_SIZE_LOOKBACK):
+def df_to_df_multidimension_array_3D(dataframe, BACHT_SIZE_LOOKBACK):
     global dataY, dataX
     dataX, dataY = [], []
     # https://stackoverflow.com/questions/60736556/pandas-rolling-apply-using-multiple-columns
@@ -178,6 +178,40 @@ def df_to_df_multidimension_array(dataframe, BACHT_SIZE_LOOKBACK):
     return_label = np.array(dataY)
     # Our vectorized labels https://stackoverflow.com/questions/48851558/tensorflow-estimator-valueerror-logits-and-labels-must-have-the-same-shape
     return_label = np.asarray(return_label).astype('float32').reshape((-1, 1))
+    return return_label, return_feature
+
+dataX, dataY = [], []
+def df_to_df_multidimension_array_2D(dataframe, BACHT_SIZE_LOOKBACK, will_check_reshaped = True):
+    global dataY, dataX
+    dataX, dataY = [], []
+    # https://stackoverflow.com/questions/60736556/pandas-rolling-apply-using-multiple-columns
+    def __create_tensor_values(ser):
+        global dataY, dataX
+        y_label = dataframe.at[ser.index[-1] , Y_TARGET]  # más óptimo que .loc
+        dataY.append(y_label)
+        x_data = dataframe.loc[ser.index[0]:ser.index[-1], dataframe.columns.drop(Y_TARGET)].values
+        dataX.append( x_data[::-1].reshape(1, -1) )
+        return 0
+
+    # dataframe[Y_TARGET].shift(-BACHT_SIZE_LOOKBACK).rolling(window=BACHT_SIZE_LOOKBACK).apply(__create_tensor_values,raw=False)
+    dataframe[Y_TARGET].rolling(window=BACHT_SIZE_LOOKBACK).apply(__create_tensor_values,raw=False)
+    return_feature = np.array(dataX)
+    return_label = np.array(dataY)
+    return_feature = return_feature.reshape(-1 , return_feature.shape[2] )
+
+    # Check the reshape
+    if will_check_reshaped:
+        for N_row in [return_feature.shape[0]//2, return_feature.shape[0]//3, return_feature.shape[0]//5, return_feature.shape[0]-2]:
+            arr_check  = np.array( dataframe.loc[(N_row-BACHT_SIZE_LOOKBACK+1):N_row, dataframe.columns.drop(Y_TARGET)] )[::-1].reshape(1, -1)
+            # return_feature[N_row-BACHT_SIZE_LOOKBACK+1]
+            if not (arr_check == return_feature[N_row-BACHT_SIZE_LOOKBACK+1]).all():
+                Logger.logr.error("data has not been reshaped 2D correctly ")
+                raise ValueError("df_to_df_multidimension_array_2D() - data has not been reshaped 2D correctly ")
+    # arr_check == return_feature[N_row-BACHT_SIZE_LOOKBACK+1] #.reshape(-1 , return_feature.shape[2] )
+
+
+    # Our vectorized labels https://stackoverflow.com/questions/48851558/tensorflow-estimator-valueerror-logits-and-labels-must-have-the-same-shape
+    return_label = np.asarray(return_label).astype('float32').reshape((-1,1))
     return return_label, return_feature
 
 
@@ -198,6 +232,39 @@ def prepare_to_split_SMOTETomek_and_scaler01(df):
     df = pd.DataFrame(array_stock, columns=df.columns)
     return df
 
+def prepare_to_split_SMOTETomek_01(df_feature,df_label ):
+    smote_tomek = SMOTETomek('auto', random_state=1)  # minority  majority
+    X_smt, y_smt = smote_tomek.fit_resample(df_feature, df_label)
+    # X_smt[Y_TARGET] = y_smt
+    # df = X_smt
+
+    return  X_smt, y_smt
+
+import joblib
+def scaler_min_max_array(array_raw, path_to_save = None, path_to_load = None):
+    sc = None
+    if path_to_load is not None:
+        # https://stackoverflow.com/questions/41993565/save-minmaxscaler-model-in-sklearn
+        Logger.logr.debug("Scaler will be Loaded Path: " + path_to_load)
+        sc = joblib.load(path_to_load)
+    else:
+        sc = MinMaxScaler(feature_range=(a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER))
+        sc = sc.fit(array_raw)
+
+    array_stock = sc.transform(array_raw)
+
+    if path_to_save is not None:
+        Logger.logr.debug("Scaler will be Saved Path: "+path_to_save)
+        joblib.dump(sc, path_to_save)
+
+    # np.clip Recorta (limita) los valores de una matriz.
+    # Dado un intervalo, los valores fuera del intervalo se recortan a
+    # los bordes del intervalo.  Por ejemplo, si se especifica un intervalo de ``[0, 1]``
+    array_stock = np.clip(array_stock, a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER)
+    # df = pd.DataFrame(array_stock, columns=df.columns)
+    return array_stock.astype('float')
+
+
 def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point', BACHT_SIZE_LOOKBACK = None, will_shuffle = False):
 
     # Use a utility from sklearn to split and shuffle your dataset.
@@ -206,17 +273,17 @@ def scaler_split_TF_onbalance(cleaned_df, label_name = 'buy_sell_point', BACHT_S
 
     # Form np arrays of labels and features.
     if BACHT_SIZE_LOOKBACK is not None:
-        train_labels,train_features = df_to_df_multidimension_array(train_df, BACHT_SIZE_LOOKBACK)
+        train_labels,train_features = df_to_df_multidimension_array_3D(train_df, BACHT_SIZE_LOOKBACK)
         bool_train_labels = (train_labels != 0).reshape((-1))
-        test_labels, test_features = df_to_df_multidimension_array(test_df,BACHT_SIZE_LOOKBACK)
-        val_labels, val_features = df_to_df_multidimension_array(val_df, BACHT_SIZE_LOOKBACK)
-        __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
+        test_labels, test_features = df_to_df_multidimension_array_3D(test_df, BACHT_SIZE_LOOKBACK)
+        val_labels, val_features = df_to_df_multidimension_array_3D(val_df, BACHT_SIZE_LOOKBACK)
+        log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
         return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
 
     bool_train_labels, test_features, test_labels, train_features, train_labels, val_features, val_labels = __cast_numpy_array(label_name, test_df, train_df, val_df)
 
 
-    __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
+    log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
     return train_labels, val_labels, test_labels, train_features, val_features, test_features, bool_train_labels
 
 
@@ -238,13 +305,10 @@ def __cast_numpy_array(label_name, test_df, train_df, val_df):
 # root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Validation features shape:(2192, 57)
 # root - [DEBUG]{MainThread} - __log_shapes_trains_val_data() - Test features shape:(3044, 57)
 
-def __log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels):
-    Logger.logr.info('Training labels shape:' + str(train_labels.shape))
-    Logger.logr.debug('Validation labels shape:' + str(val_labels.shape))
-    Logger.logr.debug('Test labels shape:' + str(test_labels.shape))
-    Logger.logr.debug('Training features shape:' + str(train_features.shape))
-    Logger.logr.debug('Validation features shape:' + str(val_features.shape))
-    Logger.logr.debug('Test features shape:' + str(test_features.shape))
+def log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels):
+    Logger.logr.info('Training features shape:' + str(train_features.shape) + '\t Labels shape:' + str(train_labels.shape))
+    Logger.logr.debug('Validation features shape:' + str(val_features.shape) + '\t Labels shape:' + str(val_labels.shape))
+    Logger.logr.debug('Test features shape:' + str(test_features.shape) + '\t\t Labels shape:' + str(test_labels.shape))
 
 
 def make_model_TF_onbalance(shape_features, metrics=METRICS_ALL, output_bias=None):
@@ -399,14 +463,9 @@ def get_df_for_list_of_result(df_full):
     return df_list_r
 
 
-def __print_csv_accuracy_loss_models(MODEL_FOLDER_TF, model_h5_name, resampled_history):
+def __print_csv_accuracy_loss_models(MODEL_FOLDER_TF, model_h5_name, resampled_history, columns :list):
     UtilsL.remove_files_starwith(MODEL_FOLDER_TF + model_h5_name + "_")
-    # resampled_history.model.metrics_names[1] # accuracy name
-    # resampled_history.history['accuracy'][-1]
-    # resampled_history.model.metrics_names[0] #Lost name
-    # resampled_history.history['loss'][-1]
-    # resampled_history.epoch[-1]
-    # resampled_history.params['epochs'] # 160 epos
+
     data_hist_model = resampled_history.model.metrics_names[1] + "_" + "{:.2f}".format(
         resampled_history.history['accuracy'][-1] * 100) + "%__" \
                       + resampled_history.model.metrics_names[0] + "_" + "{:.2f}".format(
@@ -421,4 +480,20 @@ def __print_csv_accuracy_loss_models(MODEL_FOLDER_TF, model_h5_name, resampled_h
     accuracy = "{:.2f}".format(resampled_history.history['accuracy'][-1] * 100)
     loss = "{:.2f}".format(resampled_history.history['loss'][-1])
     epochs = str(resampled_history.epoch[-1])
+
+    #Add columns that model use to predict:
+    with open(MODEL_FOLDER_TF + model_h5_name + "_" + data_hist_model + ".csv", 'a') as file:
+        file.write("\nColumns "+model_h5_name+":\n" + ", ".join(columns))
+
+
     return accuracy , loss , epochs
+
+#Format TFm_MELI_pos_low1_mult_28.h5
+def get_config_from_name_model(name_col_model):
+    subname = name_col_model.split("_")
+    stock = subname[1]
+    pos_neg = subname[2]
+    columns_type_sele = subname[3]
+    multi = subname[4]
+    type_multi = subname[5]
+    return stock,pos_neg,columns_type_sele, multi+"_"+type_multi
