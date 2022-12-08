@@ -2,6 +2,7 @@ import pandas as pd
 
 import Feature_selection_json_columns
 import Model_predictions_handle
+import a_manage_stocks_dict
 from Utils import Utils_model_predict
 
 #https://www.kaggle.com/code/andreanuzzo/balance-the-imbalanced-rf-and-xgboost-with-smote/notebook
@@ -39,10 +40,10 @@ def __get_has_to_seelBuy_by_Predictions_models(df_tech, S, type_buy_sell, path_c
     list_good_models =  dict_score['list_good_params_down']
     list_good_models_TF = [col for col in list_good_models if col.startswith('r_TF')]
 
-    if type_buy_sell == Op_buy_sell.POS and ( len(list_good_models) <= NUM_MIN_MODLES or len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
+    if type_buy_sell == Op_buy_sell.POS and ( len(list_good_models) <= NUM_MIN_MODLES and len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
         Logger.logr.info("The POS models present are less than: "+  str(NUM_MIN_MODLES) + ", STOCK prediction is not performed: "+  S + " Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
         return None
-    if type_buy_sell == Op_buy_sell.NEG and ( len(list_good_models) <= NUM_MIN_MODLES or len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
+    if type_buy_sell == Op_buy_sell.NEG and ( len(list_good_models) <= NUM_MIN_MODLES and len(list_good_models_TF) < NUM_MIN_MODLES_TF )  :
         Logger.logr.info("The NEG models present are less than: "+  str(NUM_MIN_MODLES) + ", STOCK prediction is not performed: "+  S + "Len: "+str(len(list_good_models)) +" Modeles: "+str(list_good_models))
         return None
 
