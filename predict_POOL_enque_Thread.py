@@ -1,4 +1,5 @@
 """https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
+import logging
 import re
 from threading import Thread
 import threading
@@ -25,7 +26,9 @@ from ztelegram_send_message import send_alert_and_register, send_exception
 # list_neg = [x.replace("_"+Op_buy_sell.NEG.name, '') for x in list_models_pos_neg.keys() if x.endswith("_" + Op_buy_sell.NEG.name)]
 # list_stocks =  set(list_pos +list_neg)
 
-df_result = pd.read_csv("Models/TF_multi/_RESULTS_multi_all.csv", index_col=0,sep='\t')
+# df_result = pd.read_csv("Models/TF_multi/_RESULTS_multi_all.csv", index_col=0,sep='\t')
+df_result = pd.read_csv("Models/TF_multi/_RESULTS_profit_multi_all.csv", index_col=0,sep='\t')
+
 
 list_pos = [x for x in df_result.columns if  "_" + Op_buy_sell.POS.value + "_" in x and  not x.endswith("_per") ]
 list_neg = [x for x in df_result.columns if  "_" + Op_buy_sell.NEG.value + "_" in x and  not x.endswith("_per") ]
@@ -34,6 +37,12 @@ regex_S = "TFm_([A-Z]{1,5}|[A-Z]{1,5}-USD)_(pos|neg)_"
 list_stocks = [re.search(regex_S, x, re.IGNORECASE).group(1) for x in list_stocks_models]
 list_stocks = set(list_stocks)
 print("Stoscks loaded: "+ ", ".join(list_stocks))
+
+#Cripto
+# list_cripto = [x for x in list_stocks if x.endswith("-USD")]
+# list_stocks = list_cripto
+# list_stocks = ['RIVN']
+
 
 
 
@@ -92,7 +101,7 @@ def producer():
 
             if not list_pro:
                 Logger.logr.info(" sleep(60 * 2) List all stock download empty")
-                time.sleep( 60 * 2.5 )
+                time.sleep( 60 * 4 )
                 break
             else:
                 Logger.logr.info(" Sleep(60) There are still values left in the Values queue list:  "+ " ".join(list_pro))
@@ -139,7 +148,7 @@ def consumer(int_thread):
 
         Logger.logr.info(" completed cycle    Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S') + " stoks: "+ " ".join(list_pro))
         time.sleep(int_thread *15)
-        UtilsL.thread_list_is_alive([producer_thr, consumer_thr_1, consumer_thr_2],producer,consumer )
+        # UtilsL.thread_list_is_alive([producer_thr, consumer_thr_1, consumer_thr_2],producer,consumer )
     Logger.logr.info(" Consumer: Done"+ " Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
 
@@ -167,13 +176,13 @@ consumer_thr_2 = threading.Thread(target=consumer, args=(2,), name='CONS_2')
 # # consumer_3 = threading.Thread(target=consumer, args=("[3333]",))
 # # Start the threads
 consumer_thr_1.start()
-consumer_thr_2.start()
+# consumer_thr_2.start()
 # consumer_3.start()
 
 # while True:
 #     time.sleep(20)
 #     thread_list_is_alive([producer_thr, consumer_thr_1, consumer_thr_2])
-
-producer_thr.join()
-consumer_thr_1.join()
-consumer_thr_2.join()
+#
+# producer_thr.join()
+# consumer_thr_1.join()
+# consumer_thr_2.join()
