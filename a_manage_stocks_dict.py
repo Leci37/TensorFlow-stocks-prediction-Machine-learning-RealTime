@@ -1,6 +1,7 @@
 """https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 
 from enum import Enum
+from datetime import datetime
 Y_TARGET = 'buy_sell_point'
 
 # **DOCU**
@@ -40,7 +41,8 @@ DICT_COMPANYS = {
     }
 
 PATH_REGISTER_RESULT_REAL_TIME = "d_result/prediction_real_time.csv"
-PATH_REGISTER_RESULT_MULTI_REAL_TIME = "d_result/prediction_MULTI_real_time.csv"
+PATH_REGISTER_RESULT_MULTI_REAL_TIME = "d_result/predi_MULTI_real_time_"+datetime.now().strftime("%Y_%m_%d")+".csv"
+PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT = "d_result/sent_predi_MULTI_real_time_"+datetime.now().strftime("%Y_%m_%d")+".csv"
 MIN_SCALER = 0
 MAX_SCALER = 1
 PATH_SCALERS_FOLDER = "Models/TF_multi/Scalers/"
