@@ -1,6 +1,9 @@
 #https://medium.com/codex/using-python-to-send-telegram-messages-in-3-simple-steps-419a8b5e5e2
+import threading
+
 import requests
 import pandas as pd
+import os.path
 from datetime import datetime
 
 from telegram.constants import ParseMode
@@ -9,8 +12,12 @@ import a_manage_stocks_dict
 import yhoo_history_stock
 from LogRoot.Logging import Logger
 from Utils import Utils_send_message
+from Utils.Utils_send_message import DICT_SCORE_RATE
 from a_manage_stocks_dict import Option_Historical, DICT_COMPANYS , Op_buy_sell
 from ztelegram_send_message_handle import URL_TELE, send_mesage_all_people, send_exception
+
+# from XTB_api import xtb_api
+
 
 message = "hello from your telegram bot"
 
@@ -101,13 +108,7 @@ def send_alert_and_register(S, df_b_s, type_b_s):
 
         send_mesage_all_people(message_aler)
 
-DICT_SCORE_RATE = {
-    "0" : 90,
-    "1" : 90,
-    "2" : 145,
-    "3" : 205,
-    "4" : 400
-}
+
 
 def send_MULTI_alert_and_register(S, df_mul_r):
     list_models_to_predict_POS = [x for x in df_mul_r.columns if x.startswith("Acert_TFm_" + S + "_" + Op_buy_sell.POS.value)]
@@ -126,7 +127,7 @@ def send_MULTI_alert_and_register(S, df_mul_r):
     LIST_COLS_TO_CSV = ['Date',"ticker", 'buy_sell_point', 'Close', 'Volume', "POS_score","POS_num",  "NEG_score", "NEG_num", "POS_models","NEG_moldel" ]
 
     df_mul.insert(loc=1, column="ticker", value=S)
-    df_mul['ticker'] = df_mul['ticker'].map(lambda x: x.ljust(7-len(x)) ) #all columns with 6 char
+    df_mul['ticker'] = df_mul['ticker'].map(lambda x: x.ljust(8-len(x)) ) #all columns with 6 char
     for L in ["NEG_moldel" , "POS_models" ,"NEG_num", "NEG_score", "POS_num","POS_score"]:
         df_mul.insert(loc=4, column=L, value=-1)
 
@@ -143,20 +144,46 @@ def send_MULTI_alert_and_register(S, df_mul_r):
 
     if len(list_models_to_predict_POS) > 0:
         score_POS = DICT_SCORE_RATE[str(len(list_models_to_predict_POS))]
-        if (df_mul["POS_score"][1:] >= score_POS).any() or (df_mul["POS_score"][1:] >= score_POS).any() :# or 1 == 1 :
+        if (df_mul["POS_score"][1:] >= score_POS).any() or (df_mul["POS_score"][1:] >= score_POS).any()  :# or 1 == 1 :
             message_aler , alert_message_without_tags = Utils_send_message.get_MULTI_string_alert_message(S,df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.POS, list_models_to_predict_POS )
-            Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV],path="zSent_MULTI_Telegram_Registers.csv")
-            send_mesage_all_people(message_aler)
+
+            # from XTB_api import xtb_api
+            # thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.POS, list_models_to_predict_POS), name='XTB_POS')
+            # thr_xtb.start()
+            # xtb_api.xtb_operate_Lock_thread(S, df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.POS, list_models_to_predict_POS)
+            if not is_already_sent_alert(df_mul):
+                send_mesage_all_people(message_aler)
+            Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV], path=a_manage_stocks_dict.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT)
+
 
     if len(list_models_to_predict_NEG) > 0:
         score_NEG = DICT_SCORE_RATE[str(len(list_models_to_predict_NEG))]
-        if (df_mul["NEG_score"][1:] >= score_NEG).any() or (df_mul["NEG_score"][1:] >= score_NEG).any() :# or 1 == 1 :
+        if (df_mul["NEG_score"][1:] >= score_NEG).any() or (df_mul["NEG_score"][1:] >= score_NEG).any(): #: or 1 == 1 :
             message_aler , alert_message_without_tags = Utils_send_message.get_MULTI_string_alert_message(S, df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.NEG, list_models_to_predict_NEG )
             # df_registre = pd.concat([df_registre, pd.DataFrame([[date_detect, S, type_b_s.name, "{:.2f}".format(value_detect) , alert_message_without_tags ]], columns=COL_GANAN)  ],ignore_index=True)  # añadir fila add row
-            Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV],path="zSent_MULTI_Telegram_Registers.csv")
-            send_mesage_all_people(message_aler)
+
+            # from XTB_api import xtb_api
+            # thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.NEG, list_models_to_predict_NEG), name='XTB_NEG')
+            # thr_xtb.start()
+            # xtb_api.xtb_operate_Lock_thread(S, df_mul[1:].to_dict('list'), a_manage_stocks_dict.Op_buy_sell.NEG, list_models_to_predict_NEG)
+            if not is_already_sent_alert(df_mul):
+                send_mesage_all_people(message_aler)
+            Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV], path=a_manage_stocks_dict.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT)
 
     print("START ciclo ")
+
+
+def is_already_sent_alert(df_mul):
+    if not os.path.exists(a_manage_stocks_dict.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT):
+        return False
+
+    df_sent = pd.read_csv(a_manage_stocks_dict.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT, index_col=0, sep='\t')
+    #TODO check also pos neg
+    num_is_in_the_sent_list = df_sent[(df_sent['ticker'] == df_mul["ticker"][1:].values[0]) & (df_sent.index == df_mul["Date"][1:].values[0])].shape[0]
+    if num_is_in_the_sent_list > 0:
+        return True
+    else:
+        return False
 
 # def monitor_all_stocks_and_send_alerts():
 #     print("START ciclo ")
