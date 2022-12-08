@@ -52,6 +52,14 @@ def get_string_alert_message(S, dict_pred, modles_evaluated,  type_b_s, date_det
 
     return  alert_message_html , alert_message_without_tags
 
+DICT_SCORE_RATE = {
+    "0" : 90,
+    "1" : 91,
+    "2" : 155,
+    "3" : 220,
+    "4" : 400
+}
+
 URL_INVESTING = "https://www.investing.com/search/?q=" #https://www.investing.com/search/?q=RIVN
 URL_WE_BULL = "https://www.webull.com/quote/nasdaq-" # "https://www.webull.com/quote/nasdaq-meli/news"
 def get_MULTI_string_alert_message(S, dictR, type_b_s:a_manage_stocks_dict.Op_buy_sell, list_model):
@@ -67,11 +75,17 @@ def get_MULTI_string_alert_message(S, dictR, type_b_s:a_manage_stocks_dict.Op_bu
 # ~~tachado~~ escribe el texto tachado
     #https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#message-formatting-bold-italic-code-
     #Message Formatting (bold, italic, code, ...)
+    list_model_per_result = [(x.replace("Acert_TFm_", '')+": " +str(dictR[x])) +"% " for x in list_model ]
+    percentage_visible_POS = (dictR['POS_score'][0] * 90) / DICT_SCORE_RATE[dictR['POS_num'][0].replace(']', '')]
+    percentage_visible_NEG = (dictR['NEG_score'][0] * 90) / DICT_SCORE_RATE[dictR['NEG_num'][0].replace(']', '')]
+
     s1 = "<strong>"+text_alert_main_b_s + ": " + S + "</strong> "
     s2 = "<em>" + str(dictR['Date']) + "</em>" + (flecha_simbol * 1) + "\nValue:<pre> " + str(dictR['Close']) + "</pre>\n"
     s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n"
-    s4 = "\t   POS_score: " + str(dictR['POS_score']) + "%/"+str(dictR['POS_num'])+"\n\t   NEG_score: " + str(dictR['NEG_score']) + "%/"+str(dictR['NEG_num'])+"\n"
-    s5 = "📊Model names: <pre>\n\t" + "\n\t".join(list_model).replace("Acert_TFm_",'') + "</pre>"
+    # s4 = "\t   POS_score: " + str(dictR['POS_score']) + "%/"+str(dictR['POS_num'])+"\n\t   NEG_score: " + str(dictR['NEG_score']) + "%/"+str(dictR['NEG_num'])+"\n"
+    s4 = "\t   POS_score: " + "{:.1f}".format(percentage_visible_POS) + "%/" + str(dictR['POS_num']) + "\n\t   NEG_score: " + "{:.1f}".format(percentage_visible_NEG) + "%/" + str(dictR['NEG_num']) + "\n"
+    s5 = "📊Model names: <pre>\n\t" + "\n\t".join(list_model_per_result) + "</pre>"
+    # s6 = "📊Percentage: <pre>\n\t" + "POS: "+"{:.1f}".format(percentage_visible_POS)+ "%\tNEG: "+"{:.1f}".format(percentage_visible_NEG)+  "%</pre>"
 
     alert_message_html =  (s1 + s2 + s3 + s4 + s5).replace('[', '').replace(']', '').replace('\'', '')
     alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com', '').replace("Confidence of models:", '').replace('Investing.com', '')
