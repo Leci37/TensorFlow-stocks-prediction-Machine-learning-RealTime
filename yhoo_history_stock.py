@@ -3,6 +3,7 @@ import os
 from sklearn.preprocessing import MinMaxScaler
 
 #from predict_example import kaggle_stock_market_Tech
+import a_manage_stocks_dict
 from Utils import UtilsL, Utils_Yfinance, Utils_col_sele
 import yfinance as yf
 import pandas as pd
@@ -220,24 +221,22 @@ def get_favs_SCALA_csv_stocks_history_Download_list(list_companys, csv_name, opi
 
     for l in list_companys:
         df_all_generate_history ,df_l = get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, opion)
-        df_all = pd.concat([df_all,df_l ])
+        # df_all = pd.concat([df_all,df_l ])
 
     #
-    df_all_generate_history = df_all_generate_history.sort_values(by=['Date', 'ticker'], ascending=True)
-    max_recent_date ,min_recent_date = UtilsL.get_recent_dates(df_all_generate_history)
-    df_all_generate_history.to_csv("d_price/RAW/" + csv_name + "_history_" + max_recent_date + "__" + min_recent_date + ".csv", sep='\t', index=None)
-
-
-    df_all = df_all.sort_values(by=['Date', 'ticker'], ascending=True)
-    df_all.insert(1, 'ticker', df_all.pop('ticker'))
-    df_all.to_csv("d_price/" + csv_name + "_SCALA_stock_history_" + str(opion.name) + "_sep.csv", sep='\t', index=None)
-    print("get_favs_SCALA_csv_stocks_history_Download d_price/" + csv_name + "_SCALA_stock_history_" + str(opion.name) + ".csv  Shape: " + str(df_l.shape))
+    # df_all_generate_history = df_all_generate_history.sort_values(by=['Date', 'ticker'], ascending=True)
+    # max_recent_date ,min_recent_date = UtilsL.get_recent_dates(df_all_generate_history)
+    # df_all_generate_history.to_csv("d_price/RAW/" + csv_name + "_history_" + max_recent_date + "__" + min_recent_date + ".csv", sep='\t', index=None)
+    #
+    #
+    # df_all = df_all.sort_values(by=['Date', 'ticker'], ascending=True)
+    # df_all.insert(1, 'ticker', df_all.pop('ticker'))
+    # df_all.to_csv("d_price/" + csv_name + "_SCALA_stock_history_" + str(opion.name) + "_sep.csv", sep='\t', index=None)
+    # print("get_favs_SCALA_csv_stocks_history_Download d_price/" + csv_name + "_SCALA_stock_history_" + str(opion.name) + ".csv  Shape: " + str(df_l.shape))
     return df_all
 
 
 def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, opion, generate_csv_a_stock = True, costum_columns = None, add_min_max_values_to_scaler = False):
-    sc = MinMaxScaler(feature_range=(-100, 100))
-
 
     df_l, df_RAW = get_stock_history_Tech_download(l, opion, get_technical_data=True,
                                            prepost=True, interval="15m", add_stock_id_colum=False, costum_columns = costum_columns)
@@ -264,18 +263,13 @@ def get_favs_SCALA_csv_stocks_history_Download_One(df_all_generate_history, l, o
         df_min_max = df_min_max[df_l.columns]
         df_l = pd.concat([df_min_max, df_l], ignore_index=True)
 
-    aux_date_save = df_l['Date']  # despues se añade , hay que pasar el sc.fit_transform
-    df_l['Date'] = 0
-    array_stock = sc.fit_transform(df_l)
-    df_l = pd.DataFrame(array_stock, columns=df_l.columns)
     df_l.insert(loc=1, column='ticker', value=l)
-    df_l['Date'] = aux_date_save  # to correct join
 
     if costum_columns is None:
         if generate_csv_a_stock:
-            print("get_favs_SCALA_csv_stocks_history_Download d_price/" + l + "_SCALA_stock_history_" + str(
+            print("get_favs_PLAIN_csv_stocks_history_Download d_price/" + l + "_PLAIN_stock_history_" + str(
                 opion.name) + ".csv  Shape: " + str(df_l.shape))
-            df_l.to_csv("d_price/" + l + "_SCALA_stock_history_" + str(opion.name) + ".csv", sep='\t', index=None)
+            df_l.to_csv("d_price/" + l + "_PLAIN_stock_history_" + str(opion.name) + ".csv", sep='\t', index=None)
     return df_all_generate_history, df_l
 
 
@@ -290,7 +284,7 @@ def generate_pure_min_max_csv(df_min_max, stock_id, path):
 
 def get_favs_SCALA_csv_tocks_history_Local(df_his_stock, csv_name, opion):
     from sklearn.preprocessing import MinMaxScaler
-    sc = MinMaxScaler(feature_range=(-100, 100))
+    sc = MinMaxScaler(feature_range=(a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER))
 
     df_all = pd.DataFrame()
 
