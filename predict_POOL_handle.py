@@ -74,13 +74,16 @@ def df_yhoo_(S, inter, path = None ):
     return date_15min[['Date', 'Open', 'Close', 'High', 'Low', 'Volume']]
 #WEBULL API
 def get_df_webull_realTime(INTERVAL, S,path = None):
+    if S.endswith("-USD"):
+        return None, None
+
     we_bull_id = DICT_WEBULL_ID[S]
     URL = "https://quotes-gw.webullfintech.com/api/quote/charts/queryMinutes?period=" + INTERVAL + "&tickerIds=" + str(we_bull_id)
     Logger.logr.info(S + " ================== " + datetime.today().strftime('%Y-%m-%d %H:%M:%S') + "   " + URL)
     response = requests.get(URL).json()
     csv_data = response[0]['data']
     df_S_raw = pd.DataFrame([x.split(',') for x in csv_data],columns=['Date', 'Open', 'Close', 'High', 'Low', 'Close_avg', 'Volume', "Adj"])
-    df_S_raw = df_S_raw.astype(float)
+    df_S_raw = df_S_raw.fillna(0).replace("null", 0).astype(float)
     df_S_raw['Date'] = pd.to_datetime(df_S_raw['Date'], unit="s")
     df_S_raw = df_S_raw[['Date', 'Open', 'Close', 'High', 'Low', 'Volume']]
 
@@ -105,7 +108,7 @@ def get_df_webull_realTime(INTERVAL, S,path = None):
 
 
 def merge_dataframes_bull_yhoo(S, df_S_raw, df_primeros, df_yhoo):
-    if 1 > df_primeros['Volume'][0] or 1 > df_primeros['Volume'][1]:
+    if df_primeros is None or 1 >= len( df_primeros['Volume']) or 1 > df_primeros['Volume'][0] or 1 > df_primeros['Volume'][1]:
         Logger.logr.warning(
             "No volume data has been obtained from API bull, (probably a crypto) Only Yahoo data will be used. Stock: " + S)
         df = df_yhoo
