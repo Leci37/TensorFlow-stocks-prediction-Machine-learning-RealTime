@@ -1,6 +1,9 @@
 import glob
 import re
 import os
+import sys
+# I've seen this error occur when a Python script has infinite (or very deep) recursion and the following code is used to increase the recursion limit:
+sys.setrecursionlimit(6000)
 #https://github.com/tensorflow/tensorflow/issues/48545
 os.environ["TF_GPU_ALLOCATOR"]="cuda_malloc_async"
 os.environ["TF_CPP_VMODULE"]="gpu_process_state=10,gpu_cudamallocasync_allocator=10"
@@ -44,11 +47,13 @@ df_result_all_isValid_to_buy = None
 NUM_MIN_MODLES  = 3
 NUM_MIN_MODLES_TF = 1
 
-df_RESULT = pd.read_csv("Models/TF_multi/_RESULTS_multi_all.csv", index_col=0, sep='\t')
+# df_RESULT = pd.read_csv("Models/TF_multi/_RESULTS_multi_all.csv", index_col=0, sep='\t')
+df_RESULT = pd.read_csv("Models/TF_multi/_RESULTS_profit_multi_all.csv", index_col=0,sep='\t')
+df_SCORing = pd.read_csv("Models/TF_multi/_SCORE_ALL_T_multi_all.csv", index_col=0, sep='\t')
 
 
 
-REGEX_COLUMNS_MODEL = r"Columns TFm_\w*.h5:\n((\w*[,]?[ ]?)*)"
+REGEX_COLUMNS_MODEL = r"Columns TFm_[\w\-]*.h5:\n((\w*[,]?[ ]?)*)"
 def check_columns_selections_Raise(cols_model, model):
     h5_name = glob.glob("Models/TF_multi/" + model + "*.csv")[0]
     f = open(h5_name, "r")
@@ -63,7 +68,8 @@ def fill_df_eval_r_with_values(arr_predit, df_eval_r, model_name):
     # list_per.sort(reverse=True)
     df_eval_r.insert(len(df_eval_r.columns), 'Acert_' + model_name, " ")
     for per in list_per:
-        Threshold_N = df_RESULT[model_name][str(int(per * 100)) + "%"]
+        Threshold_N = df_SCORing[str(int(per * 100)) + "%"].loc[[model_name]][0]
+        # Threshold_N = df_RESULT[model_name][str(int(per * 100)) + "%"]
         df_eval_r.loc[(arr_predit >= Threshold_N).reshape(-1), 'Acert_' + model_name] = str(int(per * 100)) + "%"
     df_eval_r['Score_' + model_name] = np.round(arr_predit, 2)
     df_eval_r['Close'] = df_eval_r['Close'].round(2)
