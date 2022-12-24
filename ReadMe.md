@@ -43,6 +43,7 @@ The alert consists of the following:
 It may be the case that both the uptrend POS and downtrend NEG have a high score, indicating increased volatility.
 - 📊⚙𝙉𝙖𝙢𝙚𝙨:
 The name of the selected models with which the prediction has been made and the percentage of strength. 
+
 ![](readme_img/tweet_image.PNG "tweet_image")
 
 ### INTRODUCTION
