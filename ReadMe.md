@@ -26,6 +26,25 @@
 
 
 See article in **medium.com** https://medium.com/@LuisCasti33/lectrade-machine-learning-with-technical-patterns-and-real-time-alerts-for-buying-and-selling-in-b4ecc59b29cb
+
+
+### Instructions for use:
+RealTime Twitter https://twitter.com/Whale__Hunters
+
+The models have been trained in **_15 min_** intervals with , i.e. the alerts expire in about 7 minutes, that means that once the tweet goes out, you have +-7 minutes to decide whether to trade or not. also that the models should be used on intra-day trade._Never blindly follow the alerts, check first_. 
+The alerts indicate points where technical patterns have brought strong trend changes in the last 5 months, i.e. if these models were applied to the last 5 months they would hit 91% of the BUY SELL points, in the future no one can know. 
+
+The alert consists of the following:
+- Can be BUY or SELL.
+- The id  of the stock, always from the nasdaq, in case of crypto will have the termination -USD.
+- Link to investing.com news, check before making the final decision.
+- Link to the candlesticks through TraderView.com, is the image shown attached with the alert. 
+- 𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:⬆⬇, level of strength indicating whether there is a positive or negative trend and behind / number of models used to obtain the percentage. 
+It may be the case that both the uptrend POS and downtrend NEG have a high score, indicating increased volatility.
+- 📊⚙𝙉𝙖𝙢𝙚𝙨:
+The name of the selected models with which the prediction has been made and the percentage of strength. 
+![](readme_img\tweet_image.PNG "tweet_image")
+
 ### INTRODUCTION
 The stock market is moved by technical indicators, there are several types of volatility, cycle volume, candlesticks, supports, resistances, moving averages...
 
@@ -608,7 +627,7 @@ In this class there are 2 types of threads
 
 
 ## Possible improvements
-would be to combine the power of https://github.com/iam-abbas/Reddit-Stock-Trends predictive models with https://github.com/Leci37/stocks-Machine-learning-RealTime-telegram/tree/develop real-time pattern calculation and alerting capabilities.
+would be to combine the power of https://github.com/huseinzol05/Stock-Prediction-Models predictive models with https://github.com/Leci37/stocks-Machine-learning-RealTime-telegram/tree/develop real-time pattern calculation and alerting capabilities.
 
 ##### Improvements in predictive models, using multi-dimensional 
 Improvements in TF predictive models using tensors (multiple matrices over time) and non-matrices (mono temporal, current design). 
