@@ -94,7 +94,7 @@ Here enters the self-fulfilling prophecy principle of explained is, at first, a 
 
 _Note 29-December 2022_ 
 The improvement: _Improvements in predictive models, using multi-dimensional_ 
-This development is complete in the https://github.com/Leci37/stocks-prediction-multi  branch, request access without any problem. 
+This development is complete in the stocks-prediction-multi  branch, request access without any problem. 
 
 - The development explained in this readme, takes ONE time partition, (e.g. from 9:00 to 9:15) analyzes all the technical patterns, and sends a concussion.
 - With the multidimensional development, the model analyzes TEN time partitions (e.g. from 9:00 to 12:30), with all the technical patterns of that time, a decision is made.
