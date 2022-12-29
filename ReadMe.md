@@ -90,6 +90,18 @@ Here enters the self-fulfilling prophecy principle of explained is, at first, a 
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.004.png)
 
+**_The project is long and complex, it takes time to install, but the result is very beautiful._** 
+
+_Note 29-December 2022_ 
+The improvement: _Improvements in predictive models, using multi-dimensional_ 
+This development is complete in the https://github.com/Leci37/stocks-prediction-multi  branch, request access without any problem. 
+
+- The development explained in this readme, takes ONE time partition, (e.g. from 9:00 to 9:15) analyzes all the technical patterns, and sends a concussion.
+- With the multidimensional development, the model analyzes TEN time partitions (e.g. from 9:00 to 12:30), with all the technical patterns of that time, a decision is made.
+
+The generated .csv files with name _SCALA_ are for mono-dimension and the _PLAIN_ are for multidimension , there is some mix in this branch. 
+
+
 ### OBJECTIVE
 Understanding the principle of self-fulfilling prophecy, it is possible to obtain the pattern of the same, by means of the massive collection of technical patterns, their calculation and the study of their patterns.
 
@@ -120,6 +132,7 @@ The closing data is obtained through yahoo API finance, and hundreds of technica
 
 `yhoo_history_stock.get_SCALA_csv_stocks_history_Download_list()`
 
+**Ground True is the variable** `buy_seel_point`
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
 
 Value will be assigned in buy_seel_point if the increase or decrease of the stock is greater than 2.5% in a period of 3 hours, using the get_buy_sell_points_Roll function.
