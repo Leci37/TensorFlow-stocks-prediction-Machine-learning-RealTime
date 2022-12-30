@@ -29,22 +29,31 @@ See article in **medium.com** https://medium.com/@LuisCasti33/lectrade-machine-l
 
 
 ### Instructions for use:
-RealTime Twitter https://twitter.com/Whale__Hunters
+- RealTime Twitter https://twitter.com/Whale__Hunters
+
+- RealTime Telegram @Whale_Hunter_Alertbot this group is limited, to receive alert to sign up  ask via github or twitter 
 
 The models have been trained in **_15 min_** intervals with , i.e. the alerts expire in about 7 minutes, that means that once the tweet goes out, you have +-7 minutes to decide whether to trade or not. also that the models should be used on intra-day trade._Never blindly follow the alerts, check first_. 
-The alerts indicate points where technical patterns have brought strong trend changes in the last 5 months, i.e. if these models were applied to the last 5 months they would hit 91% of the BUY SELL points, in the future no one can know. 
+The alerts indicate points where **_only technical patterns have brought strong trend changes_** in the last 5 months, i.e. if these models were applied to the last 5 months they would hit 91% of the BUY SELL points, in the future no one can know. 
+In other words, it is not an absolute truth.
 
-The alert consists of the following:
-- Can be BUY or SELL.
-- The id  of the stock, always from the nasdaq, in case of crypto will have the termination -USD.
-- Link to investing.com news, check before making the final decision.
-- Link to the candlesticks through TraderView.com, is the image shown attached with the alert. 
+##### The alert consists of the following:
+- Can be _**BUY**_ or _**SELL**_.
+- The id  of the stock, always from the USA market, in case of crypto will have the termination **_-USD_**. In case of Tesla, it is TSLA, in case of doubt with the company id , a simple google search "_Stocks XXX_".
+- Link to _**Investing.com**_ news, check before making the final decision.
+- Link to the candlesticks through _**TraderView.com**_, is the image shown attached with the alert. 
 - 𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:⬆⬇, level of strength indicating whether there is a positive or negative trend and behind / number of models used to obtain the percentage. 
 It may be the case that both the uptrend POS and downtrend NEG have a high score, indicating increased volatility.
 - 📊⚙𝙉𝙖𝙢𝙚𝙨:
 The name of the selected models with which the prediction has been made and the percentage of strength. 
 
+###### Example of how the alerts looks like in **Twitter**:
 ![](readme_img/tweet_image.PNG "tweet_image")
+
+###### Example of how the alerts looks like in **Telegram**:
+
+![](readme_img/telegram_bot_alert_example_2.0.jpg )
+
 
 ### INTRODUCTION
 The stock market is moved by technical indicators, there are several types of volatility, cycle volume, candlesticks, supports, resistances, moving averages...
@@ -94,12 +103,13 @@ Here enters the self-fulfilling prophecy principle of explained is, at first, a 
 
 _Note 29-December 2022_ 
 The improvement: _Improvements in predictive models, using multi-dimensional_ 
-This development is complete in the stocks-prediction-multi  branch, request access without any problem. 
+This development is completed in the _**stocks-prediction-multi_** branch, request access without any problem. 
 
 - The development explained in this readme, takes ONE time partition, (e.g. from 9:00 to 9:15) analyzes all the technical patterns, and sends a concussion.
 - With the multidimensional development, the model analyzes TEN time partitions (e.g. from 9:00 to 12:30), with all the technical patterns of that time, a decision is made.
 
 The generated .csv files with name _SCALA_ are for mono-dimension and the _PLAIN_ are for multidimension , there is some mix in this branch. 
+
 
 
 ### OBJECTIVE
@@ -114,10 +124,9 @@ The machine learnig models Sklearn, XGB and Tensor Flow , by means of the learni
 
 The image shows: MACD, RSI , Stochastic and Balance of power (Elder Ray) 
 
-The alert is sent on the vertical line, during the next 4 periods the stock decreases by 2.4%. Each candlestick period in the image indicates 15 minutes.
+The alert is sent on the **vertical line** (the only vertical line that crosses the whole image), during the next 4 periods the stock decreases (It will be indicated as _**SELL**_) by 2.4%. Each candlestick period in the image indicates 15 minutes.
 
-![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.005.png)![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.006.png)
-
+![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.006.png)
 
 
 
@@ -354,8 +363,9 @@ df_compare, df_sell = get_RealTime_buy_seel_points()
 ```
 This run generates the log file *d_result/prediction_results_N_rows.csv*
 
-This file and the notifications (telegram and mail) contain information about each prediction that has been made. It contains the following columns:
 
+This file and the notifications (telegram and mail) contain information about each prediction that has been made. It contains the following columns:
+this point _**is deprecated**_ by _stocks-prediction-multi_ branch.
 - Date: date of the prediction 
 - Stock: stock 
 - buy_sell: can be either NEG or POS, depending on whether it is a buy or sell transaction. 
@@ -644,6 +654,7 @@ In this class there are 2 types of threads
 would be to combine the power of https://github.com/huseinzol05/Stock-Prediction-Models predictive models with https://github.com/Leci37/stocks-Machine-learning-RealTime-telegram/tree/develop real-time pattern calculation and alerting capabilities.
 
 ##### Improvements in predictive models, using multi-dimensional 
+**Solved** in _stocks-prediction-multi_ branch (ask for it without any problem).
 Improvements in TF predictive models using tensors (multiple matrices over time) and non-matrices (mono temporal, current design). 
 
 In the class `Model_TF_definitions.ModelDefinition.py`
@@ -741,10 +752,11 @@ Change the operation of the bot, that is enough to send the command `\start`, an
 
 Send real time email alert
 
-Revise Stock prediction fail LSTM 
+Revise Stock prediction fail LSTM , **Solved** in _stocks-prediction-multi_ branch
 
-LSTM time series + stock price prediction = FAI 
-
+_**Recommended reading**_
+This does not understand the principle of self-fulfilling prophecy (explained at the beginning), but it is worth considering. 
+_LSTM time series + stock price prediction = FAIL_ 
 [https://www.kaggle.com/code/carlmcbrideellis/lstm-time-series-stock-price-prediction-fail ](https://www.kaggle.com/code/carlmcbrideellis/lstm-time-series-stock-price-prediction-fail)
 
 Find the explanation of what indicators and values the AI model takes, to predict what it predicts and give a small explanation-schema, for example random forest models if you can print the sequence that makes the prediction. 
@@ -753,10 +765,12 @@ Find the explanation of what indicators and values the AI model takes, to predic
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.011.png)
 
-USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS. Do not risk money which you are afraid to lose. There might be bugs in the code - this software DOES NOT come with ANY warranty.
+#### USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS. 
+Do not risk money which you are afraid to lose. There might be bugs in the code - this software DOES NOT come with ANY warranty.
 Permitted, free use and modification, but no commercialization to third parties, without authorization. All rights reserved
 
-### Indicator names:
+### Technical Patterns Names:
+All patterns used 
 ```
 Date	buy_sell_point	Open	High	Low	Close	Volume	per_Close	per_Volume	has_preMarket
   per_preMarket	olap_BBAND_UPPER	olap_BBAND_MIDDLE	olap_BBAND_LOWER	olap_BBAND_UPPER_crash	
