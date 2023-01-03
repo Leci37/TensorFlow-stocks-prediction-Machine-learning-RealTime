@@ -413,7 +413,7 @@ What is displayed in DEBUG alert, is the information from *d_result/prediction_r
 
 To understand the complete information of the alert see Point 5.1 Making predictions of the last week.
 
-![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.009.png)
+![](readme_img/telegram_bot_alert_example_MONO_old_1.0.png.png)
 
 
 
