@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 import a_manage_stocks_dict
 from LogRoot.Logging import Logger
@@ -13,7 +14,7 @@ from Utils import Utils_model_predict
 
 
 class Data_multidimension:
-    BACHT_SIZE_LOOKBACK = 10
+    BACHT_SIZE_LOOKBACK = a_manage_stocks_dict.BACHT_SIZE_LOOKBACK
     will_shuffle = True
     path_csv = None
     op_buy_sell = None
@@ -50,7 +51,7 @@ class Data_multidimension:
         if not "_PLAIN_" in  self.path_csv :
             Logger.logr.error(bcolors.HEADER + 'The input data must not have any scaling on the input to be correctly scaled. Path: ' + self.path_csv + bcolors.ENDC)
             raise ValueError('The input data must not have any scaling on the input to be correctly scaled. Path: ' + self.path_csv )
-        df = Utils_model_predict.load_and_clean_DF_Train_from_csv(self.path_csv, self.op_buy_sell, self.columns_selection)
+        df = Utils_model_predict.load_and_clean_DF_Train_from_csv(self.path_csv, self.op_buy_sell, self.columns_selection) # shape is (5086, 13)
         self.cols_df = df.columns
         if 'ticker' in self.cols_df:
             Logger.logr.error(bcolors.HEADER + '\"ticker\" column detected, development required for multi-stock predictions. Path: ' + self.path_csv + bcolors.ENDC)
@@ -64,40 +65,65 @@ class Data_multidimension:
         # En caso de que las predicciones den numeros identicos
         # https://datascience.stackexchange.com/questions/21955/tensorflow-regression-model-giving-same-prediction-every-time
 
-        #1. Obtener array 2D , con BACHT_SIZE_LOOKBACK de "miradas atras"
+        # 1.0 ADD MULTIDIMENSION  Get 2D array , with BACHT_SIZE_LOOKBACK from "backward glances".
+        # Values go from (10000 rows, 10 columns ) to (10000 rows, ( 10-1[groundTrue] * 10 dimensions ) columns ) but for the moment it does not go to 3d array remains 2d.
+        # df.shape: (1000, 10) to (1000, 90)
         arr_mul_labels, arr_mul_features = Utils_model_predict.df_to_df_multidimension_array_2D(df.reset_index(drop=True), BACHT_SIZE_LOOKBACK = self.BACHT_SIZE_LOOKBACK)
-        shape_imput_3d = (-1,self.BACHT_SIZE_LOOKBACK, len(df.columns)-1)
-        #1.1 validar la estructructura de los datos
-        arr_vali = arr_mul_features.reshape(shape_imput_3d)
+        shape_imput_3d = (-1,self.BACHT_SIZE_LOOKBACK, len(df.columns)-1) # (-1, 10, 12)
+        # 1.1 validate the structure of the data, this can be improved by
+        arr_vali = arr_mul_features.reshape(shape_imput_3d) # 5077, 10, 12
         for i in range(1, arr_vali.shape[0], self.BACHT_SIZE_LOOKBACK * 3):
             list_fails_dates = [x for x in arr_vali[i][:, 0] if not (2018 <= datetime.fromtimestamp(x).year <= 2024)]
             if list_fails_dates:
                 Logger.logr.error("The dates of the new 2D array do not appear in the first column. ")
                 raise ValueError("The dates of the new 2D array do not appear in the first column. ")
 
-        #2. Hacer el smote con 2D , con 3D no se puede
-        X_smt, y_smt = Utils_model_predict.prepare_to_split_SMOTETomek_01(arr_mul_features, arr_mul_labels)
-        #3. Hacer el scaler para entrar a la TF
-        x_feature =  Utils_model_predict.scaler_min_max_array(X_smt,path_to_save= a_manage_stocks_dict.PATH_SCALERS_FOLDER+self.name_models_stock+".scal")
-        y_label = Utils_model_predict.scaler_min_max_array(y_smt.reshape(-1,1))
 
-        #4. partir los datos en train ,validation y  test
-        cleaned_df = pd.DataFrame(x_feature)
-        cleaned_df[Y_TARGET] = y_label.reshape(-1,)
-        # Use a utility from sklearn to split and shuffle your dataset.
-        train_df, test_df = train_test_split(cleaned_df, test_size=0.16, shuffle=self.will_shuffle)
-        train_df, val_df = train_test_split(train_df, test_size=0.32, shuffle=self.will_shuffle)
+        # 2.0 SCALER  scaling the data before, save a .scal file (it will be used to know how to scale the model for future predictions )
+        # Do I have to scale now or can I wait until after I split
+        # You can scale between the following values a_manage_stocks_dict.MIN_SCALER, a_manage_stocks_dict.MAX_SCALER
+        # " that you learn for your scaling so that doing scaling before or after may give you the same results (but this depends on the actual scaling function)."  https://datascience.stackexchange.com/questions/71515/should-i-scale-data-before-or-after-balancing-dataset
+        # TODO verify the correct order to "scaler split and SMOTE" order SMOTE.  sure: SMOTE only aplay on train_df
+        arr_mul_features =  Utils_model_predict.scaler_min_max_array(arr_mul_features,path_to_save= a_manage_stocks_dict.PATH_SCALERS_FOLDER+self.name_models_stock+".scal")
+        arr_mul_labels = Utils_model_predict.scaler_min_max_array(arr_mul_labels.reshape(-1,1))
+        # 2.1 Let's put real groound True Y_TARGET  in a copy of scaled dataset
+        df_with_target = pd.DataFrame(arr_mul_features)
+        df_with_target[Y_TARGET] = arr_mul_labels.reshape(-1,)
 
-        #5.1 pasar los labeles Y_TARGET a array 2D requerido para TF
-        train_labels = np.asarray(train_df[Y_TARGET]).astype('float32').reshape((-1, 1))
+        # 3.0 SPLIT Ok we should split in 3 train val and test
+        # "you divide your data first and then apply synthetic sampling SMOTE on the training data only" https://datascience.stackexchange.com/questions/15630/train-test-split-after-performing-smote
+        # CAUTION SMOTE generates twice as many rows
+        train_df, test_df = train_test_split(df_with_target, test_size=0.18, shuffle=self.will_shuffle) # Shuffle in a time series? hmmm
+        train_df, val_df = train_test_split(train_df, test_size=0.35, shuffle=self.will_shuffle)  # Shuffle in a time series? hmmm
+        # Be carefull not to touch test_df, val_df
+        # Apply smote only to train_df but first remove Y_TARGET from train_df
+        # 3.1 Create a array 2d form dfs . Remove Y_target from train_df, because that's we want to predict and that would be cheating
+        train_df_x = np.asarray(train_df.drop(columns=[Y_TARGET] ) )
+        # In train_df_y We drop everything except Y_TARGET
+        train_df_y = np.asarray(train_df[Y_TARGET] )
+
+        # 4.0 SMOTE train_df to balance the data since there are few positive inputs, you have to generate "neighbors" of positive inputs. only in the df_train. according to the documentation of the imblearn pipeline:
+        # Now we can smote only train_df . Doing the smote with 2D, with 3D is not possible.
+        X_smt, y_smt = Utils_model_predict.prepare_to_split_SMOTETomek_01(train_df_x, train_df_y)
+        # 4.1 Let's put real groound True Y_TARGET  in a copy of scaled dataset
+        train_cleaned_df_target = pd.DataFrame(X_smt)
+        train_cleaned_df_target[Y_TARGET] = y_smt.reshape(-1,)
+        #the SMOTE leaves the positives very close together
+        train_cleaned_df_target = shuffle(train_cleaned_df_target)
+
+        # 5 PREPARE the data to be entered in TF with the correct dimensions
+        # 5.1 pass Y_TARGET labels to 2D array required for TF
+        train_labels = np.asarray(train_cleaned_df_target[Y_TARGET]).astype('float32').reshape((-1, 1)) # no need already 2d
         bool_train_labels = (train_labels != 0).reshape((-1))
-        val_labels = np.asarray(val_df[Y_TARGET]).astype('float32').reshape((-1, 1))
-        test_labels = np.asarray(test_df[Y_TARGET]).astype('float32').reshape((-1, 1))
-        #5.2 pasar los arrays 2D a 3D
-        train_features = np.array(train_df.drop(columns=[Y_TARGET]) ).reshape(shape_imput_3d)
+        val_labels = np.asarray(val_df[Y_TARGET]).astype('float32').reshape((-1, 1)) # no need already 2d
+        test_labels = np.asarray(test_df[Y_TARGET]).astype('float32').reshape((-1, 1)) # no need already 2d
+        # 5.2 all array windows that were in 2D format (to overcome the SCALER and SMOTE methods),
+        # must be displayed in 3D for TF by format of varible shape_imput_3d
+        train_features = np.array(train_cleaned_df_target.drop(columns=[Y_TARGET]) ).reshape(shape_imput_3d)
         test_features = np.array(test_df.drop(columns=[Y_TARGET]) ).reshape(shape_imput_3d )
         val_features = np.array(val_df.drop(columns=[Y_TARGET]) ).reshape(shape_imput_3d )
 
+        # 6 DISPLAY show the df format before accessing TF
         Utils_model_predict.log_shapes_trains_val_data(test_features, test_labels, train_features, train_labels, val_features, val_labels)
         # for N_row in [return_feature.shape[0] // 2, return_feature.shape[0] // 3, return_feature.shape[0] // 5,
         #               return_feature.shape[0] - 2]:
@@ -107,6 +133,7 @@ class Data_multidimension:
         # if not (arr_check == return_feature[N_row - self.BACHT_SIZE_LOOKBACK + 1]).all():
         #     Logger.logr.error("data has not been reshaped 2D correctly ")
         #     raise ValueError("df_to_df_multidimension_array_2D() - data has not been reshaped 2D correctly ")
+        # TODO validate the correct tranformation 2d to 3d by raise
 
         self.imput_shape = (train_features.shape[1], train_features.shape[2])
 
