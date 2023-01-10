@@ -1,27 +1,27 @@
 - [PROGRAM DESCRIPTION](#program-description)
   * [Instructions for use](#instructions-for-use)
-      - [The alert consists of the following:](#the-alert-consists-of-the-following-)
-        * [Example of how the alerts looks like in **Twitter**:](#example-of-how-the-alerts-looks-like-in---twitter---)
-        * [Example of how the alerts looks like in **Telegram**:](#example-of-how-the-alerts-looks-like-in---telegram---)
+      - The alert consists of the following:
+        + Example of how the alerts looks like in **Twitter**:
+        + Example of how the alerts looks like in **Telegram**:
   * [INTRODUCTION](#introduction)
     + [Self-fulfilling prophecy principle](#self-fulfilling-prophecy-principle)
   * [OBJECTIVE](#objective)
   * [OPERATION](#operation)
-    + [**1.1** Data collection](#--11---data-collection) [**1.2** Types of indicators](#--12---types-of-indicators)
-    + [**2** Indicator filtering](#--2---indicator-filtering)
-    + [**3** Training TF XGB and Sklearn](#--3---training-tf-xgb-and-sklearn)
-    + [**4.1** Assessing the QUALITY of these models](#--41---assessing-the-quality-of-these-models) [**4.2** Evaluating those real BENEFITS of models](#--42---evaluating-those-real-benefits-of-models)
-    + [**5.1** Making predictions for the past week](#--51---making-predictions-for-the-past-week)[**5.2** Sending real-time alerts](#--52---sending-real-time-alerts)
+    + **1.1** Data collection **1.2** Types of indicators
+    + **2** Indicator filtering
+    + **3** Training TF XGB and Sklearn
+    + **4.1** Assessing the QUALITY of these models **4.2** Evaluating those real BENEFITS of models
+    + **5.1** Making predictions for the past week **5.2** Sending real-time alerts
   * [Quick start-up Run your own models](#quick-start-up-run-your-own-models)
   * [Detailed start-up](#detailed-start-up)
-    + [1 Historical data collection](#1-historical-data-collection)
-      - [**1.0** (Recommended) alphavantage API](#--10----recommended--alphavantage-api) [**1.1** OHLCV history of the stock must be generated.](#--11-the---ohlcv-history-of-the-stock-must-be-generated)
-    + [2 Filtering technical indicators](#2-filtering-technical-indicators)
-    + [3 Trian TensorFlow XGB and Sklearn](#3-trian-tensorflow-xgb-and-sklearn)
-    + [4 Evaluate quality of predictive models](#4-evaluate-quality-of-predictive-models)
-    + [5 Predictions](#5-predictions)
-      - [**5.0** make predictions of the last week Optional Test](#--50---make-predictions-of-the-last-week-optional-test) [**5.1** Getting OHLCV data in real time](#--51---getting-ohlcv-data-in-real-time)
-      - [**5.2** Setting up chatIDs and tokens in Telegram](#--52---setting-up-chatids-and-tokens-in-telegram)  [**5.3** Sending real-time alerts Telegram](#--53---sending-real-time-alerts-telegram)
+    + **1** Historical data collection
+      - **1.0** (Recommended) alphavantage API **1.1** OHLCV history of the stock must be generated.
+    + **2** Filtering technical indicators
+    + **3** Trian TensorFlow XGB and Sklearn
+    + **4** Evaluate quality of predictive models
+    + **5** Predictions
+      - **5.0** make predictions of the last week Optional Test **5.1** Getting OHLCV data in real time
+      - **5.2** Setting up chatIDs and tokens in Telegram **5.3** Sending real-time alerts Telegram
 - [**Possible improvements:**](#--possible-improvements---)
       - [Combine the power of the 17 models](#combine-the-power-of-the-17-models)
       - [Better use tuners](#better-use-tuners)
