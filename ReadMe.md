@@ -462,9 +462,9 @@ Run `Utils/API_alphavantage_get_old_history.py`
 
 Run `yhoo_generate_big_all_csv.py`
 
-Run `Model_creation_models_for_a_stock.py`
-
 Run `Model_creation_scoring.py`
+
+Run `Model_creation_models_for_a_stock.py`
 
 Run `Model_predictions_Nrows.py` Optional, last week predictions 
 
