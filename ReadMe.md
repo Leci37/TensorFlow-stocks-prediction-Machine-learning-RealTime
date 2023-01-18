@@ -67,6 +67,8 @@ The models have been trained in **_15 min_** intervals with , i.e. the alerts ex
 The alerts indicate points where **_only technical patterns have brought strong trend changes_** in the last 5 months, i.e. if these models were applied to the last 5 months they would hit 91% of the BUY SELL points, in the future no one can know. 
 In other words, it is not an absolute truth.
 
+The alerts are designed **for INTRADAY operations**, for the moment only with technical patterns, that is to say at the end of the day it is recommended to close them, in the future no one can know.
+
 ##### The alert consists of the following:
 - Can be _**BUY**_ or _**SELL**_.
 - The id  of the stock, always from the USA market, in case of crypto will have the termination **_-USD_**. In case of Tesla, it is TSLA, in case of doubt with the company id , a simple google search "_Stocks XXX_".
