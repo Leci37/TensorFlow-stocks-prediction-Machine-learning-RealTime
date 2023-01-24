@@ -1,3 +1,21 @@
+If you have problems with installation, let me know. 
+I am searching _**collaborators for this project**_. If you have experience and want to collaborate text me on email or github Issues
+
+
+### Why this stock prediction project ?
+Things this project **offers** that I did not find in other free projects, are:
+
++ Testing with _**+-30 models**_. Multiple combinations features and multiple selections of models (TensorFlow , XGBoost and Sklearn )
++ Threshold and quality _**models evaluation**_
++ Use _**1k**_ technical indicators
++ Method of best features selection (technical indicators) 
++ _**Categorical target**_ (do buy, do sell and do nothing) simple and dynamic,  instead of continuous target variable
++ Powerful open-market-_**real-time**_ evaluation system 
++ Versatile integration with: Twitter, Telegram and Mail
++ Train Machine Learning model with Fresh today stock data 
+
+---
+
 - [PROGRAM DESCRIPTION](#program-description)
   * [Instructions for use](#instructions-for-use)
       - The alert consists of the following:
@@ -294,7 +312,7 @@ Example name: *TWLO_neg_buy_sell_point__ichi_chikou_span.png*
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.008.png)
 
 #### **3** Training TF XGB and Sklearn 
-`Model_creation_models_for_a_stock.py`
+`Model_creation_models_for_a_stock.py`   *Requires Declaration.py, request it* https://github.com/Leci37
 
 this requires the selection of better columns from point #2
 
@@ -460,13 +478,13 @@ Install requirements
 ```
 pip install -r requirements.txt
 ```
-Run `Utils/API_alphavantage_get_old_history.py`
+Run `Utils/API_alphavantage_get_old_history.py` Optional
 
 Run `yhoo_generate_big_all_csv.py`
 
 Run `Model_creation_scoring.py`
 
-Run `Model_creation_models_for_a_stock.py`
+Run `Model_creation_models_for_a_stock.py`  *Requires Declaration.py, request it* https://github.com/Leci37
 
 Run `Model_predictions_Nrows.py` Optional, last week predictions 
 
@@ -558,7 +576,7 @@ Check that three .json have been generated for each action in *plots_relations* 
 Train the models, for each action 36 different models are trained.
 15 minutes per share.
 
-Run `Model_creation_models_for_a_stock.py`
+Run `Model_creation_models_for_a_stock.py`  *Requires Declaration.py, request it* https://github.com/Leci37
 
 The following files are generated for each action:
 
