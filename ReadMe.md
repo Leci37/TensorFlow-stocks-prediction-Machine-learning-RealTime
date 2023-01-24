@@ -182,7 +182,7 @@ The alert is sent on the **vertical line** (the only vertical line that crosses 
 
 
 
-### OPERATION
+## OPERATION
 
 #### **1.1** Data collection
 Collect data to train the model
@@ -473,7 +473,10 @@ To understand the complete information of the alert see Point 5.1 Making predict
 
 
 
+
 ### Quick start-up Run your own models
+
+ 
 Install requirements 
 ```
 pip install -r requirements.txt
@@ -499,7 +502,7 @@ Run `predict_POOL_inque_Thread.py`
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
 
-### Detailed start-up
+## Detailed start-up
 (Running times are estimated for an intel i3 and 8GB of RAM)
 
 
