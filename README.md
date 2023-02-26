@@ -1,5 +1,5 @@
 If you have problems with installation, let me know. 
-I am searching _**collaborators for this project**_. If you have experience and want to collaborate text me on email or github Issues (part of the code is not public)
+I am searching _**collaborators for this project**_. If you have experience and want to collaborate text me on email or github Issues (part of the code was hided due to good results)
 
 
 ### Why this stock prediction project ?
