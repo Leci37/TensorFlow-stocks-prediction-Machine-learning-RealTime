@@ -784,7 +784,7 @@ There are three types of trades buy, sell or hold. the RL randomly tests them, c
 <img src="readme_img/ex_TF_RL.png" alt="ex_TF_RL" width="400"/>
 
 The main project that uses RL is https://github.com/AI4Finance-Foundation/FinRL.
-Especially the tutorial to make RL with OHLCV data and 2 technical patterns. https://github.com/AI4Finance-Foundation/FinRL/blob/master/Stock_NeurIPS2018_SB3.ipynb 
+Especially the tutorial to make RL with OHLCV data and 2 technical patterns. https://github.com/AI4Finance-Foundation/FinRL/blob/master/examples/Stock_NeurIPS2018_SB3.ipynb 
 
 That project does not have good tools for real time data collection, alert system, it also works with daily OHLCV data (instead of the intra day 5min, 15min, 1h of this project), which leaves you very exposed to news and financial results. 
 
