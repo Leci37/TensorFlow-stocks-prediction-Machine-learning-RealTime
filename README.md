@@ -53,6 +53,7 @@ Things this project **offers** that I did not find in other free projects, are:
       - [Add balance sheets](#add-balance-sheets)
       - [Recommended reading LSTM plus stock price FAIL](#recommended-reading-lstm-plus-stock-price-fail)
       - [Lighter improvements list of suggested](#lighter-improvements-list-of-suggested)
+      - [Review of all forms of time series prediction: lstm,gru,cnn and rnn](#recommended-reading-lstm-plus-stock-price-fail)
       - [Imagine the operating points TF GAN](#imagine-the-operating-points-generative-adversarial-networks)
     + [USE THE SOFTWARE AT YOUR OWN RISK THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS](#use-the-software-at-your-own-risk-the-authors-and-all-affiliates-assume-no-responsibility-for-your-trading-results)
     + [Technical Patterns all Names](#technical-patterns-all-names)
@@ -898,6 +899,8 @@ This does not understand the principle of self-fulfilling prophecy (explained at
 _LSTM time series + stock price prediction = FAIL_ 
 [https://www.kaggle.com/code/carlmcbrideellis/lstm-time-series-stock-price-prediction-fail ](https://www.kaggle.com/code/carlmcbrideellis/lstm-time-series-stock-price-prediction-fail)
 
+##### Review of all forms of time series prediction: lstm,gru,cnn and rnn
+Laurence Moroney has extensive tutorials in his book on how to correctly make temporary preditions (LSTM; GRU; RNN; CNN; ). https://github.com/lmoroney/tfbook/tree/master/chapter11 
 
 ##### Lighter improvements list of suggested
 
