@@ -61,6 +61,9 @@ Things this project **offers** that I did not find in other free projects, are:
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/leci37)
 
+#### AUTHOR'S LICENSE:
+This project is a very _**long mountain of work free**_, it is given to the public on _**one condition**_, if you make any major improvement, let me know via public or private (leciluis@gmail.com), [the improvement will not be made public if you do not want it].
+
 ## PROGRAM DESCRIPTION
 
 **OHLCV** :An opening-high-low-closing-volume chart is a type of chart that is typically used to illustrate movements in the price of a financial instrument over time.
