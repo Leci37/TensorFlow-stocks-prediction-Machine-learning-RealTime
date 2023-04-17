@@ -59,7 +59,7 @@ Things this project **offers** that I did not find in other free projects, are:
     + [Technical Patterns all Names](#technical-patterns-all-names)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/leci37)
 
 ## PROGRAM DESCRIPTION
 
@@ -483,17 +483,20 @@ Install requirements
 ```
 pip install -r requirements.txt
 ```
-Run `Utils/API_alphavantage_get_old_history.py` Optional
+By default (recommendation) the stock list will be used: `"@CHILL": ["UBER", "PYPL"]`
 
-Run `yhoo_generate_big_all_csv.py`
+Run `API_alphavantage_get_old_history.py` Optional. File generate example:  `d_price/RAW_alpha/alpha_UBER_15min_20230414__20230317.csv`
 
-Run `Model_creation_scoring.py`
+Run `get_technical_indicators.py` Files generate example: `d_price/PYPL_PLAIN_stock_history_MONTH_3_AD.csv` and `plots_relations/best_selection_PYPL_both.json`
 
-Run `Model_creation_models_for_a_stock.py`  *Requires Declaration.py, request it* https://github.com/Leci37
+Run `Model_creation_models_for_a_stock.py` Files generate example models TF .h5: `Models/TF_multi/TFm_UBER_neg_vgood16_mult_lstm.h5` , `Models/TF_multi/UBER_neg_vgood16__per_score.csv` and `Models/TF_multi/Scalers/UBER_neg_good9_.scal`
 
-Run `Model_predictions_Nrows.py` Optional, last week predictions 
+Run `Model_creation_scoring_multi.py` Optional, evaluation the models predictions File generate:  `Models/TF_multi/_SCORE_ALL_multi_all.csv`
 
-Real time forecasts:
+**Having reached this point**, We would like to get to know you (this is a project of 11 months of work) and I would like you to tell me in Issues tab or Discussion tab what you think and if you see any utility in https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram#possible-improvements. 
+
+
+Real-time forecasts:
 
 Run `Utils/Volume_WeBull_get_tikcers.py` Ignore in case of using default configuration 
 
@@ -502,7 +505,6 @@ Configure bot token see point 5**.2** Configuring chatID and tokens in Telegram
 Run `predict_POOL_inque_Thread.py`
 
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
-
 
 ## Detailed start-up
 (Running times are estimated for an intel i3 and 8GB of RAM)
@@ -520,28 +522,27 @@ pip install -r requirements.txt
 
 this allows to watch all files that are executable from the startup tutorial easily 
 
-**0.3** In the file a_manage_stocks_dict.py all the configurations are stored, look at the document and know where it is.
+**0.3** In the file `_KEYS_DICT.py` all the configurations are stored, look at the document and know where it is.
 
 In it there is the dictionary DICT_COMPANYS
 
-It contains the IDs (GameStops quotes with the ID: **GME**) of the companies to analyze. You can customize and create a class from the **nasdaq** tikers, by default the key **@FOLO3** will be used which will analyze these 39 companies.
+It contains the IDs (GameStops quotes with the ID: **GME**) of the companies to analyze. You can customize and create a class from the **nasdaq** tikers, by default the key **@CHILL** will be used which will analyze these 2 companies.
+```python 
+ "@CHILL": ["UBER", "PYPL"],
 ```
-"@FOLO3: 
-["UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "RUN", "GTLB", "MDB", "NVDA", "AMD" ADSK", "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U", "GME", "RBLX", "CRSR"],
-```
-If a faster execution is desired, it is recommended to delete items from the list and leave three
+If more stock execution is desired, change to @FOLO3 o similar in file `_KEYS_DICT.py`
 
 #### 1 Historical data collection
 ##### **1.0** (Recommended) alphavantage API
 ` `The API yfinance , if you want price to price intervals in 15min intervals is limited to 2 months, to get more time data up to 2 years back (more data better predictive models) use the free version of the API https://www.alphavantage.co/documentation/  
 
-Run `Utils/API_alphavantage_get_old_history.py`
+Run `API_alphavantage_get_old_history.py`
 
 The class is customizable: action intervals, months to ask, and ID action.
 
 Note: being the free version, there is a portrait between request and request, to get a single 2 years history it takes 2-3 minutes per action. 
 
-Once executed, the folder: *d_price/RAW_alpha* will be filled with historical OHLCV .csv of share prices. These files will be read in the next step. Example name: *alpha_GOOG_15min_20221031__20201112.csv
+Once executed, the folder: *d_price/RAW_alpha* will be filled with **_2 years extra_** historical OHLCV .csv of share prices. These files will be read in the next step. Example path name: `d_price/RAW_alpha/alpha_UBER_15min_20230414__20230317.csv`
 
 Check that one has been generated for each action in *d_price/RAW_alpha*.
 
@@ -549,7 +550,7 @@ Check that one has been generated for each action in *d_price/RAW_alpha*.
 ##### **1.1** The OHLCV history of the stock must be generated.
 As well as the history of technical patterns. It takes +-1 minute per share to calculate all technical patterns. 
 
-Run `yhoo_generate_big_all_csv.py`
+Run `get_technical_indicators.py`
 
 Once executed the folder: *d_price* will be filled with historical OHLCV .csv of share prices.
 
@@ -564,10 +565,11 @@ Note: *MONTH_3_AD* means 3 months of *API* yfinance plus the history collected f
 Check that one has been generated for each action.
 
 
-#### 2 Filtering technical indicators
+#### 2 Filtering technical indicators (automatically by default)
+This step is done automatically and the variable `GENERATED_JSON_RELATIONS` (in `get_technical_indicators.py`)  is set to True (default True). 
 It is necessary to separate the technical indicators which are related to buy or sell points and which are noise. 20 seconds per share 
 
-Run `Model_creation_scoring.py`
+Run `Feature_selection_create_json.py` (**uncommnet** `for l in list_stocks:` )
 
 Three files are generated for each action in the folder: *plots_relations* , relations for purchase "pos", relations for sale "neg" and relations for both "both".
 
@@ -585,16 +587,25 @@ Run `Model_creation_models_for_a_stock.py`  *Requires Declaration.py, request it
 
 The following files are generated for each action:
 
-*Models/Sklearn_smote* folder:
+~~*Models/Sklearn_smote* folder:~~ _[OBSOLETE]_
 
 - XGboost_AMD_yyy_xxx_.sav
 - RandomForest_AMD_yyy_xxx_.sav
 - XGboost_AMD_yyy_xxx_.sav
 
-*Models/TF_balance* folder:
+~~*Models/TF_balance* folder:~~ _[OBSOLETE]_
 
 - TF_AMD_yyy_xxx_zzz.h5
 - TF_AMD_yyy_xxx_zzz.h5_accuracy_71.08%__loss_0.59__epochs_10[160].csv
+
+*Models/TF_multi* folder: 
+
+- TFm_AMD_yyy_xxx_zzz.h5  
+  - Purely saved TF model
+- TFm_AMD_yyy_xxx_zzz.h5_accuracy_71.08%__loss_0.59__epochs_10[160].csv 
+  - Training statistics lost, accuracy against unseen data "Validation", against unseen data "Test" and information , against seen data "Test" and information of input columns
+- Scalers/AMD_yyy_xxx_.scal
+  - TF can only be entered with values from 0 to 1, the object containing the scaling patterns is saved in .scal format, it will be very useful in real time reading. 
 
 xxx can take value vgood16 good9 reg4 and low1 
 
@@ -608,16 +619,14 @@ Check that all combinations of files exposed by each action have been generated 
 #### 4 Evaluate quality of predictive models 
 From the 36 models created for each OHLCV history of each stock, only the best ones will be run in real time, in order to select and evaluate those best ones.
 
-Run `Model_creation_scoring.py`
-
-In the *Models/Scoring* folder
-
-AMD_yyy__groupby_buy_sell_point_000.json
-
-AMD_yyy__when_model_ok_threshold.csv
+Run `Model_creation_scoring_multi.py`
+You can see how around 36 TF .h5 models are generated per action, you have to evaluate the 36 and collect the 1-3 best models to use them in real time, this information will be dumped in the files:
+- Models/TF_multi/_RESULTS_profit_multi_all.csv
+- Models/TF_multi/_SCORE_ALL_multi_all.csv
 
 Check that two have been generated for each action.
 
+**Having reached this point**, We would like to get to know you (this is a project of 11 months of work) and I would like you to tell me in Issues tab or Discussion tab what you think and if you see any utility in https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram#possible-improvements. 
 
 #### 5 Predictions
 ##### **5.0** make predictions of the last week Optional Test 
@@ -704,7 +713,7 @@ In this class there are 2 types of threads
 - Producer , constantly asks for OHLCV data, once it is obtained, it enters it into a queue. 
 - Consumer (2 threads running simultaneously) are pulling OHLCV data from the queue, calculating technical parameters, making model predictions, registering them in zTelegram_Registers.csv, and if they meet the requirements they are sent by telegram. 
 
-
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/leci37)
 
 
 ## **Possible improvements:**
