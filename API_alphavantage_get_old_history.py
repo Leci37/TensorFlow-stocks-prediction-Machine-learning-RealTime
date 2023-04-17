@@ -1,3 +1,5 @@
+"""https://github.com/Leci37/LecTrade LecTrade is a tool created by github user
+@Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty,all rights reserved """
 #https://www.alphavantage.co/documentation/ Intraday (Extended History)
 import csv
 import io
@@ -19,7 +21,6 @@ ALL_TIME_OPTIONS = ["year1month1", "year1month2", "year1month3", "year1month4", 
 
 # replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
 #CSV_URL = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=IBM&interval=15min&slice=year1month1&apikey=demo'
-S = "MELI"
 intelval = "15min"
 #time_opcion = "year2month12"
 

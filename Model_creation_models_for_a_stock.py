@@ -108,19 +108,9 @@ def train_MULTI_model_with_custom_columns(name_model, columns_list, csv_file_SCA
 # yyy can take value "pos" and "neg".
 # zzz can take value s28 s64 and s128
 # Check that all files have been generated for each action in the subfolders of /Models.
-CSV_NAME = "@CRT"
-list_stocks_crt = DICT_COMPANYS[CSV_NAME]
-CSV_NAME = "@CHIC"
-list_stocks_chic = DICT_COMPANYS[CSV_NAME]
-CSV_NAME = "@FOLO3"
+
+CSV_NAME = "@CHILL"
 list_stocks = DICT_COMPANYS[CSV_NAME]
-list_stocks = list_stocks + list_stocks_chic
-
-# list_stocks = list_stocks + list_stocks_chic
-
-# CSV_NAME = "@CHIC"
-# list_stocks_c = DICT_COMPANYS[CSV_NAME]
-# list_stocks =[  "GME", "RBLX", "CRSR"] + list_stocks_chic + list_stocks_crt
 opion = _KEYS_DICT.Option_Historical.MONTH_3_AD
 
 # CSV_NAME = "@FOLO3"

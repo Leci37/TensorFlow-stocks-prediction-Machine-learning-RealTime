@@ -190,7 +190,7 @@ def created_json_relations(S , path_csv_price):
     for option_Cat_op in _KEYS_DICT.Op_buy_sell.list():  # both pos neg
         path_json = "plots_relations/best_selection_" + S + "_" + option_Cat_op.value + ".json"
         path_img = "plots_relations/plot/" + S + "_" + option_Cat_op.value + "_"
-        path_img = None
+        # path_img = None
 
         generate_json_best_columns(cleaned_df, option_Cat_op, list_columns_got=NUM_BEST_PARAMS_LIST,
                                    path_json=path_json, path_imgs=path_img)

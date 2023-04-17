@@ -52,26 +52,15 @@ def get_the_2_best_models(df_moldes_S_NP, NUMBERS_BEST_MODELS):
 # AMD_yyy__groupby_buy_sell_point_000.json
 # AMD_yyy__when_model_ok_threshold.csv
 # Check that two have been generated for each action.
-CSV_NAME = "@CRT"
-list_stocks_crt = _KEYS_DICT.DICT_COMPANYS[CSV_NAME]
-CSV_NAME = "@CHIC"
-list_stocks_chic = _KEYS_DICT.DICT_COMPANYS[CSV_NAME]
-CSV_NAME = "@FOLO3"
-list_stocks = _KEYS_DICT.DICT_COMPANYS[CSV_NAME]
-list_stocks =  list_stocks + list_stocks_crt + list_stocks_chic    #+ list_stocks_chic #list_stocksopion = _KEYS_DICT.Option_Historical.MONTH_3
-# list_stocks = [ "GOOG","MSFT", "TSLA","UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD", "NVST", "HUBS", "EPAM", "PINS", "TTD", "SNAP", "APPS", "ASAN", "AFRM", "DOCN", "ETSY", "DDOG", "SHOP", "NIO", "U"]
-# list_stocks.remove("CRSR")
+
 df_final_list_stocks = pd.DataFrame()
-
-
 df_valids = pd.DataFrame()
-
-
 df_ALL_score = pd.DataFrame()
 
 
-# list_stocks = [ "GOOG","MSFT", "TSLA","UPST", "MELI", "TWLO", "RIVN", "SNOW", "LYFT", "ADBE", "UBER", "ZI", "QCOM", "PYPL", "SPOT", "GTLB", "MDB", "NVDA", "AMD" , "ADSK", "AMZN", "CRWD"]
-
+CSV_NAME = "@CHILL"
+list_stocks = _KEYS_DICT.DICT_COMPANYS[CSV_NAME]
+opion = _KEYS_DICT.Option_Historical.MONTH_3_AD
 
 for S in list_stocks:
     for type_buy_sell in [ _KEYS_DICT.Op_buy_sell.NEG , _KEYS_DICT.Op_buy_sell.POS  ]:
