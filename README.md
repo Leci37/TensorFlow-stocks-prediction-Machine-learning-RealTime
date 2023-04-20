@@ -62,7 +62,9 @@ Things this project **offers** that I did not find in other free projects, are:
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/leci37)
 
 #### AUTHOR'S LICENSE:
-This project is a very _**long mountain of work free**_, it is given to the public on _**one condition**_, if you make any major improvement, let me know via public or private (leciluis@gmail.com), [the improvement will not be made public if you do not want it].
+This project is a very _**long mountain of work free**_, it is given to the public on _**one condition**_, if you make any major improvement, let me know via public or private (leciluis@gmail.com), [the improvement will not be made public if you do not want it]. 
+
+Any other kind of contact with us, please go to the ISSUES tab. 
 
 ## PROGRAM DESCRIPTION
 
