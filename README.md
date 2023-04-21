@@ -4,14 +4,14 @@ I am searching _**collaborators for this project**_. If you have experience and 
 ### Why this stock prediction project ?
 Things this project **offers** that I did not find in other free projects, are:
 
-+ Testing with _**+-30 models**_. Multiple combinations features and multiple selections of models (TensorFlow , XGBoost and Sklearn, LSTM  )
++ Testing with _**36 models**_. Multiple combinations features and multiple selections of models, easily expandable (TensorFlow , XGBoost, Sklearn, LSTM, GRU, dense, LINEAR etc  )
 + Threshold and quality _**models evaluation**_
-+ Use _**1k**_ technical indicators
-+ Method of best features selection (technical indicators) 
-+ _**Categorical target**_ (do buy, do sell and do nothing) simple and dynamic,  instead of continuous target variable
++ Use _**937**_ technical stocks indicators
++ Independent neural network selection of the best technical patterns for each stock
++ Response _**categorical target**_ (do buy, do sell and do nothing) simple and dynamic,  instead of poor and confused, continuous target variable ("the stock will be worth 32.4 in 2 days")
 + Powerful open-market-_**real-time**_ evaluation system 
 + Versatile integration with: Twitter, Telegram and Mail
-+ Train Machine Learning model with Fresh today stock data 
++ Train Machine Learning model with _**Fresh today stock data**_ 
 
 ---
 
