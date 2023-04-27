@@ -414,7 +414,7 @@ Note: this should be run on data that has not been used in the training model, p
 #### **5.1** Making predictions for the past week
 `Model_predictions_Nrows.py`
 
-At this point the **file** `predict_POOL_handle.py` **is required**, you must **ask for it** (if you wish you can reverse engineer it, it will take 2-3 days and it will not look good). 
+At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** (if you wish you can reverse engineer it, it will take 2-3 days and it will not look good). 
 
 You can make predictions with the real-time data of the stock.
 
@@ -501,7 +501,7 @@ Run `Model_creation_models_for_a_stock.py` Files generate example models TF .h5:
 Run `Model_creation_scoring_multi.py` Optional, evaluation the models predictions File generate:  `Models/TF_multi/_SCORE_ALL_multi_all.csv`
 
 **Having reached this point**, We would like to get to know you (this is a project of 11 months of work) and I would like you to tell me in Issues tab or Discussion tab what you think and if you see any utility in https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram#possible-improvements. 
-At this point the **file** `predict_POOL_handle.py` **is required**, you must **ask for it** . 
+At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** . 
 
 
 Real-time forecasts:
@@ -640,7 +640,7 @@ Check that two have been generated for each action.
 ##### **5.0** make predictions of the last week Optional Test 
 Run `Model_predictions_Nrows.py`
 
-At this point the **file** `predict_POOL_handle.py` **is required**, you must **ask for it** 
+At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** 
 
 This run generates the log file *d_result/prediction_results_N_rows.csv*
 Generates a sample file with predictions for the last week, data obtained with yfinance. 
