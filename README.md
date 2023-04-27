@@ -13,6 +13,12 @@ Things this project **offers** that I did not find in other free projects, are:
 + Versatile integration with: Twitter, Telegram and Mail
 + Train Machine Learning model with _**Fresh today stock data**_ 
 
+To manage collaborations we have a  **Telegram GROUP:** 
+https://t.me/+3oG6U_hp93I2M2Ix (response in less than one day )
+
+I will be asked for training, what improvements you can think of. (recommended to review the point: https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/edit/master/README.md#possible-improvements). 
+
+
 ---
 
 - [PROGRAM DESCRIPTION](#program-description)
