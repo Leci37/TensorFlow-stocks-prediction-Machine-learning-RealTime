@@ -55,14 +55,14 @@ def do_request(time_op):
     return raw_response
 
 
-def do_request_conunt_adder():
+def do_request_conunt_adder(time_op):
     global count_int_try
     count_int_try += 1
     print("[1] Exceeded calls, change API_KEY New:  " )
-    raw_response_2 = do_request()
+    raw_response_2 = do_request(time_op)
     if "for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day" in raw_response_2.text:
         print("[2] Exceeded calls, change API_KEY New: " )
-        raw_response_2 = do_request_conunt_adder()
+        raw_response_2 = do_request_conunt_adder(time_op)
     return raw_response_2
 
 #**DOCU**
@@ -76,12 +76,12 @@ def do_request_conunt_adder():
 print("Get the history of the stock 2 years back through the use of free alphavantage.co API keys")
 for S in list_companys:
     df_S_all = pd.DataFrame()
-    for time_op in ALL_TIME_OPTIONS[:1]:
+    for time_op in ALL_TIME_OPTIONS:
         print(time_op)
         raw_response = do_request(time_op)
 
         if "for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day" in raw_response.text:
-            raw_response = do_request_conunt_adder()
+            raw_response = do_request_conunt_adder(time_op)
             # if "for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day" in raw_response.text:
             #     count_int_try += 1
             #     print("[2] Excedidas las llamadas , cambiar API_KEY Nueva: " + get_api_key())
