@@ -325,7 +325,7 @@ Example name: *TWLO_neg_buy_sell_point__ichi_chikou_span.png*
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.008.png)
 
 #### **3** Training TF XGB and Sklearn 
-`Model_creation_models_for_a_stock.py`   *Requires Declaration.py, request it* https://github.com/Leci37
+`Model_creation_models_for_a_stock.py`
 
 this requires the selection of better columns from point #2
 
