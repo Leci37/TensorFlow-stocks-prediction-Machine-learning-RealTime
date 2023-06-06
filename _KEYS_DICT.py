@@ -55,9 +55,12 @@ MAX_SCALER = 1
 PATH_SCALERS_FOLDER = "Models/TF_multi/Scalers/"
 PERCENTAGES_SCORE = [0.25, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97,0.98]
 
-BACHT_SIZE_LOOKBACK = 10 #cuantos t se usan para hacer una prediccion
+BACHT_SIZE_LOOKBACK = 10  #cuantos t se usan para hacer una prediccion
 
 PATH_PNG_TRADER_VIEW = "plots_relations/Trader_View_png/"
+
+USE_GPU = "No"  # If you have a GPU and want to use. Possible values [Yes or No]
+PER_PROCESS_GPU_MEMORY_FRACTION = 0.333  # Assume that you have 12GB of GPU memory and want to allocate ~4GB
 
 class MODEL_TYPE_COLM(Enum):
     VGOOD = "_vgood16_"
