@@ -13,10 +13,8 @@ if _KEYS_DICT.USE_GPU.lower() == 'yes' or _KEYS_DICT.USE_GPU.lower() == 'y':
     # Assume that you have 12GB of GPU memory and want to allocate ~4GB:
     gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=_KEYS_DICT.PER_PROCESS_GPU_MEMORY_FRACTION)
     sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
-elif _KEYS_DICT.USE_GPU.lower() == 'no' or _KEYS_DICT.USE_GPU.lower() == 'n':
-    physical_devices = tf.config.experimental.list_physical_devices('CPU')
 else:
-    print("Invalid response for USE_GPU in _KEYS_DICT.py file. Going to assume CPU ")
+    print("Going to use CPU ")
     physical_devices = tf.config.experimental.list_physical_devices('CPU')
 
 
