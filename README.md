@@ -197,14 +197,14 @@ The alert is sent on the **vertical line** (the only vertical line that crosses 
 
 ## OPERATION
 
+**NOTE:** If you want to run better read    [Detailed start-up](#detailed-start-up)
+
+
 #### **1.1** Data collection
 Collect data to train the model
 
-`yhoo_generate_big_all_csv.py`
+`1_Get_technical_indicators.py`
 
-The closing data is obtained through yahoo API finance, and hundreds of technical patterns are calculated using the pandas_ta and talib libraries. 
-
-`yhoo_history_stock.get_SCALA_csv_stocks_history_Download_list()`
 
 **Ground True is the variable** `buy_seel_point`
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
@@ -290,7 +290,7 @@ Note: To see the 1068 indicators used go to the attached sheets at the end of th
 #### **2** Indicator filtering
 Execute to find out which columns are relevant for the model output
 
-`Feature_selection_create_json.py`
+`2_Feature_selection_create_json.md`
 
 It is necessary to know which of the hundreds of columns of technical data, is valid to train the neural model, and which are just noise. This will be done through correlations and Random Forest models.
 
@@ -325,7 +325,7 @@ Example name: *TWLO_neg_buy_sell_point__ichi_chikou_span.png*
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.008.png)
 
 #### **3** Training TF XGB and Sklearn 
-`Model_creation_models_for_a_stock.py`
+`3_Model_creation_models_for_a_stock.py`
 
 this requires the selection of better columns from point #2
 
@@ -366,7 +366,7 @@ It contains the accuracy and loss data of the model, as well as the model traini
 
 
 #### **4.1** Assessing the QUALITY of these models 
-`Model_creation_scoring.py`
+`4_Model_creation_scoring_multi.py`
 
 To make a prediction with the AIs, new data is collected and the technical indicators with which it has been trained are calculated according to the *best_selection* files.
 
@@ -428,34 +428,12 @@ Through the function call every 10-12min, download the real-time stock data thro
 ```
 df_compare, df_sell = get_RealTime_buy_seel_points()
 ```
-This run generates the log file *d_result/prediction_results_N_rows.csv*
-
-
-This file and the notifications (telegram and mail) contain information about each prediction that has been made. It contains the following columns:
-this point _**is deprecated**_ by _stocks-prediction-multi_ branch.
-- Date: date of the prediction 
-- Stock: stock 
-- buy_sell: can be either NEG or POS, depending on whether it is a buy or sell transaction. 
-- Close: This is the scaled value of the close value (not the actual value).
-- Volume: This is the scaled value of the Volume (not the actual value).
-- 88%: Fractional format ( **5/6** ) How many models have predicted a valid operating point above 88%? Five of the six analyzed 
-- 93%: Fractional format ( **5/6** ), number of models above 93%.
-- 95%: Fractional format ( **5/6** ), number of models above 95%.
-- TF: Fractional format ( **5/6** ), number of models above 93%, whose prediction has been made with Tensor Flow models. 
-- Models_names: name of the models that have tested positive, with the hit % (88%, 93%, 95%) as suffix 
-
-Registration example
-```
-2022-11-07 16:00:00 MELI NEG -51.8 -85.80 5/6 0/6 0/6 0/6 1/2 TF_reg4_s128_88%, rf_good9_88%, rf_low1_88%, rf_reg4_88%, rf_vgood16_88%,**
-```
-To be considered a valid prediction to trade, it must have at least half of the fraction score in the 93% and TF columns.
-
-More than half of the models have predicted with a score above 93% which is a good point for trading 
+~~This run generates the log file *d_result/prediction_results_N_rows.csv*~~
 
 
 
 #### **5.2** Sending real-time alerts
-`predict_POOL_enque_Thread.py `*multithreading glued 2s per action* 
+`5_predict_POOL_enque_Thread.py `*multithreading glued 2s per action* 
 
 It is possible to run it without configuring telegram point 5.2, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
@@ -492,19 +470,19 @@ To understand the complete information of the alert see Point 5.1 Making predict
 ### Quick start-up Run your own models
 
  
-Install requirements 
+Install requirements (to know the exact version `Utils/requirements_x.y.z.txt`)
 ```
 pip install -r requirements.txt
 ```
 By default (recommendation) the stock list will be used: `"@CHILL": ["UBER", "PYPL"]`
 
-Run `API_alphavantage_get_old_history.py` Optional. File generate example:  `d_price/RAW_alpha/alpha_UBER_15min_20230414__20230317.csv`
+Run `0_API_alphavantage_get_old_history.py` Optional. File generate example:  `d_price/RAW_alpha/alpha_UBER_15min_20230414__20230317.csv`
 
-Run `get_technical_indicators.py` Files generate example: `d_price/PYPL_PLAIN_stock_history_MONTH_3_AD.csv` and `plots_relations/best_selection_PYPL_both.json`
+Run `1_Get_technical_indicators.py` Files generate example: `d_price/PYPL_PLAIN_stock_history_MONTH_3_AD.csv` and `plots_relations/best_selection_PYPL_both.json`
 
-Run `Model_creation_models_for_a_stock.py` Files generate example models TF .h5: `Models/TF_multi/TFm_UBER_neg_vgood16_mult_lstm.h5` , `Models/TF_multi/UBER_neg_vgood16__per_score.csv` and `Models/TF_multi/Scalers/UBER_neg_good9_.scal`
+Run `3_Model_creation_models_for_a_stock.py` Files generate example models TF .h5: `Models/TF_multi/TFm_UBER_neg_vgood16_mult_lstm.h5` , `Models/TF_multi/UBER_neg_vgood16__per_score.csv` and `Models/TF_multi/Scalers/UBER_neg_good9_.scal`
 
-Run `Model_creation_scoring_multi.py` Optional, evaluation the models predictions File generate:  `Models/TF_multi/_SCORE_ALL_multi_all.csv`
+Run `4_Model_creation_scoring_multi.py` Optional, evaluation the models predictions File generate:  `Models/TF_multi/_SCORE_ALL_multi_all.csv`
 
 **Having reached this point**, We would like to get to know you (this is a project of 11 months of work) and I would like you to tell me in Issues tab or Discussion tab what you think and if you see any utility in https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram#possible-improvements. 
 At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** . 
@@ -516,7 +494,7 @@ Run `Utils/Volume_WeBull_get_tikcers.py` Ignore in case of using default configu
 
 Configure bot token see point 5**.2** Configuring chatID and tokens in Telegram
 
-Run `predict_POOL_inque_Thread.py`
+Run `5_predict_POOL_enque_Thread.py`
 
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
@@ -530,7 +508,8 @@ For example: today do not use python 3.10 , as it is incompatible with pandashtt
 
 **0.1** Download and install requirements, the project is powerful and demanding in terms of libraries.
 
-pip install -r requirements.txt
+pip install -r requirements.txt 
+(to know the exact version `Utils/requirements_x.y.z.txt`)
 
 **0.2** Search all files for the string `**DOCU**`
 
@@ -550,7 +529,7 @@ If more stock execution is desired, change to @FOLO3 o similar in file `_KEYS_DI
 ##### **1.0** (Recommended) alphavantage API
 ` `The API yfinance , if you want price to price intervals in 15min intervals is limited to 2 months, to get more time data up to 2 years back (more data better predictive models) use the free version of the API https://www.alphavantage.co/documentation/  
 
-Run `API_alphavantage_get_old_history.py`
+Run `0_API_alphavantage_get_old_history.py`
 
 The class is customizable: action intervals, months to ask, and ID action.
 
@@ -564,7 +543,7 @@ Check that one has been generated for each action in *d_price/RAW_alpha*.
 ##### **1.1** The OHLCV history of the stock must be generated.
 As well as the history of technical patterns. It takes +-1 minute per share to calculate all technical patterns. 
 
-Run `get_technical_indicators.py`
+Run `1_Get_technical_indicators.py`
 
 Once executed the folder: *d_price* will be filled with historical OHLCV .csv of share prices.
 
@@ -597,7 +576,7 @@ Check that three .json have been generated for each action in *plots_relations* 
 Train the models, for each action 36 different models are trained.
 15 minutes per share.
 
-Run `Model_creation_models_for_a_stock.py`  *Requires Declaration.py, request it* https://github.com/Leci37
+Run `3_Model_creation_models_for_a_stock.py`  *Requires Declaration.py, request it* https://github.com/Leci37
 
 The following files are generated for each action:
 
@@ -633,7 +612,7 @@ Check that all combinations of files exposed by each action have been generated 
 #### 4 Evaluate quality of predictive models 
 From the 36 models created for each OHLCV history of each stock, only the best ones will be run in real time, in order to select and evaluate those best ones.
 
-Run `Model_creation_scoring_multi.py`
+Run `4_Model_creation_scoring_multi.py`
 You can see how around 36 TF .h5 models are generated per action, you have to evaluate the 36 and collect the 1-3 best models to use them in real time, this information will be dumped in the files:
 - Models/TF_multi/_RESULTS_profit_multi_all.csv
 - Models/TF_multi/_SCORE_ALL_multi_all.csv
@@ -720,7 +699,7 @@ It will be reported in console via:
 
 The criteria to send alert or not is defined in the method ztelegram_send_message.will_send_alert(). If more than half of the models have a score greater than 93% or the TF models have a score greater than 93%, an alert is sent to the consumer users. 
 
-Run `predict_POOL_inque_Thread.py`
+Run `5_predict_POOL_enque_Thread.py`
 
 In this class there are 2 types of threads 
 
