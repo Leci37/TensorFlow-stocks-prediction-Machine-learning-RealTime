@@ -4,9 +4,9 @@ import tensorflow as tf
 #   tf.config.experimental.set_memory_growth(gpu, True)
 from keras.layers import Flatten
 
-physical_devices = tf.config.experimental.list_physical_devices('GPU')
-if len(physical_devices) > 0:
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.experimental.list_physical_devices('GPU')
+# if len(physical_devices) > 0:
+#     tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 import os
 import numpy as np
@@ -81,7 +81,7 @@ def __manage_get_per_results_stadistic_from_predit_result(pre, test_labels):
     df_pres = pd.DataFrame(pre).describe(percentiles=_KEYS_DICT.PERCENTAGES_SCORE).round(4)
     # series_d = pd.Series({'acc_per': accuracy, 'loss': loss, 'epochs': epochs, 'positives':df_re_dftest["validation"].value_counts()[1] }, name=0)
     # df_pres = pd.DataFrame(  pd.concat([series_d, series_c]))
-    df_pres.insert(loc=len(df_pres.columns), column="df_test", value=-1)
+    df_pres.insert(loc=len(df_pres.columns), column="df_test", value="-1")
     df_pres.insert(loc=len(df_pres.columns), column="per_acert", value=-1)
     df_pres.insert(loc=len(df_pres.columns), column="predict_", value=-1)
     df_pres.insert(loc=len(df_pres.columns), column="acert_", value=-1)
