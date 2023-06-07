@@ -19,7 +19,7 @@ from websocket._exceptions import WebSocketConnectionClosedException
 from LogRoot.Logging import Logger
 # LOGGER = Logger.logr
 
-from XTBApi.exceptions import *
+from useless.XTBApi.exceptions import *
 
 LOGGER = logging.getLogger('XTBApi.api')
 

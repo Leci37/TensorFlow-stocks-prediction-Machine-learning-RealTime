@@ -18,7 +18,8 @@ from Utils.Utils_send_message import DICT_SCORE_RATE
 from _KEYS_DICT import Option_Historical, DICT_COMPANYS , Op_buy_sell
 from ztelegram_send_message_handle import URL_TELE, send_mesage_all_people, send_exception
 
-from XTB_api import xtb_api
+from useless.XTB_api import xtb_api
+
 logging.config.fileConfig(r"LogRoot/logging.conf")
 # LOGGER = logging.getLogger('root')
 logging.root.manager.loggerDict['root'].disabled = False

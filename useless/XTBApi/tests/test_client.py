@@ -9,7 +9,7 @@ import logging
 
 import pytest
 
-from XTBApi.api import Client
+from useless.XTBApi.api import Client
 
 LOGGER = logging.getLogger('XTBApi.test_client')
 logging.getLogger('XTBApi.api').setLevel(logging.INFO)

@@ -17,7 +17,7 @@ from datetime import datetime
 from websocket import create_connection
 from websocket._exceptions import WebSocketConnectionClosedException
 
-from XTBApi.exceptions import *
+from useless.XTBApi.exceptions import *
 
 LOGGER = logging.getLogger('XTBApi.api')
 LOGIN_TIMEOUT = 120

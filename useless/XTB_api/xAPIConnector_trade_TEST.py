@@ -9,7 +9,7 @@ from datetime import datetime
 from threading import Thread
 
 # set to true on debug environment only
-import XTBApi
+from useless import XTBApi
 
 DEBUG = True
 
@@ -330,7 +330,7 @@ DICT_CRTPO_XTB = {
 
 def get_prices_operate(mode, symbol):
     conversion_mode = {MODES.BUY.value: 'ask', MODES.SELL.value: 'bid'}
-    symbol_info = XTBApi.api.BaseClient.get_symbol(symbol)
+    symbol_info = useless.XTBApi.api.BaseClient.get_symbol(symbol)
     price = symbol_info[conversion_mode[mode.value]]
     conversion_mode_2 = {MODES.BUY.value: 'low', MODES.SELL.value: 'high'}
     price_2 = symbol_info[conversion_mode_2[mode.value]]
@@ -345,7 +345,7 @@ def get_prices_operate(mode, symbol):
 
 
 # https://pypi.org/project/XTBApi/
-from XTBApi.api import Client
+from useless.XTBApi.api import Client
 client = None
 def login_client():
     global client
@@ -361,7 +361,7 @@ def close_operation_2(client_api, trade_id):
     except Exception as ex:
         print("Exception close_operation "+traceback.format_exc())
 
-def update_operation(client_api,trade_Id ,data_xtb: XTBApi.api.Transaction):
+def update_operation(client_api, trade_Id, data_xtb: useless.XTBApi.api.Transaction):
     try:
         client_api.update_trade(trade_Id, data_xtb, tp_new_value=data_xtb._trans_dict['tp'], sl_new_value=data_xtb._trans_dict['sl'])
         return "update"
@@ -460,10 +460,10 @@ def close_operation_1(client_api, data_xtb, trade_Id):
     close_operation_2(client_api, trade_Id)
 
 def get_TP_SL_in_data_xtb(data_xtb):
-    sl_b, tp_b = XTBApi.api.Client.get_tp_sl(mode=MODES.BUY.value, price=data_xtb._trans_dict['open_price'],
-                                             tp_per=0.08, sl_per=0.03)
-    sl_s, tp_s = XTBApi.api.Client.get_tp_sl(mode=MODES.SELL.value, price=data_xtb._trans_dict['open_price'],
-                                             tp_per=0.08, sl_per=0.03)
+    sl_b, tp_b = useless.XTBApi.api.Client.get_tp_sl(mode=MODES.BUY.value, price=data_xtb._trans_dict['open_price'],
+                                                     tp_per=0.08, sl_per=0.03)
+    sl_s, tp_s = useless.XTBApi.api.Client.get_tp_sl(mode=MODES.SELL.value, price=data_xtb._trans_dict['open_price'],
+                                                     tp_per=0.08, sl_per=0.03)
     if data_xtb._trans_dict['tp'] == 0 and data_xtb.mode.upper() == MODES.BUY.name.upper():
         data_xtb._trans_dict['tp'] = tp_b
     if data_xtb._trans_dict['sl'] == 0 and data_xtb.mode.upper() == MODES.BUY.name.upper():

@@ -6,7 +6,7 @@ import numpy as np
 # from LogRoot.Logging import Logger
 
 # https://pypi.org/project/XTBApi/
-from XTBApi.api import Client, TRANS_TYPES, DICT_MODES_XTB, MODES
+from useless.XTBApi.api import Client, TRANS_TYPES, DICT_MODES_XTB, MODES
 
 DICT_CRTPO_XTB = {
     "BTC-USD" : "BITCOIN",

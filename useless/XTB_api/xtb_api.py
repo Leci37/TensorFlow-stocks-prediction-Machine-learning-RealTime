@@ -5,7 +5,7 @@ from threading import Lock
 lock = Lock()
 
 # https://pypi.org/project/XTBApi/
-from XTBApi.api import Client
+from useless.XTBApi.api import Client
 #
 # logging.root.manager.loggerDict['root'].disabled = False
 

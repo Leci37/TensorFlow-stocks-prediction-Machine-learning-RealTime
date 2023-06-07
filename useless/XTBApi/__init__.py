@@ -1,7 +1,7 @@
 import logging.config
 import os.path
 
-from XTBApi.__version__ import __version__
+from useless.XTBApi.__version__ import __version__
 
 # LOGGING_CONFIG = r"C:\Users\Luis\Desktop\LecTrade\LecTrade\LogRoot\logging.conf"
 # logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers = False)

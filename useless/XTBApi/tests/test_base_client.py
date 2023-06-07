@@ -10,7 +10,7 @@ import time
 
 import pytest
 
-import XTBApi.api
+import useless.XTBApi.api
 
 LOGGER = logging.getLogger('XTBApi.test_base_client')
 logging.getLogger('XTBApi.api').setLevel(logging.DEBUG)
@@ -22,7 +22,7 @@ DEFAULT_CURRENCY = 'EURUSD'
 
 @pytest.fixture(scope="module")
 def _get_client():
-    return XTBApi.api.BaseClient()
+    return useless.XTBApi.api.BaseClient()
 
 
 def test_login(_get_client):
