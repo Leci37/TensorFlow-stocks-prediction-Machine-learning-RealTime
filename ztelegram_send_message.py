@@ -18,7 +18,7 @@ from Utils.Utils_send_message import DICT_SCORE_RATE
 from _KEYS_DICT import Option_Historical, DICT_COMPANYS , Op_buy_sell
 from ztelegram_send_message_handle import URL_TELE, send_mesage_all_people, send_exception
 
-from useless.XTB_api import xtb_api
+# from useless.XTB_api import xtb_api
 
 logging.config.fileConfig(r"LogRoot/logging.conf")
 # LOGGER = logging.getLogger('root')
@@ -141,9 +141,9 @@ def send_MULTI_alert_and_register(S, df_mul_r):
         score_POS = DICT_SCORE_RATE[str(len(list_models_to_predict_POS))]
         if (df_mul["POS_score"][1:] >= score_POS).any() and any((df_mul[list_models_to_predict_POS][1:] >= 91).any()) :# or 1 == 1 :
 
-            from XTB_api import xtb_api
-            thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS), name='XTB_POS')
-            thr_xtb.start()
+            # from XTB_api import xtb_api
+            # thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS), name='XTB_POS')
+            # thr_xtb.start()
 
             # xtb_api.xtb_operate_Lock_thread(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS)
             if not is_already_sent_alert(df_mul):
@@ -158,9 +158,9 @@ def send_MULTI_alert_and_register(S, df_mul_r):
         score_NEG = DICT_SCORE_RATE[str(len(list_models_to_predict_NEG))]
         if (df_mul["NEG_score"][1:] >= score_NEG).any() and any((df_mul[list_models_to_predict_NEG][1:] >= 91).any()) :# or 1 == 1 :
 
-            from XTB_api import xtb_api
-            thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.NEG, list_models_to_predict_NEG), name='XTB_NEG')
-            thr_xtb.start()
+            # from XTB_api import xtb_api
+            # thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.NEG, list_models_to_predict_NEG), name='XTB_NEG')
+            # thr_xtb.start()
 
             # xtb_api.xtb_operate_Lock_thread(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.NEG, list_models_to_predict_NEG)
             if not is_already_sent_alert(df_mul):
