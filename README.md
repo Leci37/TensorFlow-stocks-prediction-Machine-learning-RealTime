@@ -150,7 +150,6 @@ It operates on the basis of the crossovers between these two lines
 Or it is operated when both exceed zero.
 
 **Candlestick: Morning Star** The morning star pattern is considered a hopeful sign in a bearish market trend.
-
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.002.png)
 
 
@@ -421,7 +420,7 @@ Note: this should be run on data that has not been used in the training model, p
 #### **5.1** Making predictions for the past week
 `Model_predictions_Nrows.py`
 
-At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** (if you wish you can reverse engineer it, it will take 2-3 days and it will not look good). 
+At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** (if you wish you can reverse engineer it). 
 
 You can make predictions with the real-time data of the stock.
 
