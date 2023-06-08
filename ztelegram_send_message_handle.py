@@ -55,7 +55,7 @@ LIST_PEOPLE_IDS_CHAT = [chat_idUser1, chat_idUser2, chat_idUser2]
 def is_token_telegram_configurated():
     if TOKEN == "00000000xxxxxxx":
         Logger.logr.info("Results will be recorded in real time, but no alert will be sent on telegram. File: "+ PATH_REGISTER_RESULT_REAL_TIME)
-        Logger.logr.warning("There is no value for the telegram TOKEN, telegram is required to telegram one, see tutorial: https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token")
+        Logger.logr.warning("There is not value for the telegram TOKEN, telegram is required to telegram one, see tutorial: https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token")
         return False
     return  True
 

@@ -17,7 +17,7 @@ from LogRoot.Logging import Logger
 import yhoo_history_stock
 from Utils.Utils_QueueMap import QueueMap
 from _KEYS_DICT import Op_buy_sell, Option_Historical, DICT_WEBULL_ID, DICT_COMPANYS
-from api_twitter import twi_
+# from api_twitter import twi_
 from predict_POOL_handle import get_tech_data_nasq, get_df_webull_realTime, df_yhoo_, merge_dataframes_bull_yhoo
 from ztelegram_send_message import send_alert_and_register, send_exception
 logging.root.manager.loggerDict['root'].disabled = False
