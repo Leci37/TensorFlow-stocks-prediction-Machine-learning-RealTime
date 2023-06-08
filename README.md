@@ -60,6 +60,7 @@ I will be asked for training, what improvements you can think of. (recommended t
       - [Recommended reading LSTM plus stock price FAIL](#recommended-reading-lstm-plus-stock-price-fail)
       - [Lighter improvements list of suggested](#lighter-improvements-list-of-suggested)
       - [Review of all forms of time series prediction: lstm,gru,cnn and rnn](#recommended-reading-lstm-plus-stock-price-fail)
+      - [Use benefit evaluation function instead of Y target](#use-benefit-evaluation-function-instead-of-y-target)
       - [Imagine the operating points TF GAN](#imagine-the-operating-points-generative-adversarial-networks)
     + [USE THE SOFTWARE AT YOUR OWN RISK THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS](#use-the-software-at-your-own-risk-the-authors-and-all-affiliates-assume-no-responsibility-for-your-trading-results)
     + [Technical Patterns all Names](#technical-patterns-all-names)
@@ -804,6 +805,11 @@ forming the heat map, of the given preconditions
 Example for TF cat detection:
 
 <img src="readme_img/ex_TF_cat_heat_map.jpg" alt="ex_TF_cat_heat_map" width="400"/>
+
+##### Use benefit evaluation function instead of Y target
+Instead of using the ground true, i.e. the objective "y", it can be disguised, i.e. at each step of the training it is not evaluated against the "y" but against the function "benefit obtained" (which would have to be created). 
+For this it is necessary to create callback decorators in the training function like https://www.tensorflow.org/guide/keras/customizing_what_happens_in_fit?hl=es-419#wrapping_up_an_end-to-end_gan_example 
+
 
 ##### Imagine the operating points (generative adversarial networks) 
 
