@@ -21,8 +21,8 @@ from ztelegram_send_message_handle import URL_TELE, send_mesage_all_people, send
 # from useless.XTB_api import xtb_api
 
 logging.config.fileConfig(r"LogRoot/logging.conf")
-# LOGGER = logging.getLogger('root')
-logging.root.manager.loggerDict['root'].disabled = False
+LOGGER = logging.getLogger()
+LOGGER.disabled = False
 
 message = "hello from your telegram bot"
 
