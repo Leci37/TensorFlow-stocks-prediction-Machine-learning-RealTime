@@ -26,7 +26,7 @@ def __load_drive():
     options.add_argument("--start-maximized")
     options.headless = True
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver = webdriver.Chrome(options=options)
     driver.set_window_size(1400, 800)
     driver.maximize_window()
     Logger.logr.info("Loaded Drive 1200, 800 ChromeDriverManager()")
