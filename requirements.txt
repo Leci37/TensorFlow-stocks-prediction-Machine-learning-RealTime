@@ -9,6 +9,7 @@ telegram
 python-telegram-bot
 selenium
 cloud-tpu-client
+tweepy
 mitmproxy
 numba
 lxml
