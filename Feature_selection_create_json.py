@@ -72,11 +72,17 @@ def get_best_columns_to_train(cleaned_df, op_buy_sell : _KEYS_DICT.Op_buy_sell ,
 
 
     ''' Correlation Matrix with Heatmap '''
+
     def get_correlation_corrwith():
         global df
         print(" Correlation Matrix with Heatmap ")
-        df[Y_TARGET] = pd.to_numeric(df[Y_TARGET], errors='coerce')
-        dcf = df.select_dtypes(include=[np.number]).corrwith(df[Y_TARGET])
+        try:
+            dcf = df.corrwith(df[Y_TARGET])
+        except (ValueError, UnboundLocalError, TypeError) as e:
+            logging.info(f"Exception occurred: {str(e)}")
+            df[Y_TARGET] = pd.to_numeric(df[Y_TARGET], errors='coerce')
+            dcf = df.select_dtypes(include=[np.number]).corrwith(df[Y_TARGET])
+
         dcf = dcf.abs().sort_values(ascending=False)[:num_best]
         df_result['corrwith'] = dcf.index
         df_result['corrwith_points'] = dcf.values
