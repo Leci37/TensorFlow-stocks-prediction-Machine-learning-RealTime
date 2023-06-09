@@ -37,26 +37,26 @@ model_folder = "Models/Sklearn_smote/"
 #TODO ananalizar en más detalle https://github.com/huseinzol05/Stock-Prediction-Models
 
 '''Para ENTRENAR los distintos tipos de configuracion TF GradientBoost XGBClassifier RandomForestClassifier '''
-def train_model_with_custom_columns(name_model, columns_list, csv_file_SCALA, op_buy_sell : _KEYS_DICT.Op_buy_sell):
-    columns_selection = ['Date', Y_TARGET, 'ticker'] + columns_list
-    print(
-        "GradientBoost XGBClassifier RandomForestClassifier \n DICT_COLUMNS_TYPES: " + name_model + " Columns Selected:" + ', '.join(
-            columns_selection))
-    X_train, X_test, y_train, y_test = Model_train_sklearn_XGB.get_x_y_train_test_sklearn_XGB(columns_selection,path=csv_file_SCALA, op_buy_sell=op_buy_sell)
-
-    for type_mo in _KEYS_DICT.MODEL_TF_DENSE_TYPE_ONE_DIMENSI.list():
-        model_h5_name_k = "TF_" + name_model + type_mo.value+'.h5'
-        print(bcolors.OKBLUE + "\t\t "+model_h5_name_k + bcolors.ENDC)
-        print("START")
-        Model_train_TF_onBalance.train_TF_onBalance_One_dimension(columns_selection, model_h5_name_k,csv_file_SCALA, op_buy_sell=op_buy_sell, type_model_dime=type_mo)
-
-    SAV_surname = name_model
-    print("\nGradientBoost")
-    Model_train_sklearn_XGB.train_GradientBoost(X_train, X_test, y_train, y_test, SAV_surname)
-    print("\nXGBClassifier")
-    Model_train_sklearn_XGB.train_XGBClassifier(X_train, X_test, y_train, y_test, SAV_surname)
-    print("\nRandomForestClassifier")
-    Model_train_sklearn_XGB.train_RandomForestClassifier(X_train, X_test, y_train, y_test, SAV_surname)
+# def train_model_with_custom_columns(name_model, columns_list, csv_file_SCALA, op_buy_sell : _KEYS_DICT.Op_buy_sell):
+#     columns_selection = ['Date', Y_TARGET, 'ticker'] + columns_list
+#     print(
+#         "GradientBoost XGBClassifier RandomForestClassifier \n DICT_COLUMNS_TYPES: " + name_model + " Columns Selected:" + ', '.join(
+#             columns_selection))
+#     X_train, X_test, y_train, y_test = Model_train_sklearn_XGB.get_x_y_train_test_sklearn_XGB(columns_selection,path=csv_file_SCALA, op_buy_sell=op_buy_sell)
+#
+#     for type_mo in _KEYS_DICT.MODEL_TF_DENSE_TYPE_ONE_DIMENSI.list():
+#         model_h5_name_k = "TF_" + name_model + type_mo.value+'.h5'
+#         print(bcolors.OKBLUE + "\t\t "+model_h5_name_k + bcolors.ENDC)
+#         print("START")
+#         Model_train_TF_onBalance.train_TF_onBalance_One_dimension(columns_selection, model_h5_name_k,csv_file_SCALA, op_buy_sell=op_buy_sell, type_model_dime=type_mo)
+#
+#     SAV_surname = name_model
+#     print("\nGradientBoost")
+#     Model_train_sklearn_XGB.train_GradientBoost(X_train, X_test, y_train, y_test, SAV_surname)
+#     print("\nXGBClassifier")
+#     Model_train_sklearn_XGB.train_XGBClassifier(X_train, X_test, y_train, y_test, SAV_surname)
+#     print("\nRandomForestClassifier")
+#     Model_train_sklearn_XGB.train_RandomForestClassifier(X_train, X_test, y_train, y_test, SAV_surname)
 
 
 
