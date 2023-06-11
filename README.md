@@ -790,6 +790,11 @@ Especially the tutorial to make RL with OHLCV data and 2 technical patterns. htt
 
 That project does not have good tools for real time data collection, alert system, it also works with daily OHLCV data (instead of the intra day 5min, 15min, 1h of this project), which leaves you very exposed to news and financial results. 
 
+To start getting familiar with this POWERFUL tool, we recommend the following tools and tutorials
+- From 0 : https://gymnasium.farama.org/tutorials/training_agents/blackjack_tutorial/ 
+- Beginner: https://github.com/AminHP/gym-anytrading 
+- Intermediate-advanced: https://github.com/AminHP/gym-mtsim 
+- Professional: https://github.com/AI4Finance-Foundation/FinRL
 
 ##### MonoLabel vs MultiLabel
 The models are binary, i.e., some POS models are generated to detect only points of purchase and other NEG to detect only points of sale, these predictive models only detect True or False.
