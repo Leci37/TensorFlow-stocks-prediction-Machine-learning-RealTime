@@ -2,6 +2,14 @@ requests
 pywebcopy
 numpy
 pandas
+pandas_ta
+ta-lib  # https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib
+tensorflow  # Install latest Visual C++ https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170
+telegram
+python-telegram-bot
+selenium
+cloud-tpu-client
+tweepy
 mitmproxy
 numba
 lxml

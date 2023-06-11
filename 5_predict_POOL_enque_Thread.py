@@ -20,7 +20,8 @@ from _KEYS_DICT import Op_buy_sell, Option_Historical, DICT_WEBULL_ID, DICT_COMP
 # from api_twitter import twi_
 from predict_POOL_handle import get_tech_data_nasq, get_df_webull_realTime, df_yhoo_, merge_dataframes_bull_yhoo
 from ztelegram_send_message import send_alert_and_register, send_exception
-logging.root.manager.loggerDict['root'].disabled = False
+LOGGER = logging.getLogger()
+LOGGER.disabled = False
 
 
 # list_models_pos_neg = get_list_models_to_use()
@@ -130,7 +131,8 @@ def consumer(int_thread):
     # consume work
     while True:
         df_nasq = yhoo_history_stock.get_NASDAQ_data(exter_id_NQ = "NQ=F", interval='15m' , opion=Option_Historical.DAY_6, remove_str_in_colum = "=F")
-        logging.root.manager.loggerDict['root'].disabled = False
+        LOGGER = logging.getLogger()
+        LOGGER.disabled = False
         Logger.logr.debug("  cycle started   Date: "+ datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
         # list_recorrer = list_pro.copy()
         # if int_thread == 2:
