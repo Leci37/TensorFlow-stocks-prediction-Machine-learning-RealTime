@@ -499,11 +499,13 @@ Run `5_predict_POOL_enque_Thread.py`
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
 ## Detailed start-up
+You can also see [Step by step](README_setup_installation.md)
+
 (Running times are estimated for an intel i3 and 8GB of RAM)
 
 
 **0.0**The interpreter with which the tutorial has been made is python 3.8 , IDE Pycharm, caution with the compatibility between versions of the library pandas and python
-For example: today do not use python 3.10 , as it is incompatible with pandashttps://stackoverflow.com/questions/69586701/unable-to-install-pandas-for-python 
+For example: today do not use python 3.10 , as it is incompatible with pandas https://stackoverflow.com/questions/69586701/unable-to-install-pandas-for-python 
 
 
 **0.1** Download and install requirements, the project is powerful and demanding in terms of libraries.
