@@ -499,7 +499,7 @@ Run `5_predict_POOL_enque_Thread.py`
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
 ## Detailed start-up
-You can also see [Step by step](README_setup_installation.md)
+To do step 0, **installation or correct errors** in the installation there are also  [Step by step](Readme_setup_installation.md)
 
 (Running times are estimated for an intel i3 and 8GB of RAM)
 
