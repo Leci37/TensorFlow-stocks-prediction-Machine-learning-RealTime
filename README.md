@@ -209,7 +209,18 @@ Collect data to train the model
 **Ground True is the variable** `buy_seel_point`
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
 
-Value will be assigned in buy_seel_point if the increase or decrease of the stock is greater than 2.5% in a period of 3 hours, using the get_buy_sell_points_Roll function.
+Defining the GT (Ground True) is a subjective task, these numbers can be obtained in 2 ways:
+By default with the functions:
+ - `Utils_buy_sell_points.get_buy_sell_points_Roll` (default). Value will be assigned in buy_seel_point if the increase or decrease of the stock is greater than 2.5% in a period of 3 hours, using the get_buy_sell_points_Roll function.
+
+ - `Utils_buy_sell_points.get_buy_sell_points_HT_pp` Inspired by the TraderView technical indicator "Pilots HL". 
+
+On the graphic, you can see the difference being:
+**_Blue_** the candle Close
+_**Red**_ the values obtained in `get_buy_sell_points_Roll()` the positive and negative peaks indicate sell and buy points.
+The points obtained in `get_buy_sell_points_HT_pp()` are shown, the **_Orange_** peaks being the Buy points and the **_Green_** peaks being the Sell points.
+
+![](readme_img/GT_ways_3.PNG)
 
 Once the historical data of the stock has been obtained and all the technical indicators have been calculated, a total of 1068, files of type `AAPL_stock_history_MONTH_3_AD.csv` are generated.
 
@@ -771,6 +782,8 @@ Utils_model_predict.scaler_split_TF_onbalance(df, label_name=Y_TARGET, BACHT_SIZ
 **Improvement**: Once these multidimensional arrays are returned, models are obtained with `get_dicts_models_multi_dimension()`, it is not possible to train a model and make a prediction with multidimensional arrays. 
 
 ##### Review the way ground true is obtained 
+It is recommended to review the point "Ground True is the variable" of the documentation, to understand this point.
+
 Before training the models the intervals (of 15min) are classified as buy point 100 or 101, sell point -100 or .-101 or no trade point 0, these values are entered in the column Y_TARGET = **'buy_sell_point'** through the method `Utils.Utils_buy_sell_points.get_buy_sell_points_Roll()`.  
 
 The variation is calculated with respect to the following 12 windows (15min \* 12 = 3 hours), and from there the 8% points of greatest rise and greatest fall are obtained, and these points are assigned values other than 0.
