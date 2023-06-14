@@ -210,10 +210,9 @@ Collect data to train the model
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
 
 Defining the GT (Ground True) is a subjective task, these numbers can be obtained in 2 ways:
-By default with the functions:
  - `Utils_buy_sell_points.get_buy_sell_points_Roll` (default). Value will be assigned in buy_seel_point if the increase or decrease of the stock is greater than 2.5% in a period of 3 hours, using the get_buy_sell_points_Roll function.
 
- - `Utils_buy_sell_points.get_buy_sell_points_HT_pp` Inspired by the TraderView technical indicator "Pilots HL". 
+ - `Utils_buy_sell_points.get_buy_sell_points_HT_pp` (decomments the line) Inspired by the TraderView technical indicator "Pilots HL". 
 
 On the graphic, you can see the difference being:
 **_Blue_** the candle Close
