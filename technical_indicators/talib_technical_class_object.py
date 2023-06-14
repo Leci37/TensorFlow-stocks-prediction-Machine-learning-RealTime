@@ -1,3 +1,4 @@
+import _KEYS_DICT
 from Utils import Utils_Yfinance, Utils_buy_sell_points
 
 from technical_indicators import (
@@ -23,7 +24,9 @@ class TechData:
 
 
 def get_ALL_tech_data_local(df_his, costum_columns=None):
-    df_his = Utils_buy_sell_points.get_buy_sell_points_Roll(df_his) #'buy_sell_point'
+    #uncompatible get_buy_sell_points_Roll with get_buy_sell_points_HT_pp() use one o the other to get GT
+    df_his = Utils_buy_sell_points.get_buy_sell_points_Roll(df_his)#'buy_sell_point'
+    # df_his = Utils_buy_sell_points.get_buy_sell_points_HT_pp(df_his, _KEYS_DICT.BACHT_SIZE_LOOKBACK + 2, (_KEYS_DICT.BACHT_SIZE_LOOKBACK + 2) * 2)
     df_his = Utils_Yfinance.add_variation_percentage(df_his) #'\'per_Close\', \'per_Volume\'
 
     # RETIRAR DATOS PREMARKET

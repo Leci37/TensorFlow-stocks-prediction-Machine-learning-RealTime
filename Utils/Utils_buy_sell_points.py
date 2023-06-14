@@ -166,6 +166,45 @@ def get_buy_sell_points_Roll(df_stock, delete_aux_rows = True):
 
     return df_stock
 
+# https://stackoverflow.com/questions/64019553/how-pivothigh-and-pivotlow-function-work-on-tradingview-pinescript
+def get_buy_sell_points_HT_pp(df_l, LEN_RIGHT, LEN_LEFT):
+    print("get_HT_pp df.shape:",df_l.shape," len_right: ",LEN_RIGHT," len_left: ", LEN_LEFT)
+
+
+    # se puede usar high and low , pero distorsina los puntos
+    pivots_hh = df_l['High'].shift(-LEN_RIGHT, fill_value=0).rolling(LEN_LEFT).max()
+    # For 'High' pivots pd.Series 'high_column' and:
+    pivots_ll = df_l['Low'].shift(-LEN_RIGHT, fill_value=0).rolling(LEN_LEFT).min()
+    df_l['pp_high'] = pivots_hh
+    df_l['pp_low'] = pivots_ll
+    df_l.insert(loc=len(df_l.columns), column="touch_low", value=False)
+    df_l.insert(loc=len(df_l.columns), column="touch_high", value=False)
+    df_l.loc[(df_l["pp_low"] >= df_l['Low']), "touch_low"] = True
+    df_l.loc[(df_l["pp_high"] <= df_l['High']), "touch_high"] = True
+    # df_l.value_counts()
+    df_r = pd.DataFrame()
+    df_r['count'] = df_l[[ "touch_low", "touch_high"]].value_counts().to_frame()
+    df_r['per%'] = df_l[["touch_low", "touch_high"]].value_counts(normalize=True).mul(100).round(2)
+    # df_r.index = ['Buy_True/Sell_True', 'Buy_True/Sell_False', 'Buy_False/Sell_True', 'Buy_False/Sell_False']
+    print("Count ht pivost point stadistic balance ")
+    print(df_r)
+
+
+    # df_l[["touch_low", "touch_high"]].astype(int)
+    if Y_TARGET not in df_l.columns:
+        df_l.insert(loc=1, column=Y_TARGET, value=0)
+    df_l.loc[df_l["touch_low"] == True , Y_TARGET] = 100
+    df_l.loc[df_l["touch_high"] == True , Y_TARGET] = -100
+    #Why? can bring with "touch_high" and "touch_low" == True
+    df_l.loc[(df_l["touch_high"] == True) & (df_l["touch_low"] == True), Y_TARGET] = 0
+
+    df_l = df_l.drop(columns=['pp_high', 'pp_low', "touch_low", "touch_high"],errors='ignore')
+
+    # df_l[Y_TARGET].value_counts()
+    # df_l[Y_TARGET+"2"].value_counts()
+
+    return df_l#, df_r
+
 #obsolete method
 # Old method repleced by rolling_get_sell_price_XXX_next_value
 def get_buy_sell_points_Arcos(df_stock):
