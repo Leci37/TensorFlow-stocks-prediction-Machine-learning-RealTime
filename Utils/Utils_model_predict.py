@@ -103,7 +103,7 @@ def load_and_clean__buy_sell_atack( raw_df, columns_selection, op_buy_sell : _KE
 
     # raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace([101, -101], [100, -100])
     # raw_df[Y_TARGET] = raw_df[Y_TARGET].astype(int).replace(-100, 0)  # Solo para puntos de compra
-
+    raw_df.replace([np.inf, -np.inf], 0, inplace=True)
     df = Utils_buy_sell_points.select_work_buy_or_sell_point(raw_df.copy(), op_buy_sell)
 
     print("COMPRA VENTA PUNTO")
