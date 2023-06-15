@@ -42,7 +42,7 @@ def get_historial_data_3_month(stockID, prepos=True, interva="15m"):
     df_his = df_his.drop(columns=['Dividends', 'Stock Splits'],errors='ignore')
 
     df_his = df_his.rename(columns={'Datetime': 'Date'})
-    df_his['Date'] = df_his['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df_his['Date'] = pd.to_datetime(df_his['Date'], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')
 
     # for c in ['Open', 'High', 'Low', 'Close', 'Volume']:
     #     df_his[c] = df_his[c].round(3)
