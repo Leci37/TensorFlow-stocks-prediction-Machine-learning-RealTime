@@ -54,8 +54,8 @@ def get_string_alert_message(S, dict_pred, modles_evaluated,  type_b_s, date_det
 
 DICT_SCORE_RATE = {
     "0" : 90,
-    "1" : 91,
-    "2" : 161,
+    "1" : 95,
+    "2" : 185,
     "3" : 196,
     "4" : 400
 }
@@ -102,7 +102,7 @@ def get_MULTI_string_alert_message(S, dictR, type_b_s:_KEYS_DICT.Op_buy_sell, li
     # s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n"
     if url_info_inves != "":
         s3_aux_1 = "News: <a href=\"" + url_info_inves + "\">Investing.com</a>\n"
-    s3 = s3_aux_1 + "Candles: <a href=\"" + url_info_trader_view + "\">TraderView.com</a>\n\n<b><i>Confidence of models:</i></b>\n"
+    s3 = s3_aux_1 + "<a href=\"" + url_info_trader_view + "\">TraderView.com</a>\n\n<b><i>Confidence of models:</i></b>\n"
     # s4 = "\t   POS_score: " + str(dictR['POS_score']) + "%/"+str(dictR['POS_num'])+"\n\t   NEG_score: " + str(dictR['NEG_score']) + "%/"+str(dictR['NEG_num'])+"\n"
     s4 = "\t\t⬆POS_score: " + "{:.1f}".format(percentage_visible_POS) + "%/" + str(dictR['POS_num']) + "\n\t\t⬇NEG_score: " + "{:.1f}".format(percentage_visible_NEG) + "%/" + str(dictR['NEG_num']) + "\n"
     s5 = "<b><i>📊⚙Model names:</i></b><pre>\n\t\t⦁" + "\n\t\t⦁".join(list_model_per_result).replace(S+"_"+type_b_s.value+"_",'') + "</pre>"
