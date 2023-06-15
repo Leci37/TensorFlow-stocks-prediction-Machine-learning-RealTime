@@ -95,9 +95,15 @@ def __manage_get_per_results_stadistic_from_predit_result(pre, test_labels):
         df_re_dftest.loc[(df_re_dftest['validation'] == True) & (df_re_dftest["result"] > rate_score), "acert_" + idnx_per] = 1
 
         df_pres.at[idnx_per, "predict_"] = df_re_dftest["predict_" + idnx_per].value_counts()[1]
-        df_pres.at[idnx_per, "acert_"] = df_re_dftest["acert_" + idnx_per].value_counts()[1]
-        df_pres.at[idnx_per, "df_test"] = str(df_re_dftest["acert_" + idnx_per].value_counts()[1]) + "_in_"+str(df_re_dftest["predict_" + idnx_per].value_counts()[1])
-        df_pres.at[idnx_per, "per_acert"] = (df_pres.at[idnx_per, "acert_"] * 100 / df_pres.at[idnx_per, "predict_"]).round(2)
+        #To avoid when dont have [1] as result
+        if len(df_re_dftest["acert_" + idnx_per].value_counts()) > 1:
+            df_pres.at[idnx_per, "acert_"]= df_re_dftest["acert_" + idnx_per].value_counts()[1]
+            df_pres.at[idnx_per, "df_test"] = str(df_re_dftest["acert_" + idnx_per].value_counts()[1]) + "_in_" + str(df_re_dftest["predict_" + idnx_per].value_counts()[1])
+            df_pres.at[idnx_per, "per_acert"] = (df_pres.at[idnx_per, "acert_"] * 100 / df_pres.at[idnx_per, "predict_"]).round(2)
+        else:
+            df_pres.at[idnx_per, "acert_"] = 0
+            df_pres.at[idnx_per, "df_test"] = str(np.nan) + "_in_" + str(df_re_dftest["predict_" + idnx_per].value_counts()[1])
+            df_pres.at[idnx_per, "per_acert"] = 0 # (df_pres.at[idnx_per, "acert_"] * 100 / df_pres.at[idnx_per, "predict_"]).round(2)
 
 
     df_pres = df_pres.drop(columns=["acert_", "predict_"], errors='ignore')
