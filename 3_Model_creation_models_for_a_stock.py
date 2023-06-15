@@ -1,6 +1,7 @@
 """https://github.com/Leci37/LecTrade LecTrade is a tool created by github user @Leci37. instagram @luis__leci Shared on 2022/11/12 .   . No warranty, rights reserved """
 import pandas as pd
 from Utils import Utils_GPU_manage
+import traceback
 from tensorflow import keras
 from keras.backend import set_session
 
@@ -79,6 +80,7 @@ def train_MULTI_model_with_custom_columns(name_model, columns_list, csv_file_SCA
         except Exception as ex:
             df_result['r_TFm_' + name_model + type_mo.value] = -1
             print(bcolors.WARNING + "Exception MULTI " + bcolors.ENDC + "_" , ex)
+            print(traceback.format_exc(), "\n")
 
     df_result.to_csv("Models/TF_multi/" + name_model + "_per_score.csv", sep='\t')
     print("Path: Models/TF_multi/" + name_model + "_per_score.csv")
