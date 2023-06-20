@@ -19,7 +19,10 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from LogRoot.Logging import Logger
 
-driver = None
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
 
 def __load_drive():
     options = Options()
@@ -27,7 +30,7 @@ def __load_drive():
     options.headless = True
 
     driver = webdriver.Chrome(options=options)
-    driver.set_window_size(1400, 800)
+    driver.set_window_size(2400, 1400)
     driver.maximize_window()
     Logger.logr.info("Loaded Drive 1200, 800 ChromeDriverManager()")
     return driver
