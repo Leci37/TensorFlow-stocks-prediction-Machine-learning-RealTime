@@ -21,7 +21,7 @@ ALL_TIME_OPTIONS = ["year1month1", "year1month2", "year1month3", "year1month4", 
 
 # replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
 #CSV_URL = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=IBM&interval=15min&slice=year1month1&apikey=demo'
-intelval = "15min"
+intelval = "60min"
 #time_opcion = "year2month12"
 
 CSV_NAME = "@CHILL"
@@ -107,5 +107,5 @@ for S in list_companys:
     df_S_all['Date'] = df_S_all['Date'].astype(str)
     max_recent_date = df_S_all['Date'].max()[:10].replace('-','') # pd.to_datetime().strftime("%Y%m%d")
     min_recent_date = df_S_all['Date'].min()[:10].replace('-','') #pd.to_datetime( ).strftime("%Y%m%d")
-    print("d_price/RAW_alpha/alpha_"+S+'_'+intelval+"_"+ max_recent_date + "__" + min_recent_date + ".csv")
-    df_S_all.to_csv("d_price/RAW_alpha/alpha_"+S+'_'+intelval+"_"+ max_recent_date + "__" + min_recent_date + ".csv", sep="\t", index=None)
+    print("d_price/RAW_alpha/"+S+'_'+intelval+"_"+ max_recent_date + "__" + min_recent_date + ".csv")
+    df_S_all.to_csv("d_price/RAW_alpha/"+S+'_'+intelval+"_"+ max_recent_date + "__" + min_recent_date + ".csv", sep="\t", index=None)

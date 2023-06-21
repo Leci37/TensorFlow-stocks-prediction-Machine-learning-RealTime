@@ -8,7 +8,10 @@ from _KEYS_DICT import DICT_COMPANYS
 
 
 #TODO news news_get_data_NUTS.get_json_news_sentimet(stockId)
-
+import logging
+for logs_remove in ['numba','h5py' 'matplotlib']:
+    numba_logger = logging.getLogger(logs_remove)
+    numba_logger.setLevel(logging.WARNING)
 
 def generate_png_correlation(df):
     stockId = 'MELI'
@@ -43,6 +46,6 @@ list_stocks = DICT_COMPANYS[CSV_NAME]
 opion = _KEYS_DICT.Option_Historical.MONTH_3_AD
 
 GENERATED_JSON_RELATIONS = True
-df_download = yhoo_history_stock.get_favs_SCALA_csv_stocks_history_Download_list(list_stocks, CSV_NAME, opion, GENERATED_JSON_RELATIONS = GENERATED_JSON_RELATIONS)
+yhoo_history_stock.get_favs_SCALA_csv_stocks_history_Download_list(list_stocks, CSV_NAME, opion, GENERATED_JSON_RELATIONS = GENERATED_JSON_RELATIONS)
 
 print("END")

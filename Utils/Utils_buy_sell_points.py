@@ -107,7 +107,7 @@ def rolling_get_sell_price_NEG_next_value(rolling_col_slection):
     return update_value - 100
 
 def select_work_buy_or_sell_point(cleaned_df, opcion : _KEYS_DICT.Op_buy_sell, Y_TARGET = 'buy_sell_point'):
-
+    raise "Obsoleto para w3"
     if type(opcion) is not _KEYS_DICT.Op_buy_sell :
         Logger.logr.error("the variable op_buy_sell is not of type .op_buy_sell or has no valid value (only POS and NEG are valid).")
         raise ValueError("the variable op_buy_sell is not of type .op_buy_sell or has no valid value (only POS and NEG are valid).")

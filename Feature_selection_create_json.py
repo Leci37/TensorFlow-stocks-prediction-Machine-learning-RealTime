@@ -14,15 +14,17 @@ from numpy import array
 
 from Utils import Utils_buy_sell_points, Utils_col_sele, UtilsL, Utils_plotter
 import _KEYS_DICT
+from Utils.UtilsL import bcolors
 from Utils.Utils_col_sele import DROPS_COLUMNS
+
 
 Y_TARGET = 'buy_sell_point'
 
 def get_best_columns_to_train(cleaned_df, op_buy_sell : _KEYS_DICT.Op_buy_sell , num_best , CSV_NAME,path = None):
     df_result = pd.DataFrame()
 
-    df = Utils_buy_sell_points.select_work_buy_or_sell_point(cleaned_df.copy(), op_buy_sell)
-
+    # df = Utils_buy_sell_points.select_work_buy_or_sell_point(cleaned_df.copy(), op_buy_sell)
+    df = cleaned_df.copy()
     df = df.dropna()
     X = df.drop(columns=Y_TARGET)
     y = df[Y_TARGET]
@@ -60,7 +62,7 @@ def get_best_columns_to_train(cleaned_df, op_buy_sell : _KEYS_DICT.Op_buy_sell ,
         print(" ExtraTreesClassifier ")
         model = ExtraTreesClassifier()
         model.fit(X, y)
-        print(model.feature_importances_)  # use inbuilt class feature_importances of tree based classifiers
+        # print(model.feature_importances_)  # use inbuilt class feature_importances of tree based classifiers
         # plot graph of feature importances for better visualization
         feat_importances = pd.Series(model.feature_importances_, index=X.columns)
         # feat_importances.nlargest(20).plot(kind='barh')
@@ -118,7 +120,7 @@ def get_json_feature_selection(list_all_columns, path_json):
     import json
     with open(path_json, 'w') as fp:
         json.dump(dict_json, fp, allow_nan=True, indent=3)
-        print("\tget_json_feature_selection path: ", path_json)
+        print(bcolors.OKCYAN + "\tget_json_feature_selection path: ", path_json + bcolors.ENDC)
     print(path_json)
 
 
@@ -138,11 +140,12 @@ def generate_json_best_columns(cleaned_df, Op_buy_sell: _KEYS_DICT.Op_buy_sell,
 
     #Remove elements not valid
     list_all_columns = list(filter(lambda a: a != Y_TARGET, list_all_columns))
-    list_all_columns = list(filter(lambda a: a != "Date", list_all_columns))
+    list_all_columns = list(filter(lambda a: a != "date", list_all_columns))
     list_all_columns = list(filter(lambda a: a != "ichi_chikou_span", list_all_columns))
     get_json_feature_selection(list_all_columns, path_json)
 
     if path_imgs is not None:
+        raise
         df_aux = pd.DataFrame({"ele": list_cols_plot, "count": 0})
         df_aux = df_aux.groupby("ele").count().sort_values(["count"], ascending=False)
         list_most_relation_cols = df_aux.index
@@ -176,22 +179,24 @@ def created_json_relations(S , path_csv_price):
     global df,CSV_NAME
     CSV_NAME = S
     # df = pd.read_csv("d_price/" + CSV_NAME + "_SCALA_stock_history_" + str(opion.name) + ".csv",index_col=False, sep='\t')
-    df = pd.read_csv(path_csv_price, index_col=False,sep='\t')
+    df = pd.read_csv(path_csv_price,sep='\t', parse_dates=['Date'], index_col='Date' )
     print("created_json_relations: "+path_csv_price)
-    df = df.drop(columns=Utils_col_sele.DROPS_COLUMNS)  # +['ticker']
-    if 'ticker' in df.columns:
-        df = df.drop(columns=['ticker'])  # opcional
+    # df = df.drop(columns=Utils_col_sele.DROPS_COLUMNS)  # +['ticker']
+    # if 'ticker' in df.columns:
+    #     raise
+    #     df = df.drop(columns=['ticker'])  # opcional
 
     cleaned_df = df.copy()
-    cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
+    # cleaned_df['Date'] = pd.to_datetime(cleaned_df['Date']).map(pd.Timestamp.timestamp)
 
-    for option_Cat_op in _KEYS_DICT.Op_buy_sell.list():  # both pos neg
-        path_json = "plots_relations/best_selection_" + S + "_" + option_Cat_op.value + ".json"
-        path_img = "plots_relations/plot/" + S + "_" + option_Cat_op.value + "_"
-        path_img = None #remove it if you want grafical
+    # for option_Cat_op in _KEYS_DICT.Op_buy_sell.list():  # both pos neg
+    option_Cat_op = _KEYS_DICT.Op_buy_sell.BOTH
+    path_json = "d_price/select_col/" + S + "_" + option_Cat_op.value + ".json"
+    path_img = "plots_relations/plot/" + S + "_" + option_Cat_op.value + "_"
+    path_img = None #remove it if you want grafical
 
-        generate_json_best_columns(cleaned_df, option_Cat_op, list_columns_got=NUM_BEST_PARAMS_LIST,
-                                   path_json=path_json, path_imgs=path_img)
+    generate_json_best_columns(cleaned_df, option_Cat_op, list_columns_got=NUM_BEST_PARAMS_LIST,
+                               path_json=path_json, path_imgs=path_img)
 
 
 
