@@ -3,14 +3,15 @@
 from enum import Enum
 from datetime import datetime
 Y_TARGET = 'buy_sell_point'
-
+INDI_DATAFRAME = ['5min', '15min', '60min']
 # **DOCU**
 # 0.3 In the file _KEYS_DICT.py all the configurations are stored, take a look and know where it is.
 # In it there is the dictionary DICT_COMPANYS
 # Which contains the IDs (google quotes with the ID: GOOG) of the companies to analyze can be customized and create class from the nasdaq tikers, by default will use the key @FOLO3 which will analyze these 39 companies.
 DICT_COMPANYS = {
-    "@CHILL":
-        ["UBER", "PYPL"],
+    "@CHILL":#"MDB", "HUBS", "TTD",     "APPS"                                      FAIL "ASAN"
+       # [ 'PYPL'],
+        [  "U", "DDOG","UPST", "RIVN", "SNOW", "LYFT",  "GTLB"] + [ "MDB", "HUBS", "TTD", "ASAN",    "APPS" , "DOCN", "SHOP", "RBLX", "NIO"],# ["UBER", "PYPL", "U", "DDOG","UPST", "RIVN", "SNOW", "LYFT",  "GTLB"]
     "@FAV":
         ["MELI", "TWLO", "RIVN", "SNOW", "UBER", "U" , "PYPL", "GTLB", "MDB", "TSLA", "DDOG"],
     "@ROLL" :
@@ -55,12 +56,27 @@ MAX_SCALER = 1
 PATH_SCALERS_FOLDER = "Models/TF_multi/Scalers/"
 PERCENTAGES_SCORE = [0.25, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97,0.98]
 
-BACHT_SIZE_LOOKBACK = 10  #cuantos t se usan para hacer una prediccion
+BACHT_SIZE_LOOKBACK = 14  #cuantos t se usan para hacer una prediccion
+TIME_WINDOW_GT = 16
 
 PATH_PNG_TRADER_VIEW = "plots_relations/Trader_View_png/"
 
-USE_GPU = "No"  # If you have a GPU and want to use. Possible values [Yes or No]
+USE_GPU = "yes"  # If you have a GPU and want to use. Possible values [Yes or No]
 PER_PROCESS_GPU_MEMORY_FRACTION = 0.333  # Assume that you have 12GB of GPU memory and want to allocate ~4GB
+
+#should be removed from the training because they use global averages, i.e. if you remove the last column, they change the value of all previous columns, useless in realtime.
+LIST_TECH_REMOVE_NOT_EQUAL_IF_REMOVE_THE_FIRSH = ["mtum_APO", "mtum_CCI", "mtum_MACD_ext", "mtum_MACD_ext_signal", "mtum_MACD_ext_list", "mtum_PPO",
+                                                  "mtum_STOCH_RSI_d", "mtum_STOCH_RSI_kd", "ma_TRIMA_5", "ma_TRIMA_20", "ma_WMA_20", "ma_TRIMA_50",
+                                                  "ma_TRIMA_100", "mtum_BIAS_SMA_26", "mtum_BR_26", "olap_VMAP", "perf_CUMLOGRET_1", "perf_CUMPCTRET_1", "sti_ENTP_10"]
+#should be removed because they generate a lot of None, in the last columns, useless in RealTime.
+LIST_TECH_REMOVE_GENERATED_NONE_LAST = ['ti_acc_dist']
+
+LIST_TECH_REMOVE = LIST_TECH_REMOVE_NOT_EQUAL_IF_REMOVE_THE_FIRSH + LIST_TECH_REMOVE_GENERATED_NONE_LAST
+
+class TYPE_TIME_RELATIME(Enum):
+    MIN15 = "15min"
+    MIN5 = "5min"
+    MIN60 = "60min"
 
 class MODEL_TYPE_COLM(Enum):
     VGOOD = "_vgood16_"
