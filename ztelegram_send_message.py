@@ -21,8 +21,9 @@ from ztelegram_send_message_handle import URL_TELE, send_mesage_all_people, send
 # from useless.XTB_api import xtb_api
 
 logging.config.fileConfig(r"LogRoot/logging.conf")
-LOGGER = logging.getLogger()
-LOGGER.disabled = False
+# LOGGER = logging.getLogger()
+# LOGGER.disabled = False
+logging.root.manager.loggerDict['root'].disabled = False
 
 message = "hello from your telegram bot"
 
@@ -137,7 +138,7 @@ def send_MULTI_alert_and_register(S, df_mul_r):
 
     Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul[LIST_COLS_TO_CSV], path = _KEYS_DICT.PATH_REGISTER_RESULT_MULTI_REAL_TIME)
 
-    if len(list_models_to_predict_POS) > 0:
+    if len(list_models_to_predict_POS) > 0 or True:
         score_POS = DICT_SCORE_RATE[str(len(list_models_to_predict_POS))]
         if (df_mul["POS_score"][1:] >= score_POS).any() and any((df_mul[list_models_to_predict_POS][1:] >= 91).any()) :# or 1 == 1 :
 
@@ -172,24 +173,75 @@ def send_MULTI_alert_and_register(S, df_mul_r):
 
     print("START ciclo ")
 
+def send_MULTI_W3_alert_and_register(S, df_mul):
+    # list_models_to_predict_POS = [x for x in df_mul_r.columns if x.startswith("Acert_TFm_" + S + "_" + Op_buy_sell.POS.value)]
+    # list_models_to_predict_NEG = [x for x in df_mul_r.columns if x.startswith("Acert_TFm_" + S + "_" + Op_buy_sell.NEG.value)]
+    #
+    # if (not list_models_to_predict_POS) and (not list_models_to_predict_NEG):
+    #     Logger.logr.warning("There are no models of class columns_json in the list_good_params list, columns_json, optimal enough, we pass to the next one. Stock: " + S)
+    #     return
+
+    # df_mul = df_mul_r[['Date', 'buy_sell_point', 'Close', 'Volume'] + list_models_to_predict_POS + list_models_to_predict_NEG].iloc[-2:]
+    # # df_mul[list_models_to_predict_POS] = df_mul[list_models_to_predict_POS].map(lambda x: x.replace("%", "").replace(" ", "0")).astype('int')
+    # # df_mul[list_models_to_predict_NEG] = df_mul[list_models_to_predict_NEG].map(lambda x: x.replace("%", "").replace(" ", "0")).astype('int')
+    # for c in list_models_to_predict_POS + list_models_to_predict_NEG:
+    #     df_mul[c] = df_mul[c].str.replace("%", "").replace(" ", "0").astype('int')
+
+    LIST_COLS_TO_CSV = ['Date',"ticker", 'buy_sell_point', 'Close', 'Volume', "POS_score","POS_num",  "NEG_score", "NEG_num","POS_score_list","NEG_score_list", "POS_models_name","NEG_moldel_name" ]
+    SCORE_MIN_POS = 0.65
+    SCORE_MIN_NEG = 0.65
+    # df_mul = add_col_df_mul_to_csv_result_predictions(S, df_mul, list_models_to_predict_NEG, list_models_to_predict_POS)
+    # df_mul["NEG_score"] = str(df_mul[list_models_to_predict_NEG].sum(axis=1)) + "/" + str(len(list_models_to_predict_NEG))
+    # ['Date', 'buy_sell_point', 'Close', 'Volume', "POS_score", "NEG_score"]
+    df_mul_last = df_mul[-2:]
+    df_mul_last.insert(loc=0, column="ticker" , value=S)
+    Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul_last.round(3), path = _KEYS_DICT.PATH_REGISTER_RESULT_MULTI_REAL_TIME)
+    #
+    if df_mul_last["score_1"][-1] >= SCORE_MIN_POS  or 1 == 1 :
+        # from XTB_api import xtb_api
+        # thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS), name='XTB_POS')
+        # thr_xtb.start()
+        # xtb_api.xtb_operate_Lock_thread(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS)
+        if not is_already_sent_alert(df_mul_last):
+            thr_sending = threading.Thread(target=send_image_full_alersts, args=(S, df_mul_last,  Op_buy_sell.POS, ['rem'] ), name='SENDING_POS')
+            thr_sending.start()
+            # send_image_full_alersts(S, df_mul, op_buy_sell=Op_buy_sell.POS,list_models_to_predict=list_models_to_predict_POS)
+
+        Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul_last.round(3), path=_KEYS_DICT.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT)
+
+    if df_mul_last["score_2"][-1] >= SCORE_MIN_NEG : # or 1 == 1 :
+        # from XTB_api import xtb_api
+        # thr_xtb = threading.Thread(target=xtb_api.xtb_operate_Lock_thread, args=(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS), name='XTB_POS')
+        # thr_xtb.start()
+        # xtb_api.xtb_operate_Lock_thread(S, df_mul[1:].to_dict('list'), _KEYS_DICT.Op_buy_sell.POS, list_models_to_predict_POS)
+        if not is_already_sent_alert(df_mul_last):
+            thr_sending = threading.Thread(target=send_image_full_alersts, args=(S, df_mul_last,  Op_buy_sell.NEG, ['rem'] ), name='SENDING_NEG')
+            thr_sending.start()
+            # send_image_full_alersts(S, df_mul, op_buy_sell=Op_buy_sell.POS,list_models_to_predict=list_models_to_predict_POS)
+
+        Utils_send_message.register_MULTI_in_zTelegram_Registers(S, df_mul_last.round(3), path=_KEYS_DICT.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT)
+
+    print("START ciclo ")
+
 
 def send_image_full_alersts(S, df_mul, op_buy_sell : _KEYS_DICT.Op_buy_sell ,  list_models_to_predict :list):
-
+    df_send = df_mul.copy()
+    df_send['Date'] = df_send.index
     Logger.logr.info("It will send alert  Stock: " + S+ "_"+op_buy_sell.value)
     url_trader_view = Utils_send_message.get_traderview_url(S)
     path_imgs_tech, path_imgs_finan = get_traderview_screem_shot(url_trader_view,_KEYS_DICT.PATH_PNG_TRADER_VIEW + "" + S, will_stadistic_png = False)
 
-    message_aler, alert_message_without_tags = Utils_send_message.get_MULTI_string_alert_message(S, df_mul[1:].to_dict(
+    message_aler, alert_message_without_tags = Utils_send_message.get_MULTI_W3_string_alert_message(S, df_send[1:].to_dict(
         'list'), op_buy_sell, list_models_to_predict, list_png=[path_imgs_tech],url_trader_view=url_trader_view )
 
     send_mesage_all_people(message_aler, list_png=[path_imgs_tech ])
 
-    #https://mothereff.in/twitalics type letters
-    from api_twitter import twi_ #"𝘾𝙤𝙣𝙛𝙞𝙙𝙚𝙣𝙘𝙚 𝙤𝙛 𝙢𝙤𝙙𝙚𝙡𝙨:""""📈 𝗕𝗨𝗬 📈    𝗦𝗘𝗟𝗟 𝘾𝙤𝙣𝙛𝙞𝙙𝙚𝙣𝙘𝙚 𝙤𝙛 𝙢𝙤𝙙𝙚𝙡𝙨:📊𝙉𝙖𝙢𝙚𝙨:"""
-    tweet_text = alert_message_without_tags.replace(" BUY " , "𝗕𝗨𝗬").replace( " SELL "  , "𝗦𝗘𝗟𝗟").replace("Confidence of models:"  , "𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:").replace("📊⚙Model names:"  , "📊⚙𝙉𝙖𝙢𝙚𝙨: #𝙩𝙧𝙖𝙙𝙚𝙧") #UNICODE:   𝙈𝙤𝙙𝙚𝙡 𝙣𝙖𝙢𝙚𝙨:
-    tweet_text = tweet_text.replace("\t\t", ' ').replace("_mult_", '_mu_').replace(".0%", '%')[:280+36]#MAX tweet limit 20 por cada url
-    twi_.put_tweet_with_images(tweet_text  ,list_images_path = [path_imgs_tech])
-    Logger.logr.info("It has sent alert  Stock: " + S + "_" + op_buy_sell.value)
+    #https://mothereff.in/twitalics type letters TWITTER FALLO
+    # from api_twitter import twi_ #"𝘾𝙤𝙣𝙛𝙞𝙙𝙚𝙣𝙘𝙚 𝙤𝙛 𝙢𝙤𝙙𝙚𝙡𝙨:""""📈 𝗕𝗨𝗬 📈    𝗦𝗘𝗟𝗟 𝘾𝙤𝙣𝙛𝙞𝙙𝙚𝙣𝙘𝙚 𝙤𝙛 𝙢𝙤𝙙𝙚𝙡𝙨:📊𝙉𝙖𝙢𝙚𝙨:"""
+    # tweet_text = alert_message_without_tags.replace(" BUY " , "𝗕𝗨𝗬").replace( " SELL "  , "𝗦𝗘𝗟𝗟").replace("Confidence of models:"  , "𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:").replace("📊⚙Model names:"  , "📊⚙𝙉𝙖𝙢𝙚𝙨: #𝙩𝙧𝙖𝙙𝙚𝙧") #UNICODE:   𝙈𝙤𝙙𝙚𝙡 𝙣𝙖𝙢𝙚𝙨:
+    # tweet_text = tweet_text.replace("\t\t", ' ').replace("_mult_", '_mu_').replace(".0%", '%')[:280+36]#MAX tweet limit 20 por cada url
+    # twi_.put_tweet_with_images(tweet_text   ,list_images_path = [path_imgs_tech])
+    # Logger.logr.info("It has sent alert  Stock: " + S + "_" + op_buy_sell.value)
 
 
 def is_already_sent_alert(df_mul):
@@ -198,7 +250,8 @@ def is_already_sent_alert(df_mul):
 
     df_sent = pd.read_csv(_KEYS_DICT.PATH_REGISTER_RESULT_MULTI_REAL_TIME_SENT, index_col=0, sep='\t')
     #TODO check also pos neg
-    num_is_in_the_sent_list = df_sent[(df_sent['ticker'] == df_mul["ticker"][1:].values[0]) & (df_sent.index == df_mul["Date"][1:].values[0])].shape[0]
+    date_alert_str = pd.to_datetime(str(df_mul.index[1:].values[0])).strftime("%Y-%m-%d %H:%M:%S")
+    num_is_in_the_sent_list = df_sent[(df_sent['ticker'] == df_mul["ticker"][1:].values[0]) & (df_sent.index == date_alert_str)].shape[0]
     if num_is_in_the_sent_list > 0:
         return True
     else:
