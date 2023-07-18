@@ -14,10 +14,9 @@ os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
 print(os.getenv('TF_GPU_ALLOCATOR'))
 physical_devices = tf.config.experimental.list_physical_devices('CPU')
 
-# from utilW3 import buy_sell_point, Feature_selection_create_json, get_info_model_evaluation
-# from utilW3.data import normalise_data, get_window_data, split_data, set_save_class_weight, get_load_class_weight
-
-# from features_W3.extract import uncorrelate_selection , get_tree_correlation
+from utilW3 import buy_sell_point, Feature_selection_create_json, get_info_model_evaluation
+from utilW3.data import normalise_data, get_window_data, split_data, set_save_class_weight, get_load_class_weight
+from features_W3_old.extract import uncorrelate_selection , get_tree_correlation
 from CONFIG import *
 
 # Disable Tensorflow useless warnings
@@ -35,26 +34,26 @@ INDicator_label_3W5_ = "_3W5_"
 
 # list_options_w =  [INDicator_label_3W5_, INDicator_label_3W51560_ ,INDicator_label_3W515_, INDicator_label_3W560_ ]
 # stocks_list = [  "U", "DDOG","UPST", "RIVN", "SNOW", "LYFT",  "GTLB"] + [ "MDB", "HUBS", "TTD", "ASAN",    "APPS" , "DOCN", "SHOP", "RBLX", "NIO"]
-stocks_list =  [   "RIVN"]#,"UPST", "RIVN", "SNOW", "LYFT",  "GTLB"] + [ "MDB", "HUBS", "TTD", "ASAN",    "APPS" , "DOCN", "SHOP", "RBLX", "NIO"]
+stocks_list =  ["RIVN"]
 
 
 INDI = INDicator_label_3W5_
 indicator_timeframe = INDI
 # for INDI in list_options_w:
-REF_MODEL = INDI+"_test_"
+REF_MODEL = INDI+"_test_A1_"
 for symbol in stocks_list : #stocks_list:
 
     features_X_col = []
     ind  = "5min"
     # [1]  Read ohlcv data
-    file_rwa_alpha =  f'../d_price/tutorial_{symbol}_{ind}' + ".csv"
+    file_rwa_alpha =  f'../d_price/tutorial_pre_{symbol}_{ind}' + ".csv"
     #TIP to get more olhcv data can use 0_API_alphavantage_get_old_history.py (in this project) or alpaca API
     df_raw = pd.read_csv(file_rwa_alpha, parse_dates=['Date'], index_col='Date', sep='\t')
     for c in df_raw.columns:
         df_raw = df_raw.rename(columns={c: c.lower()})
     df_raw.index = pd.to_datetime(df_raw.index, errors="coerce")
     print("\n[1] Read data ohlcv data  path ", file_rwa_alpha, ' Shape_raw: ', df_raw.shape)
-    #TIP tip avoid using data older than 2 years, old data not useful data
+
 
     # [2] Get the 292 tech paterns
     print("\n[2] Calculating Technical indicators. stock: ", symbol )
@@ -63,10 +62,12 @@ for symbol in stocks_list : #stocks_list:
     from features_W3_old import extract_features_v3
     df_bars = extract_features_v3(df_raw)  # IT WORKS   Tech indicators Count:  292
     # from features_W3_old.ta import extract_features
-    # df_bars = extract_features(df_raw)# IT does not WORKS   Tech indicators Count:  800
-    # TIP The technical indicators have been cleaned (LIST_TECH_REMOVE) , but it is possible that some of them may be reoccasing data from the future, in order to make the calculation, these must be discarded for a correct functioning in real time.
+    # df_bars = extract_features(df_raw)# IT does NOT WORKS   Tech indicators Count:  800
+    # TIP The technical indicators have been cleaned (LIST_TECH_REMOVE) , but it is possible that some of them may be GET data from the future, in order to make the calculation, these must be discarded for a correct functioning in real time.
+    # TIP tip avoid using data older than 2 years, old data not useful data. So old data is bad data ??
+    df_bars = df_bars.loc[df_bars.index > '2021-01-01 08:00:00']
     print("[2.1] Calculated Technical indicators. stock: ",symbol," Tech indicator count: ",  df_bars.shape )
-    df_bars = df_bars.drop(columns=LIST_TECH_REMOVE+ ['Date','date', 'Date.1','date.1'], errors='ignore') #TODO no generate LIST_TECH_REMOVE, it is bad tech paterns
+    df_bars = df_bars.drop(columns=LIST_TECH_REMOVE+ ['Date','date', 'Date.1','date.1', 'Date1','date1'], errors='ignore') #TODO no generate LIST_TECH_REMOVE, it is bad tech paterns
     # see the diferenet bettewn two list set(df_bars.columns) ^ set(df_S_2.columns)
 
     # [3] Get the target_Y (ground true)
@@ -96,7 +97,7 @@ for symbol in stocks_list : #stocks_list:
     print("\n[5] For correct training, for correct training the values must be normalised to between 0 and 1  ")
     #TIP   how to normalise this data is stored in file 'data/scalers/{symbol}_{REF_MODEL}_scalex.pkl' for use in the future realtime  .
     print("[5.1] Normalise_data path: ", f'data/scalers/{symbol}_{REF_MODEL}_scalex.pkl')
-    features_X, scaleX = normalise_data(features_X, SPLIT_RATIO_X_Y, f'data//{symbol}_{REF_MODEL}_scalex.pkl')
+    features_X, scaleX = normalise_data(features_X, SPLIT_RATIO_X_Y, f'data/scalers/{symbol}_{REF_MODEL}_scalex.pkl')
 
     # [6] Get Window Data
     print("\n[6] Currently you have for each target_Y value a row of technical indicators, you add a 'window'"
@@ -154,7 +155,7 @@ for symbol in stocks_list : #stocks_list:
     print("[9.3] print diagram of the TF model Path: ", f'outputs/plots/{symbol}_{REF_MODEL}_buysell.png')
 
     # [10] Trian the model
-    print("\n[10] Start training "+ bcolors.OKBLUE  , f'outputs/{symbol}_{REF_MODEL}_buysell.h5' , bcolors.ENDC)
+    print("\n[10] Start training TF model "+ bcolors.OKBLUE  , f'outputs/{symbol}_{REF_MODEL}_buysell.h5' , bcolors.ENDC)
     # with tf.device('/cpu:0'): # to improve the eficent https://stackoverflow.com/questions/62916904/failed-copying-input-tensor-from-cpu-to-gpu-in-order-to-run-gatherve-dst-tensor
     #     X_train = tf.convert_to_tensor(X_train, np.float32); y_train = tf.convert_to_tensor(y_train, np.float32)
     model_history = model.fit(
@@ -183,7 +184,7 @@ for symbol in stocks_list : #stocks_list:
     # TIP The ideal would be to increase the precision (in 1 buy and 2 sell) above 50%, but without sacrificing the recall f1-score values.
     # TIP check the y_pred y_test table , to know what is the proportion of failures and successes in accurate prediction.
     # TODO improve the evaluation system of the model, not answering the question "how many times did I get it right", but the question "how much money did I win or lose?
-    # TODO for more ideas on possible improvements, check out the section  https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram#possible-improvements
+    # TODO for more ideas on POSSIBLE IMPROVEMNETS, check out the section  https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram#possible-improvements
     gc.collect()
     print("\n")
 print("END")
