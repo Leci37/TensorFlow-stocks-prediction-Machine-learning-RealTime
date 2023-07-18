@@ -13,14 +13,18 @@ Things this project **offers** that I did not find in other free projects, are:
 + Versatile integration with: Twitter, Telegram and Mail
 + Train Machine Learning model with _**Fresh today stock data**_ 
 
+The project is long and dense, trying to install it without understanding is a mistake, the first thing to do is to run and understand the **[TUTORIAL](#tutorial)**,
+
+
 To manage collaborations we have a  **Telegram GROUP:** 
-https://t.me/+3oG6U_hp93I2M2Ix (response in less than one day )
+https://t.me/+3oG6U_hp93I2M2Ix (Once executed and understood the tutorial)
 
 I will be asked for training, what improvements you can think of. (recommended to review the point: https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/edit/master/README.md#possible-improvements). 
 
 
 ---
 
+- [TUTORIAL](#tutorial)
 - [PROGRAM DESCRIPTION](#program-description)
   * [Instructions for use](#instructions-for-use)
       - The alert consists of the following:
@@ -73,6 +77,28 @@ This project is a very _**long mountain of work free**_, it is given to the publ
 
 Any other kind of contact with us, please go to the ISSUES tab. 
 
+## TUTORIAL
+
+The project is long and dense, _**trying to install it without understanding it is a mistake**_, the first thing to do is to run and understand the tutorial, located in `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py`
+it will show in a summarized way the global steps of the project:
+1. [1] Reading OLHCV data
+1. [2] Extraction of all technical patterns 
+1. [3] Calculation of the grount true, the Y_target to detect in real time (where to _do nothing_, _do buy_ or _do sell_)
+1. [4] Remove unhelpful or noisy technical patterns
+1. [5] Normalise the data, for correct training the values must be normalised to between 0 and 1
+1. [6] Create '_windows_' of time, for a Y_target prediction use +-4 hours later of technical patterns, not just the current value of the patterns 
+1. [7] Splitting between training data and evaluation data 
+1. [8] Ground True Y_target data are unbalanced Given that there is a lot of 'do nothing' 0, and very little 'do buy' 1 or 'do sell' 2," weight balancing is required, to give more importance to the minorities.
+1. [9] Creation of the TF model architecture 
+1. [10] Start the TF training and save it
+1. [11] Evaluating the quality of the model 
+
+_**Note:**_ inside the file `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py` , it is very important to understand the author's experience inside **print()** and **#TIP** comments. 
+
+Points: _2,3,4,9,10_ and _11_ **_should be refined and improved_**.    For more details about improvements there is point [**Possible improvements:**](#--possible-improvements---) .
+
+##### IMPORTANT: Once executed and understood, join the community to avoid repeating work or try out useless developments already done.  
+_**Telegram GROUP:**_ https://t.me/+3oG6U_hp93I2M2Ix  
 ## PROGRAM DESCRIPTION
 
 **OHLCV** :An opening-high-low-closing-volume chart is a type of chart that is typically used to illustrate movements in the price of a financial instrument over time.
