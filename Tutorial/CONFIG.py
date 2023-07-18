@@ -44,7 +44,7 @@ symbols = {
 }
 
 use_percentage = False
-NUMS_FEATURES = 45
+NUMS_FEATURES = 40
 
 # Multi Environment settings
 train_limit = 53000

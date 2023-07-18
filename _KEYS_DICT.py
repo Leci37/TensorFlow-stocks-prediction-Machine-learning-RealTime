@@ -75,6 +75,16 @@ class Option_Historical(Enum):
     DAY_6 = 4
     DAY_1 = 5
 
+#should be removed from the training because they use global averages, i.e. if you remove the last column, they change the value of all previous columns, useless in realtime.
+LIST_TECH_REMOVE_NOT_EQUAL_IF_REMOVE_THE_FIRSH = ["mtum_APO", "mtum_CCI", "mtum_MACD_ext", "mtum_MACD_ext_signal", "mtum_MACD_ext_list", "mtum_PPO",
+                                                  "mtum_STOCH_RSI_d", "mtum_STOCH_RSI_kd", "ma_TRIMA_5", "ma_TRIMA_20", "ma_WMA_20", "ma_TRIMA_50",
+                                                  "ma_TRIMA_100", "mtum_BIAS_SMA_26", "mtum_BR_26", "olap_VMAP", "perf_CUMLOGRET_1", "perf_CUMPCTRET_1", "sti_ENTP_10"]
+#should be removed because they generate a lot of None, in the last columns, useless in RealTime.
+LIST_TECH_REMOVE_GENERATED_NONE_LAST = ['ti_acc_dist']
+LIST_TECH_REMOVE_GENERATED_INFINITE = ['olap_MCGD_10']
+
+LIST_TECH_REMOVE = LIST_TECH_REMOVE_NOT_EQUAL_IF_REMOVE_THE_FIRSH + LIST_TECH_REMOVE_GENERATED_NONE_LAST +LIST_TECH_REMOVE_GENERATED_INFINITE
+
 class ExtendedEnum(Enum):
     @classmethod
     def list_values(cls):
