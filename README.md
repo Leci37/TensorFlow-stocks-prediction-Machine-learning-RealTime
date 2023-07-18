@@ -95,7 +95,7 @@ it will show in a summarized way the global steps of the project:
 
 _**Note:**_ inside the file `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py` , it is very important to understand the author's experience inside **print()** and **#TIP** comments. 
 
-Points: _2,3,4,9,10_ and _11_ **_should be refined and improved_**.    For more details about improvements there is point [**Possible improvements:**](#--possible-improvements---) .
+Points: _2,3,4,9,10_ and _11_ **_should be refined and improved_**.    For more details about improvements there is point [**Possible improvements:**](#combine-the-power-of-the-17-models) .
 
 ##### IMPORTANT: Once executed and understood, join the community to avoid repeating work or try out useless developments already done.  
 _**Telegram GROUP:**_ https://t.me/+3oG6U_hp93I2M2Ix  
