@@ -94,6 +94,7 @@ it will show in a summarized way the global steps of the project:
 1. [11] Evaluating the quality of the model 
 
 _**Note:**_ inside the file `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py` , it is very important to understand the author's experience inside **print()** and **#TIP** comments. 
+[RUN_buy_sell_Tutorial_3W_5min_RT](https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/blob/master/Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py)
 
 Points: _2,3,4,9,10_ and _11_ **_should be refined and improved_**.    For more details about improvements there is point [**Possible improvements:**](#combine-the-power-of-the-17-models) .
 
