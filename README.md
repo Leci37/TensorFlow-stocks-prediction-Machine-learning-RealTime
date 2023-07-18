@@ -75,12 +75,13 @@ I will be asked for training, what improvements you can think of. (recommended t
 #### AUTHOR'S LICENSE:
 This project is a very _**long mountain of work free**_, it is given to the public on _**one condition**_, if you make any major improvement, let me know via public or private (leciluis@gmail.com), [the improvement will not be made public if you do not want it]. 
 
-Any other kind of contact with us, please go to the ISSUES tab. 
+Any other kind of contact with us, please go to the ISSUES tab.  
 
 ## TUTORIAL
 
 The project is long and dense, _**trying to install it without understanding it is a mistake**_, the first thing to do is to run and understand the tutorial, located in `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py`
-it will show in a summarized way the global steps of the project:
+it will show in a summarized way the global steps of the project [RUN_buy_sell_Tutorial_3W_5min_RT](https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/blob/master/Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py)
+ :
 1. [1] Reading OLHCV data
 1. [2] Extraction of all technical patterns 
 1. [3] Calculation of the grount true, the Y_target to detect in real time (where to _do nothing_, _do buy_ or _do sell_)
