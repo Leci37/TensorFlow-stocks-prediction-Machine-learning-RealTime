@@ -852,6 +852,8 @@ Example for TF cat detection:
 
 <img src="readme_img/ex_TF_cat_heat_map.jpg" alt="ex_TF_cat_heat_map" width="400"/>
 
+Search for better correlations strength  https://gmarti.gitlab.io/ml/2019/10/13/tf-dcgan-financial-correlation-matrices.html 
+
 ##### Use benefit evaluation function instead of Y target
 Instead of using the ground true, i.e. the objective "y", it can be disguised, i.e. at each step of the training it is not evaluated against the "y" but against the function "benefit obtained" (which would have to be created). 
 For this it is necessary to create callback decorators in the training function like https://www.tensorflow.org/guide/keras/customizing_what_happens_in_fit?hl=es-419#wrapping_up_an_end-to-end_gan_example 
