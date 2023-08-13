@@ -20,7 +20,7 @@ ALL_TIME_OPTIONS = "2019-01"
 
 # replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
 #CSV_URL = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY_EXTENDED&symbol=IBM&interval=15min&slice=year1month1&apikey=demo'
-intelval = "5min"
+intelval = "15min"
 #time_opcion = "year2month12"
 
 CSV_NAME = "@CHILL"
