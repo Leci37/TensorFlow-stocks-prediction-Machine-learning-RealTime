@@ -10,7 +10,7 @@ Y_TARGET = 'buy_sell_point'
 # Which contains the IDs (google quotes with the ID: GOOG) of the companies to analyze can be customized and create class from the nasdaq tikers, by default will use the key @FOLO3 which will analyze these 39 companies.
 DICT_COMPANYS = {
     "@CHILL":
-        ["UBER", "PYPL"],
+        ["TSLA", "PYPL"],
     "@FAV":
         ["MELI", "TWLO", "RIVN", "SNOW", "UBER", "U" , "PYPL", "GTLB", "MDB", "TSLA", "DDOG"],
     "@ROLL" :
