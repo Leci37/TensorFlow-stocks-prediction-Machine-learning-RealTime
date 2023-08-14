@@ -48,7 +48,7 @@ def do_request(time_op):
     global count_int_try
     sleep(randint(2, 7))
     api_key = get_api_key()
-    CSV_URL = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={S}&interval={intelval}&month=2019-01&outputsize=full&apikey={api_key}'
+    CSV_URL = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={S}&interval={intelval}&month={ALL_TIME_OPTIONS}&outputsize=full&apikey={api_key}'
     print(S + " ==== " + CSV_URL)
     raw_response = requests.get(CSV_URL)
     return raw_response
