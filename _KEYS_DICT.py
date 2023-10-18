@@ -88,7 +88,7 @@ LIST_TECH_REMOVE = LIST_TECH_REMOVE_NOT_EQUAL_IF_REMOVE_THE_FIRSH + LIST_TECH_RE
 class ExtendedEnum(Enum):
     @classmethod
     def list_values(cls):
-        return list(map(lambda c: c.value, cls))
+        return list(map(lambda c: c.sub_dict, cls))
     @classmethod
     def list(cls):
         return list(map(lambda c: c, cls))
@@ -100,7 +100,7 @@ class Op_buy_sell(ExtendedEnum):
 class MODEL_TF_DENSE_TYPE_MULTI_DIMENSI(Enum):
     @classmethod
     def list_values(cls):
-        return list(map(lambda c: c.value, cls))
+        return list(map(lambda c: c.sub_dict, cls))
     @classmethod
     def list(cls):
         return list(map(lambda c: c, cls))
@@ -124,7 +124,7 @@ class MODEL_TF_DENSE_TYPE_MULTI_DIMENSI(Enum):
 class MODEL_TF_DENSE_TYPE_ONE_DIMENSI(Enum):
     @classmethod
     def list_values(cls):
-        return list(map(lambda c: c.value, cls))
+        return list(map(lambda c: c.sub_dict, cls))
     @classmethod
     def list(cls):
         return list(map(lambda c: c, cls))
@@ -212,7 +212,11 @@ DICT_WEBULL_ID = {
     "SPG" : 913324356,
     "STAG" : 913254301,
     "O" : 913324022,
-    "PSEC" : 913323566}
+    "PSEC" : 913323566,
+    "SOFI" : 950178653,
+    "STNE" : 950091058,
+    "PDD" : 950064710,
+    "INMD" : 950134104}
 
 
 
