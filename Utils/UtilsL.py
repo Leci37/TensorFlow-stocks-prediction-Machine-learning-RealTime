@@ -363,3 +363,40 @@ def thread_list_is_alive(list_thread,producer,consumer ):
                 consumer_thr_1 = Thread(target=consumer, args=(1,), name='CONS_AU')
                 consumer_thr_1.start()
     return list_is_alive
+
+def remove_strong_correlations_columns(df_cor , factor:float):
+    # Create correlation matrix https://stackoverflow.com/questions/29294983/how-to-calculate-correlation-between-all-columns-and-remove-highly-correlated-on
+    corr_matrix = df_cor.corr().abs()  # Select upper triangle of correlation matrix
+    upper = corr_matrix.where(
+        np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))  # Find features with correlation greater than 0.95
+    to_drop = [column for column in upper.columns if any(upper[column] > factor)]
+    print("\tDEBUG Columns more correlated than factor, will be Removed. Factor: ",factor, " Columns: ",",".join(to_drop) )
+    df_cor.drop(to_drop, axis=1, inplace=True)  # Drop features
+    return df_cor
+
+def log_versions_libs():
+    # This Python 3 environment comes with many helpful analytics libraries installed
+    # It is defined by the kaggle/python docker image: https://github.com/kaggle/docker-python
+
+    #load packages
+    import sys #access to system parameters https://docs.python.org/3/library/sys.html
+    print("Python version: {}". format(sys.version))
+
+    import pandas as pd #collection of functions for data processing and analysis modeled after R dataframes with SQL like features
+    print("pandas version: {}". format(pd.__version__))
+
+    import matplotlib #collection of functions for scientific and publication-ready visualization
+    print("matplotlib version: {}". format(matplotlib.__version__))
+
+    import numpy as np #foundational package for scientific computing
+    print("NumPy version: {}". format(np.__version__))
+
+    import scipy as sp #collection of functions for scientific computing and advance mathematics
+    print("SciPy version: {}". format(sp.__version__))
+
+    import IPython
+    from IPython import display #pretty printing of dataframes in Jupyter notebook
+    print("IPython version: {}". format(IPython.__version__))
+
+    import sklearn #collection of machine learning algorithms
+    print("scikit-learn version: {}". format(sklearn.__version__))
