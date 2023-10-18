@@ -1,5 +1,6 @@
 import pandas as pd
 import os.path
+import re
 
 from Utils import  UtilsL
 import _KEYS_DICT
@@ -99,6 +100,41 @@ def get_MULTI_string_alert_message(S, dictR, type_b_s:_KEYS_DICT.Op_buy_sell, li
 
     s1 = "<strong>"+text_alert_main_b_s + ": " + S + "</strong> "
     s2 = "<em>" + str(dictR['Date']) + "</em>" + (flecha_simbol * 1) + "-𝘓𝘰𝘯𝘥𝘰𝘯\n☝Value:<pre> " + str(dictR['Close']) + "</pre>\n"
+    s2 = "<em>" + str(dictR['Date']) + "</em>" + (flecha_simbol * 1) + "-𝘓𝘰𝘯𝘥𝘰𝘯\n☝Value:<pre> " + str(dictR['Close']) + "</pre>\n"
+    # s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n"
+    if url_info_inves != "":
+        s3_aux_1 = "News: <a href=\"" + url_info_inves + "\">Investing.com</a>\n"
+    s3 = s3_aux_1 + "<a href=\"" + url_info_trader_view + "\">TraderView.com</a>\n\n<b><i>Confidence of models:</i></b>\n"
+    # s4 = "\t   POS_score: " + str(dictR['POS_score']) + "%/"+str(dictR['POS_num'])+"\n\t   NEG_score: " + str(dictR['NEG_score']) + "%/"+str(dictR['NEG_num'])+"\n"
+    s4 = "\t\t⬆POS_score: " + "{:.1f}".format(percentage_visible_POS) + "%/" + str(dictR['POS_num']) + "\n\t\t⬇NEG_score: " + "{:.1f}".format(percentage_visible_NEG) + "%/" + str(dictR['NEG_num']) + "\n"
+    s5 = "<b><i>📊⚙Model names:</i></b><pre>\n\t\t⦁" + "\n\t\t⦁".join(list_model_per_result).replace(S+"_"+type_b_s.value+"_",'') + "</pre>"
+    # s6 = "📊Percentage: <pre>\n\t" + "POS: "+"{:.1f}".format(percentage_visible_POS)+ "%\tNEG: "+"{:.1f}".format(percentage_visible_NEG)+  "%</pre>"
+
+    alert_message_html =  (s1 + s2 + s3 + s4 + s5).replace('[', '').replace(']', '').replace('\'', '').replace('__', '_')
+    alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com', '').replace('Investing.com', url_info_inves).replace('TraderView.com', url_info_trader_view)#.replace(": ", ":")
+    # alert_message_without_tags = alert_message_without_tags#.replace('\t', ' ').replace('\n', ' ')
+
+    return  alert_message_html , alert_message_without_tags
+
+# URL_INVESTING = "https://www.investing.com/search/?q=" #https://www.investing.com/search/?q=RIVN
+URL_WE_BULL = "https://www.webull.com/quote/nasdaq-" # "https://www.webull.com/quote/nasdaq-meli/news"
+def get_MULTI_string_alert_message(S, dictR, type_b_s:_KEYS_DICT.Op_buy_sell, list_model:list, list_png:list, url_trader_view ):
+    text_alert_main_b_s, flecha_simbol = get_text_alert(type_b_s)
+    url_info_inves, s3_aux_1 = get_invesing_url(S)
+    url_info_webull = URL_WE_BULL + S.lower()
+    url_info_trader_view = url_trader_view
+    # **negrita** escribe el texto en negrita
+# __cursiva__ escribe el texto en cursiva
+# ```monospace``` escribe el texto en monospace
+# ~~tachado~~ escribe el texto tachado
+    #https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#message-formatting-bold-italic-code-
+    #Message Formatting (bold, italic, code, ...)
+    # list_model_per_result = [(x.replace("Acert_TFm_", '')+": " +str(dictR[x])) +"% " for x in list_model ]
+    percentage_visible_POS = (dictR['POS_score'][0] * 90) / DICT_SCORE_RATE[dictR['POS_num'][0].replace(']', '')]
+    percentage_visible_NEG = (dictR['NEG_score'][0] * 90) / DICT_SCORE_RATE[dictR['NEG_num'][0].replace(']', '')]
+
+    s1 = "<strong>"+text_alert_main_b_s + ": " + S + "</strong> "
+    s2 = "<em>" + str(dictR['Date']) + "</em>" + (flecha_simbol * 1) + "-𝘓𝘰𝘯𝘥𝘰𝘯\n☝Value:<pre> " + str(dictR['Close']) + "</pre>\n"
     # s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n"
     if url_info_inves != "":
         s3_aux_1 = "News: <a href=\"" + url_info_inves + "\">Investing.com</a>\n"
@@ -116,13 +152,76 @@ def get_MULTI_string_alert_message(S, dictR, type_b_s:_KEYS_DICT.Op_buy_sell, li
 
 
 
+from datetime import datetime, timedelta
+DATE_FORMAT_STR = '%Y-%m-%d %H:%M:%S'
+def add_two_hours(date_str):
+    origin_date = datetime.strptime(str(date_str).replace("[Timestamp(\'", "").replace("\')]", ""), DATE_FORMAT_STR)
+    three_hour_later = origin_date + timedelta(hours=2)
+    return datetime.strftime(three_hour_later, DATE_FORMAT_STR)
+
+# URL_INVESTING = "https://www.investing.com/search/?q=" #https://www.investing.com/search/?q=RIVN
+URL_WE_BULL = "https://www.webull.com/quote/nasdaq-" # "https://www.webull.com/quote/nasdaq-meli/news"
+def get_MULTI_W3_string_alert_message(S, dictR, type_b_s:_KEYS_DICT.Op_buy_sell, list_model:list, list_png:list, url_trader_view ):
+    text_alert_main_b_s, flecha_simbol = get_text_alert(type_b_s)
+    url_info_inves, s3_aux_1 = get_invesing_url(S)
+    url_info_webull = URL_WE_BULL + S.lower()
+    url_info_trader_view = url_trader_view
+    # **negrita** escribe el texto en negrita
+# __cursiva__ escribe el texto en cursiva
+# ```monospace``` escribe el texto en monospace
+# ~~tachado~~ escribe el texto tachado
+    #https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#message-formatting-bold-italic-code-
+    #Message Formatting (bold, italic, code, ...)
+    # list_model_per_result = [(x.replace("Acert_TFm_", '')+": " +str(dictR[x])) +"% " for x in list_model ]
+    dictR['score_0'][0] = round( float(dictR['score_0'][0]), 3)
+    dictR['score_1'][0] = round( float(dictR['score_1'][0]), 3)
+    dictR['score_2'][0] = round( float(dictR['score_2'][0]), 3)
+    percentage_visible_POS = (dictR['score_1'][0] * 100) # / DICT_SCORE_RATE[dictR['POS_num'][0].replace(']', '')]
+    percentage_visible_NEG = (dictR['score_2'][0] * 100) #/ DICT_SCORE_RATE[dictR['NEG_num'][0].replace(']', '')]
+
+    # per_sta_accura, per_sta_neg, per_sta_pos = extrac_stadistics_info(S)
+
+    s1 = "<strong>"+text_alert_main_b_s + ": " + S + "</strong> "
+    s2 = "<em>" + add_two_hours( dictR['Date'] ) + "</em>" + (flecha_simbol * 1) + "-𝘗𝘢𝘳𝘪𝘴\n☝Value:<pre> " + str(dictR['close']) + "</pre>\n"
+    # s3 = "<a href=\"" + url_info_inves + "\">Investing.com</a>\n<a href=\"" + url_info_webull + "\">WeBull.com</a>\n\nConfidence of models:\n"
+    if url_info_inves != "":
+        s3_aux_1 = "News: <a href=\"" + url_info_inves + "\">Investing.com</a>\n"
+    s3 = s3_aux_1 + "<a href=\"" + url_info_trader_view + "\">TraderView.com</a>\n\n<b><i>Confidence of models:</i></b>\n"
+    # s4 = "\t   POS_score: " + str(dictR['POS_score']) + "%/"+str(dictR['POS_num'])+"\n\t   NEG_score: " + str(dictR['NEG_score']) + "%/"+str(dictR['NEG_num'])+"\n"
+    # s4 = "\t\t⬆POS_score: " + "{:.2f}".format(percentage_visible_POS) + "%"  + "\n\t\t⬇NEG_score: " + "{:.2f}".format(percentage_visible_NEG) + "%\n"
+    # s4 = "\t\t⬆POS_score: " + "{:.2f}".format(percentage_visible_POS) + "%|" +per_sta_pos.group(1)+  "\n\t\t⬇NEG_score: " + "{:.2f}".format( percentage_visible_NEG) + "%|" +per_sta_neg.group(1)+ "\n"
+    s4 = "\t\t⬆POS_score: " + "{:.2f}".format(percentage_visible_POS) + "%\t|f1: " +str(dictR['f1_score_1'][0])+  "\n\t\t⬇NEG_score: " + "{:.2f}".format( percentage_visible_NEG) + "%\t|f1: " +str(dictR['f1_score_2'][0])+ "\n"
+
+    s5 = "" # "<b><i>📊⚙Model names:</i></b>" #<pre>\n\t\t⦁"   + "\n\t\t⦁".join(list_model_per_result).replace(S+"_"+type_b_s.value+"_",'') + "</pre>"
+    # s6 = "📊Percentage: <pre>\n\t" + "POS: "+"{:.1f}".format(percentage_visible_POS)+ "%\tNEG: "+"{:.1f}".format(percentage_visible_NEG)+  "%</pre>"
+    # s6 = "\t\t📊⚙Model quality: "+str(float(per_sta_accura.group(1))*100)+"%"
+    s6 = "\t\t📊⚙Model quality: " + str(round( float(dictR['f1_buy_sell_score'][0] * 100), 2)) + "%\n"  + r'<pre><code class="language-python">' + str(dictR ).replace(", \'", "\n").replace("'", "").replace(": ", ":\t\t\t") + "</code></pre>"  #Code block
+
+    alert_message_html =  (s1 + s2 + s3 + s4 + s5+s6).replace('[', '').replace(']', '').replace('\'', '').replace('__', '_').replace("(", '').replace(")", '').replace("Timestamp", '')
+    alert_message_without_tags = UtilsL.clean_html_tags(alert_message_html).replace('WeBull.com', '').replace('Investing.com', url_info_inves).replace('TraderView.com', url_info_trader_view)#.replace(": ", ":")
+    # alert_message_without_tags = alert_message_without_tags#.replace('\t', ' ').replace('\n', ' ')
+
+    return  alert_message_html , alert_message_without_tags
+#TODO move to CONFIG file
+PATH_MODEL = r"E:\TradeDL/"
+REF_MODEL = "_3W5_"+"_tut_A1_"
+def extrac_stadistics_info(S):
+
+    print(PATH_MODEL + f'outputs/model_info/{S}_{REF_MODEL}_.info')
+    text_info = open(PATH_MODEL + f'outputs/model_info/{S}_{REF_MODEL}_.info', "r").read()
+    per_sta_pos = re.search(r" {4,}1 {4,}(0.\d\d) {4,}(0.\d\d)", text_info)
+    per_sta_neg = re.search(r" {4,}2 {4,}(0.\d\d) {4,}(0.\d\d)", text_info)  #
+    per_sta_accura = re.search(r" {3,}accuracy {14,}(0.\d\d)", text_info)
+    return per_sta_accura, per_sta_neg, per_sta_pos
+
+
 def get_fraciones_afirmativos_results(S, dict_pred, modles_evaluated, type_b_s):
     names_models_r = ""
     count_TF_models = 0
     modles_evaluated.sort()
     for k in modles_evaluated:
         if dict_pred[k] == 1:  # dict_predict_1[k] == 1:
-            names_models_r = names_models_r + k.replace('br_', '').replace("_" + type_b_s.value, '').replace('__','_').replace("_" + S, '') + '%, '
+            names_models_r = names_models_r + k.replace('br_', '').replace("_" + type_b_s.sub_dict, '').replace('__', '_').replace("_" + S, '') + '%, '
         if k.startswith('br_TF') and k.endswith('_93'):
             count_TF_models = count_TF_models + 1
     s88 = str(dict_pred['sum_r_88']) + "/" + str(dict_pred['num_models'])
@@ -144,9 +243,9 @@ def register_in_zTelegram_Registers(S, dict_predict, modles_evaluated, type_b_s 
 
 def register_MULTI_in_zTelegram_Registers(S, df_r, path = _KEYS_DICT.PATH_REGISTER_RESULT_REAL_TIME):
     if os.path.isfile(path):
-        df_r.to_csv(path, sep="\t", index=None, mode='a', header=False)
+        df_r.to_csv(path, sep="\t", mode='a', header=False)
     else:
-        df_r.to_csv(path, sep="\t", index=None)
+        df_r.to_csv(path, sep="\t")
         print("Created MULTI : " + path)
 
 USER_ID_RE_SU_MADC_KONDORDE ="1q24vjd7"
