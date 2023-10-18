@@ -73,14 +73,14 @@ def _get_data(command, **parameters):
 
 def _check_mode(mode):
     """check if mode acceptable"""
-    modes = [x.value for x in MODES]
+    modes = [x.sub_dict for x in MODES]
     if mode not in modes:
         raise ValueError("mode must be in {}".format(modes))
 
 
 def _check_period(period):
     """check if period is acceptable"""
-    if period not in [x.value for x in PERIOD]:
+    if period not in [x.sub_dict for x in PERIOD]:
         raise ValueError("Period: {} not acceptable".format(period))
 
 
@@ -313,7 +313,7 @@ class BaseClient(object):
     def trade_transaction(self, symbol, mode, trans_type, volume, **kwargs):
         """tradeTransaction command"""
         # check type
-        if trans_type not in [x.value for x in TRANS_TYPES]:
+        if trans_type not in [x.sub_dict for x in TRANS_TYPES]:
             raise ValueError(f"Type must be in {[x for x in trans_type]}")
         # check kwargs
         accepted_values = ['order', 'price', 'expiration', 'customComment',
@@ -329,8 +329,8 @@ class BaseClient(object):
         }
         info.update(kwargs)  # update with kwargs parameters
         data = _get_data("tradeTransaction", tradeTransInfo=info)
-        name_of_mode = [x.name for x in MODES if x.value == mode][0]
-        name_of_type = [x.name for x in TRANS_TYPES if x.value ==
+        name_of_mode = [x.name for x in MODES if x.sub_dict == mode][0]
+        name_of_type = [x.name for x in TRANS_TYPES if x.sub_dict ==
                         trans_type][0]
         self.LOGGER.info(f"CMD: trade transaction of {symbol} of mode "
                          f"{name_of_mode} with type {name_of_type} of "
@@ -441,7 +441,7 @@ class Client(BaseClient):
     def open_trade(self, mode, symbol,volumen ,  dolars =0, custom_Messege ="", tp_per = 0.05, sl_per= 0.05, order_margin_per = 0, expiration_stamp = 0):
         """open trade transaction"""
         if mode in [MODES.BUY.value, MODES.SELL.value]:
-            mode = [x for x in MODES if x.value == mode][0]
+            mode = [x for x in MODES if x.sub_dict == mode][0]
         elif mode in ['buy', 'sell']:
             modes = {'buy': MODES.BUY, 'sell': MODES.SELL}
             mode = modes[mode]
@@ -449,14 +449,14 @@ class Client(BaseClient):
             raise ValueError("mode can be buy or sell")
 
         conversion_mode = {MODES.BUY.value: 'ask', MODES.SELL.value: 'bid'}
-        price = self.get_symbol(symbol)[conversion_mode[mode.value]]
+        price = self.get_symbol(symbol)[conversion_mode[mode.sub_dict]]
 
         if order_margin_per != 0:
             # https://www.xtb.com/int/education/xstation-5-pending-orders
             mode, mode_name = self.change_to_order_type_mode(mode.name)
         else:
             mode_name = mode.name
-            mode = mode.value
+            mode = mode.sub_dict
 
         self.LOGGER.debug(f"opening trade of {symbol} of Dolars: {dolars} with {mode_name}  Expiration: {datetime.fromtimestamp(expiration_stamp/1000) }")
         price = round(price * (1 + order_margin_per) , 2) #No mas de 3 decimales

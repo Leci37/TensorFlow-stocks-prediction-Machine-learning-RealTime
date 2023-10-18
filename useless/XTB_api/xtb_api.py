@@ -33,7 +33,10 @@ import _KEYS_DICT
 # df_all_symbol =  pd.DataFrame(client.get_all_symbols())
 Meli = 'MELI.US_4'
 S = 'EURUSD' # 'ETHEREUM'
-client = None
+XTB_CLIENT = None
+
+XTB_USER_ID = ""
+XTB_PASS = "L.PugaEV!7y+@+T"
 
 # OPEN BUY
 # client.open_trade('buy', 'ETHEREUM', dolars=100, custom_Messege="buy", tp_per=0.07, sl_per=0.02)
@@ -70,12 +73,12 @@ def recive_and_manage_data_to_xtb(S, type_b_s):
 
 
 def login_client():
-    global client
-    if client is None:
-        client = Client()
+    global XTB_CLIENT
+    if XTB_CLIENT is None:
+        XTB_CLIENT = Client()
         # THEN LOGIN
-        client.login(userId, password)  # mode={demo,real})
-    return client
+        XTB_CLIENT.login(XTB_USER_ID, XTB_PASS)  # mode={demo,real})
+    return XTB_CLIENT
 
 
 
@@ -89,7 +92,10 @@ list_stocks_crt.remove(None)
 list_stocks_chic = [   "TER.US_4", "KLAC.US_4", "ALGN.US_4",  "SPG.US_4", "STAG.US_4" ] #"UONE.US_4",
 # CSV_NAME = "@FOLO3"
 # list_stocks = _KEYS_DICT.DICT_COMPANYS[CSV_NAME]
-list_stocks = [ "GOOG.US_4","MSFT.US_4", "TSLA.US_4","UPST.US_4", "MELI.US_4", "TWLO.US_4", "RIVN.US_4", "SNOW.US_4", "LYFT.US_4", "ADBE.US_4", "UBER.US_4", "ZI.US_4", "QCOM.US_4", "PYPL.US_4", "SPOT.US_4", "GTLB.US", "MDB.US_4", "NVDA.US_4", "AMD.US_4" , "ADSK.US_4", "AMZN.US_4", "CRWD.US", "NVST.US_4", "HUBS.US_4", "EPAM.US_4", "PINS.US_4", "TTD.US_4", "SNAP.US_4", "APPS.US_4", "ASAN.US_4", "AFRM.US_4", "DOCN.US", "ETSY.US_4", "DDOG.US", "SHOP.US_4", "NIO.US_4", "U.US_4", "GME.US_4", "RBLX.US_4"]
+list_stocks = [ "GOOG.US_4","MSFT.US_4", "TSLA.US_4","UPST.US_4", "MELI.US_4", "TWLO.US_4", "RIVN.US_4", "SNOW.US_4", "LYFT.US_4", "ADBE.US_4", "UBER.US_4",
+                "ZI.US_4", "QCOM.US_4", "PYPL.US_4", "SPOT.US_4", "GTLB.US", "MDB.US_4", "NVDA.US_4", "AMD.US_4" , "ADSK.US_4", "AMZN.US_4", "CRWD.US",
+                "NVST.US_4", "HUBS.US_4", "EPAM.US_4", "PINS.US_4", "TTD.US_4", "SNAP.US_4", "APPS.US_4", "ASAN.US_4", "AFRM.US_4", "DOCN.US", "ETSY.US_4",
+                "DDOG.US", "SHOP.US_4", "NIO.US_4", "U.US_4", "GME.US_4", "RBLX.US_4", "SOFI.US_4", "STNE.US_4","PDD.US_4", "INMD.US_4" ,  "CRSR.US_4"]
 list_stocks =    list_stocks +list_stocks_crt + list_stocks_chic  #
 LIST_STOCKS_XTB = list_stocks + list_stocks_chic
 
