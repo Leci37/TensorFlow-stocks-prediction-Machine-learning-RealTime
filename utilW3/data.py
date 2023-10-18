@@ -44,7 +44,7 @@ def get_window_data(df: pd.DataFrame, target: pd.Series, window_size: int, todic
         target = pd.get_dummies(df['target'])
         df = df.drop(['target'], axis=1)
         #Por que lo hace en lo anteiror
-        print("INFO To create the window_data need to create an artificial Useless Y_target  Count: ", len(df.columns), " Names : ", ",".join(df.columns))
+        print("INFO To create the window_data need to create an artificial Useless Y_target  Count: ", len(df.columns) , " Names : ", ",".join(df.columns))
         print("DEBUG features_W3 index Dates:: ", df.index[0], df.index[-1], " Shape: ", df.shape)
         target = target[target.index.isin(df.index)]
         df = df[df.index.isin(target.index)]
@@ -259,3 +259,15 @@ def get_load_class_weight( path_class_weight):
     with open(path_class_weight, 'rb') as f:
         loaded_dict = pickle.load(f)
     return loaded_dict
+
+
+
+def remove_strong_correlations_columns(df_cor , factor:float):
+    # Create correlation matrix https://stackoverflow.com/questions/29294983/how-to-calculate-correlation-between-all-columns-and-remove-highly-correlated-on
+    corr_matrix = df_cor.corr().abs()  # Select upper triangle of correlation matrix
+    upper = corr_matrix.where(
+        np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))  # Find features with correlation greater than 0.95
+    to_drop = [column for column in upper.columns if any(upper[column] > factor)]
+    print("\tDEBUG Columns more correlated than factor, will be Removed. Factor: ",factor, " Columns number: ", len(to_drop) )
+    df_cor.drop(to_drop, axis=1, inplace=True)  # Drop features
+    return df_cor
