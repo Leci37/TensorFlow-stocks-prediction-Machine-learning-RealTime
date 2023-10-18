@@ -22,16 +22,22 @@ from LogRoot.Logging import Logger
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
+#https://stackoverflow.com/questions/76724939/there-is-no-such-driver-by-url-https-chromedriver-storage-googleapis-com-lates
 driver = webdriver.Chrome(ChromeDriverManager().install())
 
 def __load_drive():
+    global driver
     options = Options()
     options.add_argument("--start-maximized")
+    options.add_argument(f"--window-size=1966,1068")
+    options.add_argument(f'--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36')
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument("--disable-extensions")
     options.headless = True
 
-    driver = webdriver.Chrome(options=options)
-    driver.set_window_size(2400, 1400)
-    driver.maximize_window()
+    # driver = webdriver.Chrome(options=options)
+    driver.set_window_size(1300, 1120)
+    driver.minimize_window()# maximize_window()
     Logger.logr.info("Loaded Drive 1200, 800 ChromeDriverManager()")
     return driver
 
@@ -42,7 +48,7 @@ def __remove_elelment_by_xpath(x_path,timeOut ):
         # ele_remove = driver.find_element(By.CSS_SELECTOR,"body > div: nth - child(10) > div > div > div")
         driver.execute_script("""var element = arguments[0]; element.parentNode.removeChild(element);""", ele_remove)
     except Exception as ex:
-         Logger.logr.info("Exception remove: " + str(ex))
+         Logger.logr.info("Do not be able to remove xpath element advert banner  " )
 
 
 def __create_find_data_png_trader_view(path_png):
@@ -77,8 +83,8 @@ def __create_find_data_png_trader_view(path_png):
 # https://www.urlbox.io/website-screenshots-python
 def get_traderview_screem_shot(url, path_png,  will_stadistic_png = True ):
     global driver
-    if driver is None:
-        driver = __load_drive()
+    # if driver is None:
+    driver = __load_drive()
 
     driver.get(url)
     Logger.logr.info(" driver.get(url): "+url)
