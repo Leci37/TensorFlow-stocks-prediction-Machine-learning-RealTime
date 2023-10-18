@@ -187,7 +187,7 @@ def send_image_full_alersts(S, df_mul, op_buy_sell : _KEYS_DICT.Op_buy_sell ,  l
     #https://mothereff.in/twitalics type letters
     from api_twitter import twi_ #"𝘾𝙤𝙣𝙛𝙞𝙙𝙚𝙣𝙘𝙚 𝙤𝙛 𝙢𝙤𝙙𝙚𝙡𝙨:""""📈 𝗕𝗨𝗬 📈    𝗦𝗘𝗟𝗟 𝘾𝙤𝙣𝙛𝙞𝙙𝙚𝙣𝙘𝙚 𝙤𝙛 𝙢𝙤𝙙𝙚𝙡𝙨:📊𝙉𝙖𝙢𝙚𝙨:"""
     tweet_text = alert_message_without_tags.replace(" BUY " , "𝗕𝗨𝗬").replace( " SELL "  , "𝗦𝗘𝗟𝗟").replace("Confidence of models:"  , "𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:").replace("📊⚙Model names:"  , "📊⚙𝙉𝙖𝙢𝙚𝙨: #𝙩𝙧𝙖𝙙𝙚𝙧") #UNICODE:   𝙈𝙤𝙙𝙚𝙡 𝙣𝙖𝙢𝙚𝙨:
-    tweet_text = tweet_text.replace("\t\t", ' ').replace("_mult_", '_mu_').replace(".0%", '%')[:280+36]#MAX tweet limit 20 por cada url
+    tweet_text = tweet_text.replace("\t\t", ' ').replace("_mult_", '_mu_')[:270 ]#MAX  [:280+36] tweet limit 20 por cada url
     twi_.put_tweet_with_images(tweet_text  ,list_images_path = [path_imgs_tech])
     Logger.logr.info("It has sent alert  Stock: " + S + "_" + op_buy_sell.value)
 
