@@ -265,9 +265,32 @@ def get_load_class_weight( path_class_weight):
 def remove_strong_correlations_columns(df_cor , factor:float):
     # Create correlation matrix https://stackoverflow.com/questions/29294983/how-to-calculate-correlation-between-all-columns-and-remove-highly-correlated-on
     corr_matrix = df_cor.corr().abs()  # Select upper triangle of correlation matrix
-    upper = corr_matrix.where(
-        np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))  # Find features with correlation greater than 0.95
+    upper = corr_matrix.where( np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))  # Find features with correlation greater than 0.95
     to_drop = [column for column in upper.columns if any(upper[column] > factor)]
     print("\tDEBUG Columns more correlated than factor, will be Removed. Factor: ",factor, " Columns number: ", len(to_drop) )
     df_cor.drop(to_drop, axis=1, inplace=True)  # Drop features
     return df_cor
+
+def get_best_Y_correlations_columns(df_cor, target_Y, num_columns:int):
+    # Create correlation matrix https://stackoverflow.com/questions/29294983/how-to-calculate-correlation-between-all-columns-and-remove-highly-correlated-on
+    df_cor['aux_target_Y_1'] = target_Y[1]
+    df_cor['aux_target_Y_2'] = target_Y[2]
+    df_corr = df_cor.corr()[['aux_target_Y_1','aux_target_Y_2']].abs().head(-2)
+
+    df_corr['sum_strong_corr'] = df_corr['aux_target_Y_1'] + df_corr['aux_target_Y_2']
+    df_corr = df_corr.sort_values(['sum_strong_corr'], ascending=False).head(num_columns)
+    df_cor.drop(['aux_target_Y_1','aux_target_Y_2'], axis=1, inplace=True)
+    return df_corr.index.values
+
+    # corr_matrix = df_cor['aux_target_Y_1','aux_target_Y_2'].corr().abs()  # Select upper triangle of correlation matrix
+    # upper = corr_matrix.where( np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))  # Find features with correlation greater than 0.95
+    # # df_one_col = upper.stack().reset_index()
+    # # df_one_col = df_one_col.sort_values([0], ascending=True)
+    # # df_one_col = df_one_col[df_one_col[0] >0.0001] #at lest something
+    # #
+    # # df_one_col.head(factor)
+    #
+    # to_drop = [column for column in upper.columns if any(upper[column] > factor)]
+    # # print("\tDEBUG Columns best correlated  Num: ",factor, " Columns number: ", len(to_drop) )
+    # df_cor.drop(to_drop, axis=1, inplace=True)  # Drop features
+    # return df_cor
