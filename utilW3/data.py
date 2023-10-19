@@ -183,7 +183,7 @@ def normalise_data(X, split_ratio, scaler_path, todict=False):
         try:
             output = scaler.transform(X)
         except ValueError:
-            print("{ValueError}The feature names should match those that were passed during fit.")
+            print("DEBUG {ValueError}The feature names should match those that were passed during fit.")
             output = scaler.transform(X[scaler.feature_names_in_])
         output = pd.DataFrame(output, columns=columns, index=index)
     else:
