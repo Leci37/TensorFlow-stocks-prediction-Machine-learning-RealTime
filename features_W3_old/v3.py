@@ -2,7 +2,7 @@ from .ta import *
 from tqdm import tqdm
 from pprint import pprint
 
-def extract_features(df: pd.DataFrame, make_stationary=True, shift=150, debug=False):
+def extract_features(df: pd.DataFrame,extra_columns =False,  shift=150, debug=False):
     df = df.copy()
 
     result = None
@@ -19,6 +19,8 @@ def extract_features(df: pd.DataFrame, make_stationary=True, shift=150, debug=Fa
     subset = get_py_TI_indicator(subset, cos_cols=None)
     subset = get_all_pandas_TA_tecnical(subset, cos_cols=None)
     subset = get_all_pandas_TU_tecnical(subset, cos_cols=None)
+    if extra_columns:
+        subset = get_ALL_CRASH_funtion(subset, custom_columns=None) #this add +-600 columns
         # if result is None: result = subset[-1:]
         # else: result = pd.concat([result, subset[-1:]], axis=0)
         #
@@ -28,18 +30,18 @@ def extract_features(df: pd.DataFrame, make_stationary=True, shift=150, debug=Fa
     result = subset
     original_length = len(df)
     result = result.dropna()
-    if debug: print(f'Dropped {original_length - len(result)} from {original_length} bars')
+    if debug: print(f'Dropped V3333333 {original_length - len(result)} from {original_length} bars')
 
     for l in ['mtum_QQEl_14_5_4.236', 'mtum_QQEs_14_5_4.236', 'tend_PSARl_0.02_0.2', 'tend_PSARs_0.02_0.2']:
         if l in df.columns: df[l] = df[l].replace(np.nan, 0)
 
     # Part 2 : Stationarise all non-stationary data
-    if make_stationary:
-        result = stationise(result, debug)
-        result = result.dropna()
-
-        if debug: print(f'Finalised with {len(result)} bars')
-        return result
+    # if make_stationary:
+    #     result = stationise(result, debug)
+    #     result = result.dropna()
+    #
+    #     if debug: print(f'Finalised with {len(result)} bars')
+    return result
 
 
 
