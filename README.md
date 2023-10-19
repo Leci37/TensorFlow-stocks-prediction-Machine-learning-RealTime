@@ -18,58 +18,62 @@ The project is long and dense, trying to install it without understanding is a m
 
 To manage collaborations we have a  **Telegram GROUP:** 
 https://t.me/+3oG6U_hp93I2M2Ix (Once executed and understood the tutorial)
+ (recommended to review the point: https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/edit/master/README.md#possible-improvements). 
 
-I will be asked for training, what improvements you can think of. (recommended to review the point: https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/edit/master/README.md#possible-improvements). 
-
+Models with better accuracy are in _**Tutorial/RUN_5_models_0.61_accuracy.py**_
 
 ---
-
-- [TUTORIAL](#tutorial)
-- [PROGRAM DESCRIPTION](#program-description)
-  * [Instructions for use](#instructions-for-use)
-      - The alert consists of the following:
-        + Example of how the alerts looks like in **Twitter**:
-        + Example of how the alerts looks like in **Telegram**:
+  * [Why this stock prediction project ?](#why-this-stock-prediction-project--)
+    + [AUTHOR'S LICENSE:](#author-s-license-)
+- [**TUTORIAL**](#tutorial)
+      - [IMPORTANT: Once executed and understood, join the community to avoid repeating work or try out useless developments already done.](#important--once-executed-and-understood--join-the-community-to-avoid-repeating-work-or-try-out-useless-developments-already-done)
   * [INTRODUCTION](#introduction)
     + [Self-fulfilling prophecy principle](#self-fulfilling-prophecy-principle)
-  * [OBJECTIVE](#objective)
-  * [OPERATION](#operation)
-    + **1.1** Data collection **1.2** Types of indicators
-    + **2** Indicator filtering
-    + **3** Training TF XGB and Sklearn
-    + **4.1** Assessing the QUALITY of these models **4.2** Evaluating those real BENEFITS of models
-    + **5.1** Making predictions for the past week **5.2** Sending real-time alerts
+    + [Ground True is the variable `buy_seel_point`](#ground-true-is-the-variable--buy-seel-point-)
   * [Quick start-up Run your own models](#quick-start-up-run-your-own-models)
-  * [Detailed start-up](#detailed-start-up)
-    + **1** Historical data collection
-      - **1.0** (Recommended) alphavantage API **1.1** OHLCV history of the stock must be generated.
-    + **2** Filtering technical indicators
-    + **3** Trian TensorFlow XGB and Sklearn
-    + **4** Evaluate quality of predictive models
-    + **5** Predictions
-      - **5.0** make predictions of the last week Optional Test **5.1** Getting OHLCV data in real time
-      - **5.2** Setting up chatIDs and tokens in Telegram **5.3** Sending real-time alerts Telegram
+- [**Detailed start-up**](#detailed-start-up)
+    + [1 Historical data collection](#1-historical-data-collection)
+      - [**1.0** (Recommended) alphavantage API](#--10----recommended--alphavantage-api)
+      - [**1.1** The OHLCV history of the stock must be generated.](#--11---the-ohlcv-history-of-the-stock-must-be-generated)
+    + [2 Filtering technical indicators (automatically by default)](#2-filtering-technical-indicators--automatically-by-default-)
+    + [3 Training TensorFlow XGB and Sklearn](#3-trian-tensorflow-xgb-and-sklearn)
+    + [4 Evaluate quality of predictive models](#4-evaluate-quality-of-predictive-models)
+    + [5 Predictions](#5-predictions)
+      - [**5.0** make predictions of the last week Optional Test](#--50---make-predictions-of-the-last-week-optional-test)
+      - [**5.1** Getting OHLCV data in real time](#--51---getting-ohlcv-data-in-real-time)
+      - [**5.2** Setting up chatIDs and tokens in Telegram](#--52---setting-up-chatids-and-tokens-in-telegram)
+      - [**5.3** Sending real-time alerts Telegram](#--53---sending-real-time-alerts-telegram)
 - [**Possible improvements:**](#--possible-improvements---)
       - [Combine the power of the 17 models](#combine-the-power-of-the-17-models)
       - [Better use tuners](#better-use-tuners)
       - [Real-time alert with .png financial data](#real-time-alert-with-png-financial-data)
       - [Improvements in predictive models using multi-dimensional](#improvements-in-predictive-models-using-multi-dimensional)
       - [Review the way ground true is obtained](#review-the-way-ground-true-is-obtained)
-      - [Architecture to RL Reinforcement Learning](#architecture-to-reinforcement-learning)
+      - [For unbalanced classes, you should look at the F1-score](#for-unbalanced-classes--you-should-look-at-the-f1-score)
+      - [Review the free code winners of KAGGLE](#review-the-free-code-winners-of-kaggle)
+      - [Are 3 GrounsTrue detection tags sufficient or are subclasses required?](#are-3-grounstrue-detection-tags-sufficient-or-are-subclasses-required-)
+      - [Remove columns that have more than 0.9 correlation between them](#remove-columns-that-have-more-than-09-correlation-between-them)
+      - [Architecture to Reinforcement Learning](#architecture-to-reinforcement-learning)
       - [MonoLabel vs MultiLabel](#monolabel-vs-multilabel)
       - [Show TF heat map of the detected decison](#show-tf-heat-map-of-the-detected-decison)
+      - [Use benefit evaluation function instead of Y target](#use-benefit-evaluation-function-instead-of-y-target)
+      - [Imagine the operating points (generative adversarial networks)](#imagine-the-operating-points--generative-adversarial-networks-)
       - [Testing the MachineLearning platforms of large IT companies](#testing-the-machinelearning-platforms-of-large-it-companies)
       - [Add news sentiment indicator](#add-news-sentiment-indicator)
       - [Add balance sheets](#add-balance-sheets)
-      - [Recommended reading LSTM plus stock price FAIL](#recommended-reading-lstm-plus-stock-price-fail)
+      - [**Recommended reading LSTM plus stock price FAIL**](#recommended-reading-lstm-plus-stock-price-fail)
+      - [Review of all forms of time series prediction: lstm,gru,cnn and rnn](#review-of-all-forms-of-time-series-prediction--lstm-gru-cnn-and-rnn)
       - [Lighter improvements list of suggested](#lighter-improvements-list-of-suggested)
-      - [Review of all forms of time series prediction: lstm,gru,cnn and rnn](#recommended-reading-lstm-plus-stock-price-fail)
-      - [Use benefit evaluation function instead of Y target](#use-benefit-evaluation-function-instead-of-y-target)
-      - [Imagine the operating points TF GAN](#imagine-the-operating-points-generative-adversarial-networks)
+  * [**Instructions for final user**](#instructions-for-final-user)
+      - [The alert consists of the following:](#the-alert-consists-of-the-following-)
+        * [Example of how the alerts looks like in **Twitter**:](#example-of-how-the-alerts-looks-like-in---twitter---)
+        * [Example of how the alerts looks like in **Telegram**:](#example-of-how-the-alerts-looks-like-in---telegram---)
+  * [Program Description {OLD}](#program-description--old-)
     + [USE THE SOFTWARE AT YOUR OWN RISK THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS](#use-the-software-at-your-own-risk-the-authors-and-all-affiliates-assume-no-responsibility-for-your-trading-results)
     + [Technical Patterns all Names](#technical-patterns-all-names)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/leci37)
 
 #### AUTHOR'S LICENSE:
@@ -101,51 +105,6 @@ Points: _2,3,4,9,10_ and _11_ **_should be refined and improved_**.    For more 
 
 ##### IMPORTANT: Once executed and understood, join the community to avoid repeating work or try out useless developments already done.  
 _**Telegram GROUP:**_ https://t.me/+3oG6U_hp93I2M2Ix  
-## PROGRAM DESCRIPTION
-
-**OHLCV** :An opening-high-low-closing-volume chart is a type of chart that is typically used to illustrate movements in the price of a financial instrument over time.
-
-**Functions:**
-
-1. Collection of historical **stocks** OHLCV data for the last years and calculation of technical patterns (momentums, volatility, Japanese candlesticks, statistics...), 1068 patterns.
-1. Calculations of which of the 1068 are the most valuable, and most relevant for the detection of good trading points (buy-sell).
-1. Training of several machine learning models using powerful libraries:Google Tensor Flow Sklearn and XGB
-1. Evaluation of the multiple models, to discard the less reliable ones. 
-1. OHLCV data collection and making predictions from the models in real time, when any of the multiple predictions (buy-sell stocks) is considered valid, sending real-time alert to Telegram and Mail. 
-
-_**Remember**_ the scalability of the project, it receives OHLCV data but can _**receive any type of data in .csv or excel**_ for predictions, with few changes (check the structure), it would be nice to complete the development so that it can receive predictions of any type, with open source. I am willing to help. 
-The predictive models generated by the solution are **_binary_**, i.e. they detect True or False.
-
-See article in **medium.com** https://medium.com/@LuisCasti33/lectrade-machine-learning-with-technical-patterns-and-real-time-alerts-for-buying-and-selling-in-b4ecc59b29cb
-
-### Instructions for use
-- RealTime Twitter https://twitter.com/Whale__Hunters
-
-- RealTime Telegram @Whale_Hunter_Alertbot this group is limited, to receive alert to sign up  ask via github or twitter 
-
-The models have been trained in **_15 min_** intervals with , i.e. the alerts expire in about 7 minutes, that means that once the tweet goes out, you have +-7 minutes to decide whether to trade or not. also that the models should be used on intra-day trade._Never blindly follow the alerts, check first_. 
-The alerts indicate points where **_only technical patterns have brought strong trend changes_** in the last 5 months, i.e. if these models were applied to the last 5 months they would hit 91% of the BUY SELL points, in the future no one can know. 
-In other words, it is not an absolute truth.
-
-The alerts are designed **for INTRADAY operations**, for the moment only with technical patterns, that is to say at the end of the day it is recommended to close them, in the future no one can know.
-
-##### The alert consists of the following:
-- Can be _**BUY**_ or _**SELL**_.
-- The id  of the stock, always from the USA market, in case of crypto will have the termination **_-USD_**. In case of Tesla, it is TSLA, in case of doubt with the company id , a simple google search "_Stocks XXX_".
-- Link to _**Investing.com**_ news, check before making the final decision.
-- Link to the candlesticks through _**TraderView.com**_, is the image shown attached with the alert. 
-- 𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:⬆⬇, level of strength indicating whether there is a positive or negative trend and behind / number of models used to obtain the percentage. 
-It may be the case that both the uptrend POS and downtrend NEG have a high score, indicating increased volatility.
-- 📊⚙𝙉𝙖𝙢𝙚𝙨:
-The name of the selected models with which the prediction has been made and the percentage of strength. 
-
-###### Example of how the alerts looks like in **Twitter**:
-![](readme_img/tweet_image.PNG "tweet_image")
-
-###### Example of how the alerts looks like in **Telegram**:
-
-![](readme_img/telegram_bot_alert_example_2.0.jpg )
-
 
 ### INTRODUCTION
 The stock market is moved by technical indicators, there are several types of volatility, cycle volume, candlesticks, supports, resistances, moving averages...
@@ -192,49 +151,7 @@ Here enters the self-fulfilling prophecy principle of explained is, at first, a 
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.004.png)
 
-**_The project is long and complex, it takes time to install, but the result is very beautiful._** 
-
-_Note 29-December 2022_ 
-The improvement: _Improvements in predictive models, using multi-dimensional_ 
-This development is completed in the _**stocks-prediction-multi_** branch, request access without any problem. 
-
-- The development explained in this readme, takes ONE time partition, (e.g. from 9:00 to 9:15) analyzes all the technical patterns, and sends a concussion.
-- With the multidimensional development, the model analyzes TEN time partitions (e.g. from 9:00 to 12:30), with all the technical patterns of that time, a decision is made.
-
-The generated .csv files with name _SCALA_ are for mono-dimension and the _PLAIN_ are for multidimension , there is some mix in this branch. 
-
-
-
-### OBJECTIVE
-Understanding the principle of self-fulfilling prophecy, it is possible to obtain the pattern of the same, by means of the massive collection of technical patterns, their calculation and the study of their patterns.
-
-
-` `For this, techniques such as big data will be used through Pandas Python libraries, machine learning through Sklearn, XGB and neural networks through the open google Tensor Flow library. 
-
-The result will be displayed in a simple and friendly way through alerts on mobile or computer.
-
-The machine learnig models Sklearn, XGB and Tensor Flow , by means of the learning of the last months detect the point of sale. To detect this point of sale a series of indicators have been taken into account: olap_VMAP, ma_SMA_50, ichi_senkou_a, olap_BBAND_dif ,mtum_MACD_ext, olap_BBAND_MIDDLE, mtum_MACD_ext_signal, fibo_s1, volu_PVI_1, ma_KAMA_5, etcetera.
-
-The image shows: MACD, RSI , Stochastic and Balance of power (Elder Ray) 
-
-The alert is sent on the **vertical line** (the only vertical line that crosses the whole image), during the next 4 periods the stock decreases (It will be indicated as _**SELL**_) by 2.4%. Each candlestick period in the image indicates 15 minutes.
-
-![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.006.png)
-
-
-
-## OPERATION
-
-**NOTE:** If you want to run better read    [Detailed start-up](#detailed-start-up)
-
-
-#### **1.1** Data collection
-Collect data to train the model
-
-`1_Get_technical_indicators.py`
-
-
-**Ground True is the variable** `buy_seel_point`
+#### Ground True is the variable `buy_seel_point`
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
 
 Defining the GT (Ground True) is a subjective task, these numbers can be obtained in 2 ways:
@@ -249,262 +166,6 @@ The points obtained in `get_buy_sell_points_HT_pp()` are shown, the **_Orange_**
 
 ![](readme_img/GT_ways_3.PNG)
 
-Once the historical data of the stock has been obtained and all the technical indicators have been calculated, a total of 1068, files of type `AAPL_stock_history_MONTH_3_AD.csv` are generated.
-
-Example of the file with the first eight indicators:
-
-![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.007.png)
-
-This data collection is customizable, you can obtain and train models of any Nasdaq stock, for other indicators or crypto-assets, it is also possible by making small changes.
-
-**Through the Option_Historical** class it is possible to create historical data files: annual, monthly and daily.
-```
-**class Option_Historical**(Enum): YEARS_3 = 1, MONTH_3 = 2, MONTH_3_AD = 3, DAY_6 = 4, DAY_1 = 5
-```
-
-The files *\d_price_maxAAPL_min_max_stock_MONTH_3.csv* are generated, which store the max and min value of each column, to be read in `Model_predictions_Nrows.py` for a quick fit_scaler() (this is the "cleaning" process that the data requires before entering the AI training models) . This operation is of vital importance for a correct optimization in reading data in real time.
-
-
-
-
-#### **1.2** Types of indicators
-During the generation of the data collection file of point 1 `AAPL_stock_history_MONTH_3_AD.csv` 1068 technical indicators are calculated, which are divided into subtypes, based on **prefixes** in the name.
-
-List of prefixes and an example of the name of one of them.
-
-- Overlap: **olap_**
-
-olap_BBAND_UPPER, olap_BBAND_MIDDLE, olap_BBAND_LOWER, 
-
-- Momentum: **mtum_**
-
-mtum_MACD, mtum_MACD_signal, mtum_RSI, mtum_STOCH_k,
-
-- Volatility: **vola_**
-
-vola_KCBe_20_2, vola_KCUe_20_2, vola_RVI_14
-
-- Cycle patterns: **cycl_**
-
-cycl_DCPHASE, cycl_PHASOR_inph, cycl_PHASOR_quad
-
-- Candlestick patterns: **cdl_**
-
-cdl_RICKSHAWMAN, cdl_RISEFALL3METHODS, cdl_SEPARATINGLINES
-
-- Statistics: **sti_**
-
-sti_STDDEV, sti_TSF, sti_VAR
-
-- Moving averages: **ma_**
-
-ma_SMA_100, ma_WMA_10, ma_DEMA_20, ma_EMA_100, ma_KAMA_10, 
-
-- Trend: **tend_** and **ti_**
-
-tend_renko_TR, tend_renko_brick, ti_acc_dist, ti_chaikin_10_3
-
-- Resistors and support suffixes: **_s3, _s2, _s1, _pp, _r1, _r2, _r3**
-
-fibo_s3, fibo_s2, fibo_s1, fibo_pp, fibo_r1, fibo_r2, fibo_r3, fibo_r2, fibo_r3
-
-demark_s1, demark_pp, demark_r1
-
-- Intersection point with resistance or support: **pcrh_.**
-
-pcrh_demark_s1, pcrh_demark_pp, pcrh_demark_r1
-
-- Intersection point with moving average or of moving averages between them: **mcrh_.**
-
-mcrh_SMA_20_TRIMA_50, mcrh_SMA_20_WMA_50, mcrh_SMA_20_DEMA_100
-
-- Indicators of changes in the stock index, nasdaq: **NQ_.**
-
-NQ_SMA_20, NQ_SMA_100
-
-Note: To see the 1068 indicators used go to the attached sheets at the end of the document.
-
-
-#### **2** Indicator filtering
-Execute to find out which columns are relevant for the model output
-
-`2_Feature_selection_create_json.md`
-
-It is necessary to know which of the hundreds of columns of technical data, is valid to train the neural model, and which are just noise. This will be done through correlations and Random Forest models.
-
-Answer the question:
-
-Which columns are most relevant for buy or sell points?
-
-Generate the *best_selection* files, which are a raking of the best technical data to train the model, it is intended to go from 1068 columns to about 120.
-
-For example, for the Amazon stock, point-of-purchase detection, in the period June to October 2022, the most valuable indicators are:
-
-- Senkuo of the Ichimoku Cloud
-- Chaikin Volatility 
-- On-balance volume
-
-Example of *plots_relations/best_selection_AMNZ_pos.json* file
-```json
-"index": {
-  "12": [
-    "ichi_chilou_span"
-    ],
-  "10": [
-    "volu_Chaikin_AD"
-  ],
-  "9": [
-    "volu_OBV"
-   ],
-```
-Plots with the 3 best technical data are printed in the folder *plots_relations/plot.*
-Example name: *TWLO_neg_buy_sell_point__ichi_chikou_span.png*
-
-![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.008.png)
-
-#### **3** Training TF XGB and Sklearn 
-`3_Model_creation_models_for_a_stock.py`
-
-this requires the selection of better columns from point #2
-
-There are four types of predictive algorithms, AI models:
-
-- **Gradient Boosting** consists of a set of individual [decision trees](https://www.cienciadedatos.net/documentos/py07_arboles_decision_python.html), trained sequentially, so that each new tree tries to improve on the errors of the previous trees. Sklearn Library
-- **Random Forest** Random forests are an ensemble learning method for classification, regression, and other tasks that operates by constructing a multitude of decision trees at training time. Sklearn Library 
-- **XGBoost** is an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable. It implements machine learning algorithms under the Gradient Boosting framework. XGBoost Library 
-- **TensorFlow TF** is an open source library for machine learning across a range of tasks, and developed by Google to meet their needs for systems capable of building and training neural networks to detect and decipher patterns and correlations, analogous to the learning and reasoning used by humans. TensorFlow Library 
-
-
-There are POS (buy) or NEG (sell) models and there is a BOTH model (BOTH is discarded, since prediction models are binary, they only accept 2 positions, true or false).
-
-This point generates prediction models `.sav` for XGB and Sklearn. `.h5` for Tensor Flow.
-
-Naming Examples: *XGboost_U_neg_vgood16_s28.sav* and *TF_AMZN_pos_low1_s128.h5*
-
-Format of the names:
-
-- Type of AI you train with can be:
-  -  XGboost, TF, TF64, GradientBoost and RandomForest
-- Stock ticker AMZN for amazon , AAPL for Apple ...
-- Detects points of purchase or sale pos or neg
-- How many indicators have been used in the learning, can be of 4 types depending on the relevance given by point *#2 Indicator filtering*. This ranking is organized in the **MODEL_TYPE_COLM** class, 
-  - vgood16 the best 16 indicators
-  - good9 the best 32 indicators
-  - reg4 the best 64 indicators 
-  - low1 the best 128 indicators 
-- Only for TF models. Depending on the density of the neurons used, defined in the class a_manage_stocks_dict. **MODEL_TF_DENSE_TYPE_ONE_DIMENSI** can take value: s28 s64 and s128
-
-These combinations imply that for each stock 5 types of IA are created, each in pos and neg, plus for each combination the 4 technical indicator configurations are added.  This generates 40 IA models, which will be selected in point: *#4 to evaluate the QUALITY of those models.*
-
-Each time an AI template is generated, a log file is generated: *TF_balance_TF_AAPL_pos_reg4.h5_accuracy_87.6%__loss_2.74__epochs_10[160].csv*
-
-It contains the accuracy and loss data of the model, as well as the model training records.
-
-
-
-
-#### **4.1** Assessing the QUALITY of these models 
-`4_Model_creation_scoring_multi.py`
-
-To make a prediction with the AIs, new data is collected and the technical indicators with which it has been trained are calculated according to the *best_selection* files.
-
-When the .h5 and .sav models are queried:
-
-  Is this a point of sale? 
-
-These answer a number that can vary between 0.1 and 4 
-
-The higher the number the more likely it is to be a correct buy/sell point.
-
-Each model has a rating scale on which it is considered point of sale. For some models with a rating of more than 0.4 will be enough (usually the XGboost), while for others require more than 1.5 (usually the TF).
-
-How do you know what the threshold score is for each model?
-
-The Model_creation_scoring.py class generates the threshold score *threshold* files, which tell which threshold point is considered the buy-sell point.
-
-Each AI model will have its own type file:
-
-*Models/Scoring/AAPL_neg__when_model_ok_threshold.csv*
-
-For each action in *#3 train the TF, XGB and Sklearn models*, 40 AI models are generated. This class evaluates and selects the most accurate models so that only the most accurate ones will be executed in real time (usually between 4 and 8 are selected).
-
-*Models/Scoring/AAPL_neg__groupby_buy_sell_point_000.json*
-```json
-"list_good_params": [
-
-  "r_rf_AFRM_pos_low1_",
-
-   "r_TF64_AFRM_pos_vgood16_",
-
-   "r_TF64_AFRM_pos_good9_",
-
-   "r_TF_AFRM_pos_reg4_"
-
-],
-```
-
-#### **4.2** Evaluating those real BENEFITS of models
-`Model_predictions_N_eval_profits.py`
-
-Answer the question: 
-
-If you leave it running for N days, how much hypothetical money do you make?
-
-Note: this should be run on data that has not been used in the training model, preferably
-
-*Models/eval_Profits/_AAPL_neg_ALL_stock_20221021__20221014.csv*
-
-
-#### **5.1** Making predictions for the past week
-`Model_predictions_Nrows.py`
-
-At this point the **file** `realtime_model_POOL_driver.py` **is required**, you must **ask for it** (if you wish you can reverse engineer it). 
-
-You can make predictions with the real-time data of the stock.
-
-Through the function call every 10-12min, download the real-time stock data through the yahoo financial API.
-```
-df_compare, df_sell = get_RealTime_buy_seel_points()
-```
-~~This run generates the log file *d_result/prediction_results_N_rows.csv*~~
-
-
-
-#### **5.2** Sending real-time alerts
-`5_predict_POOL_enque_Thread.py `*multithreading glued 2s per action* 
-
-It is possible to run it without configuring telegram point 5.2, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
-
-There is the possibility to send alerts of purchase and sale of the share, to telegram or mail.
-
-the multiple AI trained models are evaluated, and only those greater than 96% probability (as previously trained) are reported.
-
-Every 15 minutes, **all** necessary indicators are calculated in real time for each action and evaluated in the AI models.
-
-The alert indicates which models are detecting the correct buy and sell points at which to execute the transaction. 
-
-These buy and sell alerts expire in, plus or minus 7 minutes, given the volatility of the market.
-
-Also attached is the price at which it was detected, the time, and links to news websites.
-
-Note: financial news should always prevail over technical indicators. 
-
-What is displayed in DEBUG alert, is the information from *d_result/prediction_results_N_rows.csv* of the Item: 5 make predictions of the last week Test
-
-To understand the complete information of the alert see Point 5.1 Making predictions of the last week.
-
-![](readme_img/telegram_bot_alert_example_MONO_old_1.0.png.png)
-
-
-
-
-
-
-
-
-
-
-
 ### Quick start-up Run your own models
 
  
@@ -515,6 +176,7 @@ pip install -r requirements.txt
 By default (recommendation) the stock list will be used: `"@CHILL": ["UBER", "PYPL"]`
 
 Run `0_API_alphavantage_get_old_history.py` Optional. File generate example:  `d_price/RAW_alpha/alpha_UBER_15min_20230414__20230317.csv`
+Run BETTER get **alpaca API** key and  `0_API_alpaca_historical.py` 
 
 Run `1_Get_technical_indicators.py` Files generate example: `d_price/PYPL_PLAIN_stock_history_MONTH_3_AD.csv` and `plots_relations/best_selection_PYPL_both.json`
 
@@ -537,6 +199,8 @@ Run `5_predict_POOL_enque_Thread.py`
 It is possible to run it without configuring telegram point **5.2**, in that case no alerts will be sent in telegram, but if the results were recorded in real time in: *d_result/prediction_real_time.csv*
 
 ## Detailed start-up
+Models with better accuracy are in _**Tutorial/RUN_5_models_0.61_accuracy.py**_
+
 To do step 0, **installation or correct errors** in the installation there are also  [Step by step](Readme_setup_installation.md)
 
 (Running times are estimated for an intel i3 and 8GB of RAM)
@@ -570,6 +234,8 @@ If more stock execution is desired, change to @FOLO3 o similar in file `_KEYS_DI
 ` `The API yfinance , if you want price to price intervals in 15min intervals is limited to 2 months, to get more time data up to 2 years back (more data better predictive models) use the free version of the API https://www.alphavantage.co/documentation/  
 
 Run `0_API_alphavantage_get_old_history.py`
+
+Run BETTER get **alpaca API** key and  `0_API_alpaca_historical.py` 
 
 The class is customizable: action intervals, months to ask, and ID action.
 
@@ -786,7 +452,7 @@ Example of summary:
 
 
 ##### Improvements in predictive models using multi-dimensional 
-**Solved** in _stocks-prediction-multi_ branch (ask for it without any problem).
+**Solved**  _Note 29-December 2022_  in _stocks-prediction-multi_ branch (ask for it without any problem).
 Improvements in TF predictive models using tensors (multiple matrices over time) and non-matrices (mono temporal, current design). 
 
 In the class `Model_TF_definitions.ModelDefinition.py`
@@ -806,6 +472,8 @@ To start the development must be to call the method with BACHT_SIZE_LOOKBACK wit
 
 Utils_model_predict.scaler_split_TF_onbalance(df, label_name=Y_TARGET, BACHT_SIZE_LOOKBACK=8)
 
+
+
 **Improvement**: Once these multidimensional arrays are returned, models are obtained with `get_dicts_models_multi_dimension()`, it is not possible to train a model and make a prediction with multidimensional arrays. 
 
 ##### Review the way ground true is obtained 
@@ -820,6 +488,38 @@ To obtain the Y_TARGET there are 2 methods that are responsible for the strategy
 `rolling_get_sell_price_POS()` and `rolling_get_sell_price_NEG()`
 
 **Optional improvement**: the current system decides by percentages, i.e. the 16% highest rises and falls (8% each) are ground true. I.e. there are rises or falls greater than 3% that can be left out if the stock is very volatile.
+
+##### For unbalanced classes, you should look at the F1-score
+For unbalanced classes, you should look at the f1-score indicator https://datascience.stackexchange.com/questions/105089/how-f1-score-is-good-with-unbalanced-dataset  
+What we are trying to achieve with the F1-score metric is to find an equal balance between precision and recall, which is extremely useful in most scenarios when we are working with imbalanced datasets (i.e., a dataset with a non-uniform distribution of class labels). 
+A model with high recall but low precision score returns many positive results, but most of its predicted labels are incorrect when compared to the ground truth.
+On the other hand, a model with high precision but low recall score returns very few results, but most of its predicted labels are correct when compared to the ground-truth. 
+An ideal scenario would be a model with high precision and high recall, meaning it will return many results, with all results labelled correctly. Unfortunately, in most cases, precision and recall are often in tension. 
+
+#####  Review the free code winners of KAGGLE 
+Review the free code of people who have been in the top10 winners of kaggle, the championship models teach a lot.
+At the moment I'm inspired by the 3rd place of the "price of the house in paris", it's data from .csv and unbalanced https://www.kaggle.com/code/viktortaran/ps-s-3-e-6?scriptVersionId=119565159&cellId=129  
+( it's hard to find them most of the winners in kaggle don't publish in open) 
+For more CHAMPIONSHIP notebooks:
+https://ndres.me/kaggle-past-solutions/  
+https://www.kaggle.com/code/sudalairajkumar/winning-solutions-of-kaggle-competitions 
+
+##### Are 3 GrounsTrue detection tags sufficient or are subclasses required? 
+How do you know that GrounsTrue **clustering** (_buy, sell, nothing_) is similar and correct? Is it necessary to cluster with **more labels** (_buy_A, sell_A , nothing_A, buy_B, sell_B , nothing_B, buy_C, sell_C_)? How do I know the number of tags needed ?
+To solve this question you can use the "K-means Clustering" https://neptune.ai/blog/clustering-algorithms
+
+<img src="readme_img/kmeans_clustering.gif" alt="kmeans_clustering" width="400"/>
+
+##### Remove columns that have more than 0.9 correlation between them
+Remove columns that have more than 0.9 correlation between them, as they **are redundant**. Inside the method 
+```python 
+uncorrelate_selection(features_X_ALL, num_features=NUMS_FEATURES, split_ratio=SPLIT_RATIO_X_Y, column_path=f'data/columns_select/{symbol}_{REF_MODEL}.pkl')
+    # Look for the next line and try the correction 
+    # Get the correlation table
+    corr = train_data.corr()
+```
+More info help: https://machinelearningmastery.com/basic-data-cleaning-for-machine-learning/ 
+
 
 ##### Architecture to Reinforcement Learning
 Another way to get a rebuild of the GT, is to change the architecture to Reinforcement Learning RL, which has the feature of not using GT, **it learns after many trial and error attempts**.
@@ -983,6 +683,55 @@ Find the explanation of what indicators and values the AI model takes, to predic
 (green buy, red do not trade) https://stackoverflow.com/questions/40155128/plot-trees-for-a-random-forest-in-python-with-scikit-learn 
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.011.png)
+
+### Instructions for final user
+- RealTime Twitter https://twitter.com/Whale__Hunters
+
+- RealTime Telegram @Whale_Hunter_Alertbot this group is limited, to receive alert to sign up  ask via github or twitter 
+
+The models have been trained in **_15 min_** intervals with , i.e. the alerts expire in about 7 minutes, that means that once the tweet goes out, you have +-7 minutes to decide whether to trade or not. also that the models should be used on intra-day trade._Never blindly follow the alerts, check first_. 
+The alerts indicate points where **_only technical patterns have brought strong trend changes_** in the last 5 months, i.e. if these models were applied to the last 5 months they would hit 91% of the BUY SELL points, in the future no one can know. 
+In other words, it is not an absolute truth.
+
+The alerts are designed **for INTRADAY operations**, for the moment only with technical patterns, that is to say at the end of the day it is recommended to close them, in the future no one can know.
+
+##### The alert consists of the following:
+- Can be _**BUY**_ or _**SELL**_.
+- The id  of the stock, always from the USA market, in case of crypto will have the termination **_-USD_**. In case of Tesla, it is TSLA, in case of doubt with the company id , a simple google search "_Stocks XXX_".
+- Link to _**Investing.com**_ news, check before making the final decision.
+- Link to the candlesticks through _**TraderView.com**_, is the image shown attached with the alert. 
+- 𝙈𝙤𝙙𝙚𝙡 𝙏𝙧𝙪𝙨𝙩:⬆⬇, level of strength indicating whether there is a positive or negative trend and behind / number of models used to obtain the percentage. 
+It may be the case that both the uptrend POS and downtrend NEG have a high score, indicating increased volatility.
+- 📊⚙𝙉𝙖𝙢𝙚𝙨:
+The name of the selected models with which the prediction has been made and the percentage of strength. 
+
+###### Example of how the alerts looks like in **Twitter**:
+![](readme_img/tweet_image.PNG "tweet_image")
+
+###### Example of how the alerts looks like in **Telegram**:
+
+![](readme_img/telegram_bot_alert_example_2.0.jpg )
+
+### Program Description {OLD}
+
+**OHLCV** :An opening-high-low-closing-volume chart is a type of chart that is typically used to illustrate movements in the price of a financial instrument over time.
+
+**Functions:**
+
+1. Collection of historical **stocks** OHLCV data for the last years and calculation of technical patterns (momentums, volatility, Japanese candlesticks, statistics...), 1068 patterns.
+1. Calculations of which of the 1068 are the most valuable, and most relevant for the detection of good trading points (buy-sell).
+1. Training of several machine learning models using powerful libraries:Google Tensor Flow Sklearn and XGB
+1. Evaluation of the multiple models, to discard the less reliable ones. 
+1. OHLCV data collection and making predictions from the models in real time, when any of the multiple predictions (buy-sell stocks) is considered valid, sending real-time alert to Telegram and Mail. 
+
+_**Remember**_ the scalability of the project, it receives OHLCV data but can _**receive any type of data in .csv or excel**_ for predictions, with few changes (check the structure), it would be nice to complete the development so that it can receive predictions of any type, with open source. I am willing to help. 
+The predictive models generated by the solution are **_binary_**, i.e. they detect True or False.
+
+See article in **medium.com** https://medium.com/@LuisCasti33/lectrade-machine-learning-with-technical-patterns-and-real-time-alerts-for-buying-and-selling-in-b4ecc59b29cb
+
+
+
+
 
 #### USE THE SOFTWARE AT YOUR OWN RISK THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS
 USE THE SOFTWARE AT YOUR OWN RISK THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS. Do not risk money which you are afraid to lose. There might be bugs in the code - this software DOES NOT come with ANY warranty.
