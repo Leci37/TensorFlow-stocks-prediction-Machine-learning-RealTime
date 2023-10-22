@@ -28,6 +28,17 @@ from tensorflow import keras
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras import backend as K
 
+def get_best_model_column(df_f1):
+    df_f1.insert(2, 'best', "__")
+    for S in df_f1['stock'].unique():
+        # df2.loc[((df2['close'] < df2['ichi_senkou_b']) & (df2['close'] > df2['ichi_senkou_a']))
+        df_S = df_f1[(df_f1['stock'] == S) & (df_f1['REF_key_model'].str.startswith(REF_MODEL))]
+        # 'precision_BS','recall_BS','f1_BS','precision_avg', 'recall_avg','f1_avg'
+        df_S['score_quality'] = df_S[['recall_BS', 'f1_BS', 'recall_avg', 'f1_avg']].astype(float).mean(axis=1)
+        ref_model_best = df_S[df_S['score_quality'] == df_S['score_quality'].max()].index[0]
+        df_f1.loc[df_f1.index == ref_model_best, 'best'] = "**"
+        # df_S = df_S[(df_S['score_quality'] == df_S['score_quality'].max())]
+        return df_f1
 
 INDI = INDicator_label_3W5_
 indicator_timeframe = INDI
@@ -88,7 +99,13 @@ for symbol in stocks_list : #stocks_list:
         except Exception as e:
             print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "Exception: ",  str(e))
 
-path = "../Tutorial/ALL_F1_score_EVAL.csv"
+
+
+
+df_f1 = get_best_model_column(df_f1)
+
+df_f1 = df_f1.apply(pd.to_numeric, errors='ignore')
+path = f"../Tutorial/ALL_F1_score_EVAL_{REF_MODEL}.csv"
 if os.path.isfile(path):
     df_f1.to_csv(path, sep="\t", mode='a', header=False)
 else:

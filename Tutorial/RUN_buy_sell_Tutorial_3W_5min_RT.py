@@ -72,12 +72,12 @@ for symbol in stocks_list : #stocks_list:
     # df_bars = features_W3.ta.extract_features(df_raw)#TODO optimise, calculate the 830, It just need the +-90 from the .json
     #TODO review why using the 800 indicators reduces the effectiveness of the 270 indicators.
     from features_W3_old import extract_features_v3
-    df_bars = extract_features_v3(df_raw, extra_columns=True)  # IT WORKS   Tech indicators Count:  292
+    df_bars = extract_features_v3(df_raw, extra_columns=False)  # IT WORKS   Tech indicators Count:  292
     # from features_W3_old.ta import extract_features
     # df_bars = extract_features(df_raw)# IT does NOT WORKS   Tech indicators Count:  800
     # TIP The technical indicators have been cleaned (LIST_TECH_REMOVE) , but it is possible that some of them may be GET data from the future, in order to make the calculation, these must be discarded for a correct functioning in real time.
     # TIP tip avoid using data older than 2 years, old data not useful data. So old data is bad data ??
-    df_bars = df_bars.loc[df_bars.index > '2021-01-01 08:00:00']
+    df_bars = df_bars.loc[df_bars.index > '2018-01-01 08:00:00']
     print("[2.1] Calculated Technical indicators. stock: ",symbol," Tech indicator count: ",  df_bars.shape )
     df_bars = df_bars.drop(columns=LIST_TECH_REMOVE+ ['Date','date', 'Date.1','date.1', 'Date1','date1'], errors='ignore') #TODO no generate LIST_TECH_REMOVE, it is bad tech paterns
     # see the diferenet bettewn two list set(df_bars.columns) ^ set(df_S_2.columns)
@@ -100,8 +100,8 @@ for symbol in stocks_list : #stocks_list:
     print("\n[4] Calculation of correlation strength. What are the +-100 best technical indicators and which are noise. Remove strong correlacted columns")
     print("[4.1]uncorrelate_selection path: ", f'data/columns_select/{symbol}_{REF_MODEL}_columns.pkl')
     features_X_ALL = remove_strong_correlations_columns(features_X_ALL,factor=0.85)
-    features_X_col_corr = get_best_Y_correlations_columns(features_X_ALL.copy(), target_Y, num_columns=NUMS_FEATURES+20)
-    features_X_col_tree = get_tree_correlation(features_X_ALL.copy(), target_Y, num_features=22)
+    features_X_col_corr = get_best_Y_correlations_columns(features_X_ALL.copy(), target_Y, num_columns=NUMS_FEATURES)
+    features_X_col_tree = get_tree_correlation(features_X_ALL.copy(), target_Y, num_features=18)
     # TIP  all these convolutions have been tried to find out which has the strongest relationship in Tutorial/CONFIG.dict_correlations
     #TODO remove columns that have more than 0.9 correlation between them, as they are redundant. More info help: https://machinelearningmastery.com/basic-data-cleaning-for-machine-learning/
     columns_json_BOTH = list(set(list(features_X_col_corr) + list(features_X_col_tree)  ))
@@ -171,8 +171,6 @@ for symbol in stocks_list : #stocks_list:
     ])
     # TIP inspired by the kaggle winner  https://www.kaggle.com/code/viktortaran/ps-s-3-e-6#%E2%9C%855.12.-Keras
     loss = keras.losses.MeanSquaredError(reduction="auto", name="mean_squared_error")
-    # reduce_lr_loss = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_acc', factor=0.8, patience=6, verbose=1,min_delta=0.005, min_lr=0.000001, mode='max')
-    # early_stopping = keras.callbacks.EarlyStopping(patience=12, min_delta=0.0001, monitor="val_acc", mode='max',restore_best_weights=True)
     reduce_lr_loss = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=5, verbose=1,min_delta=0.001, min_lr=0.000001, mode='min')
     early_stopping = keras.callbacks.EarlyStopping(patience=11, monitor="val_loss", mode='min', verbose=1,restore_best_weights=True)
     callbacks_save = ModelCheckpoint(filepath=f'outputs/{symbol}_{REF_MODEL}_buysell.h5',monitor='val_loss', verbose=1, save_best_only=True)
