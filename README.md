@@ -658,6 +658,8 @@ _LSTM time series + stock price prediction = FAIL_
 ##### Review of all forms of time series prediction: lstm,gru,cnn and rnn
 Laurence Moroney has extensive tutorials in his book on how to correctly make temporary preditions (LSTM; GRU; RNN; CNN; ). https://github.com/lmoroney/tfbook/tree/master/chapter11 
 
+A good google brain tutorial Laurence Moroney  https://github.com/MoRebaie/Sequences-Time-Series-Prediction-in-Tensorflow/blob/master/Course_4_Week_4_Exercise_Question.ipynb 
+
 ##### Lighter improvements list of suggested
 
 Allow to analyze stocks outside the nasdaq, change in :
