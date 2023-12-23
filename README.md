@@ -81,9 +81,13 @@ This project is a very _**long mountain of work free**_, it is given to the publ
 
 Any other kind of contact with us, please go to the ISSUES tab.  
 
+#### author's note IMPORTANT:
+Before assembling everything check the tutorial code, **the predictive models require improvement** without cheating. (95% of the predictive code is in the tutorial). 
+The stock market does not only work with technical patterns, you need to know more about the inner workings.  Important to review the article: [My neural network does not improve](https://www.linkedin.com/pulse/my-neural-network-does-improve-through-classical-means-luis-leci%25C3%25B1ana-hsj0f)
+
 ## TUTORIAL
 
-The project is long and dense, _**trying to install it without understanding it is a mistake**_, the first thing to do is to run and understand the tutorial, located in `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py`
+The project is long and dense, _**trying to install it without understanding it is a mistake**_, the first thing to do is to run and understand the tutorial file, located in `Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py`
 it will show in a summarized way the global steps of the project [RUN_buy_sell_Tutorial_3W_5min_RT](https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/blob/master/Tutorial/RUN_buy_sell_Tutorial_3W_5min_RT.py)
  :
 1. [1] Reading OLHCV data
