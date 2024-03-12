@@ -20,7 +20,7 @@ To manage collaborations we have a  **Telegram GROUP:**
 https://t.me/+3oG6U_hp93I2M2Ix (Once executed and understood the tutorial)
  (recommended to review the point: https://github.com/Leci37/stocks-prediction-Machine-learning-RealTime-telegram/edit/master/README.md#possible-improvements). 
 
-Models with better accuracy are in _**Tutorial/RUN_5_models_0.61_accuracy.py**_
+**Strategy models** with Randon Forest, simpler [Randon Forest](https://github.com/Leci37/Strategy-stock-Random-Forest-ML-sklearn-TraderView)
 
 ---
   * [Why this stock prediction project ?](#why-this-stock-prediction-project--)
