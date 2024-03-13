@@ -6,7 +6,7 @@ Things this project **offers** that I did not find in other free projects, are:
 
 + Testing with _**36 models**_. Multiple combinations features and multiple selections of models, easily expandable (TensorFlow , XGBoost, Sklearn, LSTM, GRU, dense, LINEAR etc  )
 + Threshold and quality _**models evaluation**_
-+ Use _**937**_ technical stocks indicators
++ Use _**637**_ technical stocks indicators
 + Independent neural network selection of the best technical patterns for each stock
 + Response _**categorical target**_ (do buy, do sell and do nothing) simple and dynamic,  instead of poor and confused, continuous target variable ("the stock will be worth 32.4 in 2 days")
 + Powerful open-market-_**real-time**_ evaluation system 
@@ -254,6 +254,8 @@ Check that one has been generated for each action in *d_price/RAW_alpha*.
 As well as the history of technical patterns. It takes +-1 minute per share to calculate all technical patterns. 
 
 Run `1_Get_technical_indicators.py`
+
+**ALL technical indicators** in python you can find here, look the funtion extract_features(df: pd.DataFrame,extra_columns =False,  shift=150, debug=False) inside https://github.com/Leci37/TensorFlow-stocks-prediction-Machine-learning-RealTime/blob/master/features_W3_old/v3.py some of the technical indicators take future data, be careful.
 
 Once executed the folder: *d_price* will be filled with historical OHLCV .csv of share prices.
 
@@ -744,6 +746,9 @@ USE THE SOFTWARE AT YOUR OWN RISK THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPO
 Permitted, free use and modification, but no commercialization to third parties, without authorization. All rights reserved. Improvements or changes by third parties must be notified
 
 #### Technical Patterns all Names
+
+**ALL technical indicators** in python you can find here, look the funtion extract_features(df: pd.DataFrame,extra_columns =False,  shift=150, debug=False) inside https://github.com/Leci37/TensorFlow-stocks-prediction-Machine-learning-RealTime/blob/master/features_W3_old/v3.py some of the technical indicators take future data, be careful.
+
 All patterns used 
 ```
 Date	buy_sell_point	Open	High	Low	Close	Volume	per_Close	per_Volume	has_preMarket
