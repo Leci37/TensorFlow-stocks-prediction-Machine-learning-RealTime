@@ -1,6 +1,8 @@
 If you have problems with installation, let me know. 
 I am searching _**collaborators for this project**_. If you have experience and want to collaborate text me on email or github Issues
 
+_**SEE ALSO**_ [Machine Learning Strategy](https://github.com/Leci37/Strategy-stock-Random-Forest-ML-sklearn-TraderView/tree/main)
+
 ### Why this stock prediction project ?
 Things this project **offers** that I did not find in other free projects, are:
 
