@@ -155,13 +155,14 @@ Here enters the self-fulfilling prophecy principle of explained is, at first, a 
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.004.png)
 
-#### Ground True is the variable `buy_seel_point`
+#### Ground True is the variable `buy_seel_point` GT
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
 
 Defining the GT (Ground True) is a subjective task, these numbers can be obtained in 2 ways:
  - `Utils_buy_sell_points.get_buy_sell_points_Roll` (default). Value will be assigned in buy_seel_point if the increase or decrease of the stock is greater than 2.5% in a period of 3 hours, using the get_buy_sell_points_Roll function.
 
- - `Utils_buy_sell_points.get_buy_sell_points_HT_pp` (decomments the line) Inspired by the TraderView technical indicator "Pilots HL". 
+ - `Utils_buy_sell_points.get_buy_sell_points_HT_pp` (decomments the line) Inspired by the TraderView technical indicator "Pilots HL".
+ - For change the config to **1-day candlesticks** (with frequent daily changes of +-1% defined in the variable `PER_VALEU_CHANGE = 1`). You can see it in the method `get_GT_day_candle(df_kon)` and extra `rolling_buy_sell_val_BUY(df_ind)`it is strongly recommended to use this other function to obtain the GT, [file candlesticks GT day](https://github.com/Leci37/Strategy-stock-Random-Forest-ML-sklearn-TraderView/blob/main/technical_parameters_konk_tools_Prepro.py) 
 
 On the graphic, you can see the difference being:
 **_Blue_** the candle Close
