@@ -157,6 +157,7 @@ Here enters the self-fulfilling prophecy principle of explained is, at first, a 
 
 ![](readme_img/Aspose.Words.b41e3638-ef34-4eaa-ac86-1fda8999e934.004.png)
 
+
 #### Ground True is the variable `buy_seel_point` GT
 The model to be able to train in detecting points of purchase and sale, creates the column `buy_seel_point` has value of: 0, -100, 100. These are detected according to the maximum changes, (positive 100, negative -100) in the history of the last months, this point will be with which the training is trained, also called the *ground* true. 
 
@@ -616,6 +617,9 @@ More models, more power Azure, it is also more expensive.
 
 ##### Add news sentiment indicator
 You get the news for each stock with `news_get_data_NUTS.get_news_sentiment_data()` this method gets all the associated news from: INVESTING.com, YAHOO.com and FINVIZ.COM.
+
+News is obtained from yahoo and finviz.com, (see file https://github.com/Leci37/TensorFlow-stocks-prediction-Machine-learning-RealTime/blob/master/news_sentiment/news_get_data_NUTS.py ) **NO NEWS FROM TWITTER** in this version, just publish result on it.
+While news are obtained, the news are not valued by the TensorFlow models as of today. (providers with little and poor data).
 
 ( it uses investpy API , which recently october 2022 has started to fail , probably due to investing[.com](https://github.com/alvarobartt/investpy) blocking <https://github.com/alvarobartt/investpy> )
 
