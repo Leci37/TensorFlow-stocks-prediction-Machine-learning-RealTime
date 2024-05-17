@@ -148,6 +148,13 @@ Or it is operated when both exceed zero.
 
 These indicators are present in refuted and popular websites like investing.com to be analyzed by the market <https://es.investing.com/equities/apple-computer-inc-technical>
 
+###### How do I know when the WHALE touches the button, and breaks the model? 
+In the video you can see the whales manipulating the price, does anyone think they can predict when the madman in the City of London hits the button? It is recommended to understand that there are NOT VISIBLE data, and if they are not visible TF can not do miracles (TV and politicians say that AI does miracles, what it does is massive statistics with data).  If you don't understand this I think you should go to other projects. It is recommended to avoid this code in intervals less than 1 hour. 
+
+**See the news** _A “fat-finger error” by a [London-based trader at Citigroup that triggered a flash crash](https://www.theguardian.com/business/2022/jun/03/flash-crash-set-off-by-fat-fingered-citigroup-trader-could-cost-50m) across European stock markets could cost the bank at least $50m (£39.8m)._
+**See video** [Chinese Whales Dumping Bitcoin](https://www.youtube.com/watch?v=pkgTAEsOWnA) or [alternative](https://www.youtube.com/shorts/IpIyo4YmfuY?app=desktop) .
+I ask the reader at this point, **how is this predicted?** _I don't have the testosterone data of the London Kids XD ._ 😄😄
+
 #### Self-fulfilling prophecy principle
 
 It is extremely difficult to predict the price of any stock. Inflation, wars, populism, all this conditions affect the economy, and it becomes difficult, if not impossible to predict what Vladimir Putin will do tomorrow. 
