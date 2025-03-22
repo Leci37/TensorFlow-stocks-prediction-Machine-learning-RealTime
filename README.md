@@ -1,7 +1,11 @@
 If you have problems with installation, let me know. 
-I am searching _**collaborators for this project**_. If you have experience and want to collaborate **We are currently developing privately, if you want to join the team please contact us. https://www.linkedin.com/in/luislcastillo/**
+I am searching _**collaborators for this project**_. If you have experience and want to collaborate We are currently developing privately, if you want to join the team please contact us.
 
- _**SEE ALSO**_ [Machine Learning Strategy](https://github.com/Leci37/Strategy-stock-Random-Forest-ML-sklearn-TraderView/tree/main)      <img src="https://raw.githubusercontent.com/Leci37/Strategy-stock-Random-Forest-ML-sklearn-TraderView/main/img/give_a_start-RB.png" alt="give_a_start.jpg" width="72" />  
+**Here the result: https://tuisku.eu/**
+
+
+ _**SEE ALSO**_ [Machine Learning Strategy](https://github.com/Leci37/Strategy-stock-Random-Forest-ML-sklearn-TraderView/tree/main)      <img src="https://github.com/Leci37/ML-Sklearn-strategy-stock-crypto-for-TraderView/blob/main/img/give_a_start-RB.png" alt="give_a_start.jpg" width="30" />  
+https://www.linkedin.com/in/luislcastillo/ 
 
 ### Why this stock prediction project ?
 Things this project **offers** that I did not find in other free projects, are:
