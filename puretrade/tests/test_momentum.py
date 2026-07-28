@@ -69,6 +69,12 @@ def _ref(name, df):
         "ma_DEMA_20": lambda: talib.DEMA(c, 20),
         "ma_TEMA_20": lambda: talib.TEMA(c, 20),
         "ma_SMA_20": lambda: talib.SMA(c, 20),
+        "ma_WMA_20": lambda: talib.WMA(c, 20),
+        "ma_TRIMA_20": lambda: talib.TRIMA(c, 20),
+        "ma_KAMA_20": lambda: talib.KAMA(c, 20),
+        "ma_T3_5": lambda: talib.T3(c, 5, 0.7),
+        "olap_MIDPOINT": lambda: talib.MIDPOINT(c, 14),
+        "olap_MIDPRICE": lambda: talib.MIDPRICE(h, l, 14),
     }
     return R[name]().to_numpy(dtype="float64")
 
@@ -84,6 +90,8 @@ NUMERIC = [
     "volu_OBV", "volu_Chaikin_AD", "volu_Chaikin_ADOSC",
     "vola_ATR", "vola_NATR", "vola_TRANGE",
     "ma_EMA_20", "ma_DEMA_20", "ma_TEMA_20", "ma_SMA_20",
+    "ma_WMA_20", "ma_TRIMA_20", "ma_KAMA_20", "ma_T3_5",
+    "olap_MIDPOINT", "olap_MIDPRICE",
 ]
 
 

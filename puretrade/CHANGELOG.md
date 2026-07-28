@@ -64,3 +64,10 @@
 - Motor: compute() usa pd.concat por productor (elimina el PerformanceWarning de
   fragmentación al calcular muchos indicadores).
 - 100/318 indicadores migrados. Pendientes de pandas-ta: NVI_1, PVI_1, PVR.
+
+### Medias + Overlap (paridad TA-Lib)
+- WMA, TRIMA, KAMA (semilla en n-1), T3 (Tillson) con paridad exacta -> familia
+  MovingAverage COMPLETA (40/40). TRIMA/WMA reclasificadas como Rolling/PIT-safe.
+- olap_MIDPOINT, olap_MIDPRICE con paridad exacta.
+- SAR/SAREXT y MAMA/FAMA/HT_TRENDLINE (Hilbert) pendientes -> _optional/talib_bridge.
+- 122/318 indicadores migrados.

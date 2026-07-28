@@ -51,3 +51,19 @@ def tema(s: pd.Series, n: int) -> pd.Series:
     e2 = ema(e1, n)
     e3 = ema(e2, n)
     return 3 * e1 - 3 * e2 + e3
+
+
+def t3(s: pd.Series, n: int, vfactor: float = 0.7) -> pd.Series:
+    """T3 de Tillson, idéntica a TA-Lib (vfactor por defecto 0.7)."""
+    e1 = ema(s, n)
+    e2 = ema(e1, n)
+    e3 = ema(e2, n)
+    e4 = ema(e3, n)
+    e5 = ema(e4, n)
+    e6 = ema(e5, n)
+    v = vfactor
+    c1 = -v ** 3
+    c2 = 3 * v ** 2 + 3 * v ** 3
+    c3 = -6 * v ** 2 - 3 * v - 3 * v ** 3
+    c4 = 1 + 3 * v + v ** 3 + 3 * v ** 2
+    return c1 * e6 + c2 * e5 + c3 * e4 + c4 * e3

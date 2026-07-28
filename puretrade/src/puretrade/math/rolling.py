@@ -68,3 +68,33 @@ def highest(s: pd.Series, n: int) -> pd.Series:
 
 def lowest(s: pd.Series, n: int) -> pd.Series:
     return s.rolling(n, min_periods=n).min()
+
+
+def wma(s: pd.Series, n: int) -> pd.Series:
+    """Media móvil ponderada linealmente (pesos 1..n), idéntica a TA-Lib."""
+    w = np.arange(1, n + 1, dtype="float64")
+    return s.rolling(n, min_periods=n).apply(lambda x: np.dot(x, w) / w.sum(), raw=True)
+
+
+def trima(s: pd.Series, n: int) -> pd.Series:
+    """Media triangular de TA-Lib (SMA de SMA)."""
+    if n % 2 == 1:
+        m1 = m2 = (n + 1) // 2
+    else:
+        m1, m2 = n // 2 + 1, n // 2
+    return sma(sma(s, m1), m2)
+
+
+def kama(s: pd.Series, n: int, fast: int = 2, slow: int = 30) -> pd.Series:
+    """Kaufman Adaptive Moving Average, idéntica a TA-Lib (semilla en n-1)."""
+    x = s.to_numpy(dtype="float64")
+    out = np.full(x.shape, np.nan)
+    if len(x) <= n:
+        return pd.Series(out, index=s.index)
+    vol = pd.Series(np.abs(np.diff(x, prepend=x[0]))).rolling(n).sum().to_numpy()
+    change = np.abs(x - np.roll(x, n))
+    sc = (change / vol * (2 / (fast + 1) - 2 / (slow + 1)) + 2 / (slow + 1)) ** 2
+    out[n - 1] = x[n - 1]
+    for i in range(n, len(x)):
+        out[i] = out[i - 1] + sc[i] * (x[i] - out[i - 1])
+    return pd.Series(out, index=s.index)

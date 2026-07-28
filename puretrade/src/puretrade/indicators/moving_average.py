@@ -5,11 +5,12 @@ import pandas as pd
 
 from ..core.enums import Family, FactorStyle, Nature
 from ..core.registry import register
-from ..math.ewm import dema, ema, tema
-from ..math.rolling import sma
+from ..math.ewm import dema, ema, t3, tema
+from ..math.rolling import kama, sma, trima, wma
 
 _PERIODS = (5, 10, 20, 50, 100)
-_FUNCS = {"SMA": sma, "EMA": ema, "DEMA": dema, "TEMA": tema}
+_FUNCS = {"SMA": sma, "EMA": ema, "DEMA": dema, "TEMA": tema,
+          "WMA": wma, "TRIMA": trima, "KAMA": kama, "T3": t3}
 
 
 def _make(kind: str, fn, n: int):
@@ -31,4 +32,6 @@ for _kind, _fn in _FUNCS.items():
     for _n in _PERIODS:
         _make(_kind, _fn, _n)
 
-# TODO: KAMA, WMA, T3, TRIMA (TRIMA/WMA algunos marcados no-PIT en el catálogo).
+# Nota: SMA/EMA/DEMA/TEMA/WMA/TRIMA/KAMA/T3, todas con paridad exacta vs TA-Lib.
+# TRIMA/WMA estaban en la lista negra del proyecto viejo, pero son rolling y
+# point-in-time seguras; se registran como Rolling.
