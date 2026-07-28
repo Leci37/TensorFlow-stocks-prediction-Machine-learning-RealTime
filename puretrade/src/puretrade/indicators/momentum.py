@@ -122,6 +122,13 @@ def _stochf(df: pd.DataFrame, k: int = 5, d: int = 3) -> pd.DataFrame:
     fast_k = _stoch_fastk(df, k)
     return pd.DataFrame({"mtum_STOCH_Fa_k": fast_k, "mtum_STOCH_Fa_d": sma(fast_k, d)})
 
+@register(key="mtum_AO_5_34", outputs=("mtum_AO_5_34",), inputs=("high", "low"),
+          family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=34)
+def _ao(df: pd.DataFrame) -> pd.DataFrame:
+    median = (df["high"] + df["low"]) / 2
+    return pd.DataFrame({"mtum_AO_5_34": sma(median, 5) - sma(median, 34)})
+
+
 @register(key="mtum_MFI", outputs=("mtum_MFI",), inputs=("high", "low", "close", "volume"),
           family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=14)
 def _mfi(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:

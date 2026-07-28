@@ -110,7 +110,7 @@ ma_WMA_5,MovingAverage,trend/momentum,Rolling,True,native,C,5.0,continuous,False
 ma_WMA_50,MovingAverage,trend/momentum,Rolling,True,native,C,50.0,continuous,False,True
 mtum_ADX,Momentum,trend/momentum,Rolling,True,native,"H,L,C",,continuous,False,True
 mtum_ADXR,Momentum,trend/momentum,Rolling,True,native,"H,L,C",,continuous,False,True
-mtum_AO_5_34,Momentum,trend/momentum,Rolling,True,pandas_ta,C,34.0,continuous,False,False
+mtum_AO_5_34,Momentum,trend/momentum,Rolling,True,native,C,34.0,continuous,False,True
 mtum_APO,Momentum,trend/momentum,Rolling,True,native,C,,continuous,True,True
 mtum_AROONOSC,Momentum,trend/momentum,Rolling,True,native,"H,L,C",,continuous,False,True
 mtum_AROON_down,Momentum,trend/momentum,Rolling,True,native,"H,L,C",,continuous,False,True
@@ -317,3 +317,15 @@ volu_PVI_1,Volume,flow/liquidity,Cumulative,True,talib,"H,L,C,V",1.0,continuous,
 volu_PVOL,Volume,flow/liquidity,Rolling,True,native,"H,L,C,V",,continuous,False,True
 volu_PVR,Volume,flow/liquidity,Rolling,True,talib,"H,L,C,V",,continuous,False,False
 volu_PVT,Volume,flow/liquidity,Cumulative,True,native,"H,L,C,V",,continuous,False,True
+ichi_tenkan_9,Trend,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+ichi_kijun_26,Trend,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+ichi_senkou_a,Trend,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+ichi_senkou_b_52,Trend,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+olap_VWAP,Overlap,trend/momentum,Cumulative,True,native,,0.0,continuous,False,True
+piv_P,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+piv_R1,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+piv_S1,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+piv_R2,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+piv_S2,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+piv_R3,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True
+piv_S3,Overlap,trend/momentum,Rolling,True,native,,0.0,continuous,False,True

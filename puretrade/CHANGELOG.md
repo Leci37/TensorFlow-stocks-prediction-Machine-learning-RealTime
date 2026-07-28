@@ -88,3 +88,11 @@
   HANGINGMAN min(o,c)>=high1-Near; INVERTEDHAMMER gap-down; SHOOTINGSTAR gap-up.
 - FIX: _sig ahora admite cond_white=None (patrones solo bajistas).
 - 29/61 velas; 143/318 indicadores. RICKSHAWMAN y 3BLACKCROWS siguen pendientes.
+
+### Populares de TradingView (huecos cubiertos)
+- Awesome Oscillator (mtum_AO_5_34), Ichimoku (tenkan/kijun/senkou A/B),
+  VWAP anclado a sesión (olap_VWAP) y Pivot Points clásicos (piv_P/R1..R3/S1..S3).
+- Ninguno es de TA-Lib: fórmula estándar + verificación point-in-time. VWAP y
+  Pivots se anclan al día natural (índice datetime). Chikou de Ichimoku se omite
+  a propósito (look-ahead).
+- Catálogo ampliado a 330 filas; 156 indicadores migrados.
