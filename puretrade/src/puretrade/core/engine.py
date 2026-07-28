@@ -44,10 +44,46 @@ def _toposort(keys: Iterable[str], producers) -> List[str]:
     return ordered
 
 
+def _as_set(value) -> Optional[set]:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return {value.lower()}
+    return {str(v).lower() for v in value}
+
+
+def _select_keys(producers, features, family, nature, rt_safe_only) -> List[str]:
+    """Resuelve qué productores ejecutar a partir de los filtros dados."""
+    oidx = output_index()
+    if features is not None:
+        keys = []
+        for f in features:
+            if f in producers:
+                keys.append(f)
+            elif f in oidx:
+                keys.append(oidx[f])
+            else:
+                raise KeyError(f"Indicador/columna desconocida: {f!r}")
+        keys = list(dict.fromkeys(keys))
+    else:
+        keys = list(producers)
+
+    fams, nats = _as_set(family), _as_set(nature)
+    if fams is not None:
+        keys = [k for k in keys if producers[k].family.value.lower() in fams]
+    if nats is not None:
+        keys = [k for k in keys if producers[k].nature.value.lower() in nats]
+    if rt_safe_only:
+        keys = [k for k in keys if producers[k].nature not in PIT_UNSAFE]
+    return keys
+
+
 def compute(
     df: pd.DataFrame,
     features: Optional[Iterable[str]] = None,
     *,
+    family=None,
+    nature=None,
     rt_safe_only: bool = False,
 ) -> pd.DataFrame:
     """Calcula indicadores técnicos sobre un DataFrame OHLCV.
@@ -58,29 +94,26 @@ def compute(
         DataFrame con columnas open/high/low/close[/volume] (mayúsc. o minúsc.).
     features :
         Nombres de indicadores o de columnas de salida. ``None`` = todos.
+    family :
+        Familia(s) a calcular: p. ej. ``"Volatility"``, ``"Candle"`` o
+        ``["Momentum", "Volume"]``. ``None`` = todas.
+    nature :
+        Naturaleza(s) a calcular: ``"Rolling"``, ``"Cumulative"``, ``"Pattern"``…
     rt_safe_only :
         Si ``True``, excluye los indicadores que no son point-in-time seguros.
+
+    Examples
+    --------
+    >>> compute(df)                          # todos
+    >>> compute(df, family="Volatility")     # solo volatilidad
+    >>> compute(df, family="Candle")         # solo patrones de vela
+    >>> compute(df, ["mtum_RSI", "vola_ATR"])  # solo estos
+    >>> compute(df, rt_safe_only=True)       # solo point-in-time
     """
     work = _normalise(df)
     producers = all_producers()
-    oidx = output_index()
 
-    if features is None:
-        keys = list(producers)
-    else:
-        keys = []
-        for f in features:
-            if f in producers:
-                keys.append(f)
-            elif f in oidx:
-                keys.append(oidx[f])
-            else:
-                raise KeyError(f"Indicador/columna desconocida: {f!r}")
-        keys = list(dict.fromkeys(keys))  # dedup preservando orden
-
-    if rt_safe_only:
-        keys = [k for k in keys if producers[k].nature not in PIT_UNSAFE]
-
+    keys = _select_keys(producers, features, family, nature, rt_safe_only)
     order = _toposort(keys, producers)
 
     parts = []
@@ -99,3 +132,22 @@ def compute(
         if wanted:
             out = out[wanted]
     return out
+
+
+def families() -> List[str]:
+    """Lista ordenada de familias disponibles (Momentum, Candle, Volatility…)."""
+    return sorted({p.family.value for p in all_producers().values()})
+
+
+def list_features(*, family=None, nature=None, rt_safe_only: bool = False) -> List[str]:
+    """Nombres de columnas de salida que casan con los filtros (sin calcular nada).
+
+    >>> list_features(family="Volatility")
+    >>> list_features(rt_safe_only=True)
+    """
+    producers = all_producers()
+    keys = _select_keys(producers, None, family, nature, rt_safe_only)
+    cols: List[str] = []
+    for k in keys:
+        cols.extend(producers[k].outputs)
+    return cols

@@ -19,6 +19,8 @@ from .core import (
     OutputType,
     all_producers,
     compute,
+    families,
+    list_features,
     load_catalog as catalog,
     pit_check,
     register,
@@ -29,6 +31,8 @@ __version__ = "0.1.0"
 
 __all__ = [
     "compute",
+    "families",
+    "list_features",
     "catalog",
     "pit_check",
     "register",

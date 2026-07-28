@@ -29,6 +29,7 @@ dependencies = [
 # Solo para el puñado de indicadores DSP/Hilbert no viables en numpy puro.
 talib = ["TA-Lib>=0.4"]
 dev = ["pytest>=7", "ruff", "mypy"]
+docs = ["mkdocs-material"]
 all = ["puretrade[talib]"]
 
 [project.urls]

@@ -103,3 +103,10 @@
 - KICKING/KICKINGBYLENGTH implementados pero NO registrados (no disparan ni con
   datos con gaps sintéticos -> no verificables). INNECK/ONNECK/THRUSTING/TRISTAR/
   STICKSANDWICH/RICKSHAWMAN/3BLACKCROWS siguen pendientes.
+
+### API de selección + documentación
+- compute() acepta family= y nature= además de features=: generar todo, solo una
+  familia (Volatility/Candle/...), varias, por naturaleza, o solo point-in-time,
+  y combinaciones. Nuevos helpers pt.families() y pt.list_features().
+- Documentación estructurada en docs/ (index, installation, usage, catalog,
+  design, contributing) + mkdocs.yml, y README reescrito con todos los modos de uso.

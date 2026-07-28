@@ -45,3 +45,22 @@ def test_unknown_feature_raises(ohlcv):
     except KeyError:
         return
     raise AssertionError("debería lanzar KeyError")
+
+
+def test_select_by_family(ohlcv):
+    vola = pt.compute(ohlcv, family="Volatility")
+    assert all(c.startswith("vola_") for c in vola.columns)
+    assert vola.shape[1] >= 3
+
+
+def test_select_by_family_list(ohlcv):
+    both = pt.compute(ohlcv, family=["Momentum", "Volume"])
+    only_m = pt.compute(ohlcv, family="Momentum")
+    only_v = pt.compute(ohlcv, family="Volume")
+    assert both.shape[1] == only_m.shape[1] + only_v.shape[1]
+
+
+def test_families_and_list_features():
+    fams = pt.families()
+    assert {"Candle", "Momentum", "Volatility"}.issubset(set(fams))
+    assert set(pt.list_features(family="Volatility")) == {"vola_TRANGE", "vola_ATR", "vola_NATR"}

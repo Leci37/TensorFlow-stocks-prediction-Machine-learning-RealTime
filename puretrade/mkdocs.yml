@@ -1,0 +1,26 @@
+site_name: puretrade
+site_description: Indicadores técnicos para ML financiero en puro numpy + pandas
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: teal
+    - scheme: slate
+      primary: teal
+  features:
+    - navigation.sections
+    - content.code.copy
+
+nav:
+  - Inicio: index.md
+  - Instalación: installation.md
+  - Guía de uso: usage.md
+  - Catálogo: catalog.md
+  - Diseño interno: design.md
+  - Contribuir: contributing.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - tables
