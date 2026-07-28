@@ -44,6 +44,24 @@ def true_range(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
     return tr
 
 
+def dmi_smooth(s: pd.Series, n: int) -> pd.Series:
+    """Suavizado de Wilder de TA-Lib para DMI/ADX (+DM, -DM, TR).
+
+    A diferencia de ``rma``, siembra con la SUMA de los primeros ``n-1`` valores
+    y arranca la recursión ``s = s - s/n + x`` incluyendo el actual. Devuelve la
+    suma suavizada (no la media): así el cociente +DM/TR reproduce TA-Lib.
+    """
+    a = s.to_numpy(dtype="float64")
+    out = np.full(a.shape, np.nan)
+    if len(a) <= n:
+        return pd.Series(out, index=s.index)
+    acc = np.nansum(a[1:n])
+    for i in range(n, len(a)):
+        acc = acc - acc / n + a[i]
+        out[i] = acc
+    return pd.Series(out, index=s.index)
+
+
 def highest(s: pd.Series, n: int) -> pd.Series:
     return s.rolling(n, min_periods=n).max()
 

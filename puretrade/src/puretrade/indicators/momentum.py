@@ -7,7 +7,7 @@ import pandas as pd
 from ..core.enums import Family, Nature
 from ..core.registry import register
 from ..math.ewm import ema, ema_seed_at
-from ..math.rolling import highest, lowest, rma, sma
+from ..math.rolling import dmi_smooth, highest, lowest, rma, sma, true_range
 
 
 @register(key="mtum_RSI", outputs=("mtum_RSI",), inputs=("close",),
@@ -131,4 +131,71 @@ def _mfi(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:
     neg = rmf.where(tp < tp.shift(1), 0.0).rolling(n, min_periods=n).sum()
     return pd.DataFrame({"mtum_MFI": 100 * pos / (pos + neg)})
 
-# TODO: ADX/DMI (Wilder), AROON, ULTOSC, TRIX, STOCH_RSI...
+# ------------------------- DMI / ADX (suavizado Wilder de TA-Lib) -------------------------
+
+@register(key="mtum_DMI",
+          outputs=("mtum_PLUS_DM", "mtum_MINUS_DM", "mtum_PLUS_DI", "mtum_MINUS_DI", "mtum_DX"),
+          inputs=("high", "low", "close"), family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=14)
+def _dmi(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:
+    up, dn = df["high"].diff(), -df["low"].diff()
+    plus_dm = up.where((up > dn) & (up > 0), 0.0)
+    minus_dm = dn.where((dn > up) & (dn > 0), 0.0)
+    plus_dm.iloc[0] = np.nan
+    minus_dm.iloc[0] = np.nan
+    s_tr = dmi_smooth(true_range(df["high"], df["low"], df["close"]), n)
+    s_p, s_m = dmi_smooth(plus_dm, n), dmi_smooth(minus_dm, n)
+    plus_di, minus_di = 100 * s_p / s_tr, 100 * s_m / s_tr
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di)
+    return pd.DataFrame({
+        "mtum_PLUS_DM": s_p, "mtum_MINUS_DM": s_m,
+        "mtum_PLUS_DI": plus_di, "mtum_MINUS_DI": minus_di, "mtum_DX": dx,
+    })
+
+
+@register(key="mtum_ADX", outputs=("mtum_ADX",), inputs=("high", "low", "close"),
+          depends_on=("mtum_DMI",), family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=27)
+def _adx(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:
+    return pd.DataFrame({"mtum_ADX": rma(df["mtum_DX"], n)})
+
+
+@register(key="mtum_ADXR", outputs=("mtum_ADXR",), inputs=("high", "low", "close"),
+          depends_on=("mtum_ADX",), family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=40)
+def _adxr(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:
+    adx = df["mtum_ADX"]
+    return pd.DataFrame({"mtum_ADXR": (adx + adx.shift(n - 1)) / 2})
+
+
+# ------------------------- AROON / ULTOSC / TRIX / STOCH-RSI -------------------------
+
+@register(key="mtum_AROON", outputs=("mtum_AROON_up", "mtum_AROON_down", "mtum_AROONOSC"),
+          inputs=("high", "low"), family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=15)
+def _aroon(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:
+    up = df["high"].rolling(n + 1, min_periods=n + 1).apply(lambda x: 100 * np.argmax(x) / n, raw=True)
+    down = df["low"].rolling(n + 1, min_periods=n + 1).apply(lambda x: 100 * np.argmin(x) / n, raw=True)
+    return pd.DataFrame({"mtum_AROON_up": up, "mtum_AROON_down": down, "mtum_AROONOSC": up - down})
+
+
+@register(key="mtum_ULTOSC", outputs=("mtum_ULTOSC",), inputs=("high", "low", "close"),
+          family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=28)
+def _ultosc(df: pd.DataFrame, s: int = 7, m: int = 14, ln: int = 28) -> pd.DataFrame:
+    prev = df["close"].shift(1)
+    bp = df["close"] - np.minimum(df["low"], prev)
+    tr = np.maximum(df["high"], prev) - np.minimum(df["low"], prev)
+    a = [bp.rolling(p).sum() / tr.rolling(p).sum() for p in (s, m, ln)]
+    return pd.DataFrame({"mtum_ULTOSC": 100 * (4 * a[0] + 2 * a[1] + a[2]) / 7})
+
+
+@register(key="mtum_TRIX", outputs=("mtum_TRIX",), inputs=("close",),
+          family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=90)
+def _trix(df: pd.DataFrame, n: int = 30) -> pd.DataFrame:
+    e3 = ema(ema(ema(df["close"], n), n), n)
+    return pd.DataFrame({"mtum_TRIX": 100 * (e3 - e3.shift(1)) / e3.shift(1)})
+
+
+@register(key="mtum_STOCH_RSI", outputs=("mtum_STOCH_RSI_k", "mtum_STOCH_RSI_d"),
+          inputs=("close",), family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=19)
+def _stochrsi(df: pd.DataFrame, n: int = 14, k: int = 5, d: int = 3) -> pd.DataFrame:
+    delta = df["close"].diff()
+    rsi = 100 - 100 / (1 + rma(delta.clip(lower=0), n) / rma(-delta.clip(upper=0), n))
+    fast_k = 100 * (rsi - lowest(rsi, k)) / (highest(rsi, k) - lowest(rsi, k))
+    return pd.DataFrame({"mtum_STOCH_RSI_k": fast_k, "mtum_STOCH_RSI_d": sma(fast_k, d)})

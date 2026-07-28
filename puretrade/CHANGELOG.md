@@ -48,3 +48,10 @@
 - Subcomponentes verificados vs TA-Lib (RSI/MFI/SMA/STDDEV/stoch); PVI/NVI
   replicados exactos del Pine. KONCORDE completo verificado point-in-time.
 - Nuevo mtum_MFI con paridad exacta vs TA-Lib. 82/318 indicadores migrados.
+
+### Momentum pesado (DMI/ADX + AROON + ULTOSC + TRIX + STOCH-RSI)
+- Familia direccional completa con paridad exacta: PLUS_DM, MINUS_DM, PLUS_DI,
+  MINUS_DI, DX, ADX, ADXR. Requirió el suavizado Wilder específico de TA-Lib
+  (semilla = suma de los primeros n-1), añadido como math.rolling.dmi_smooth.
+- ADX depende de DMI y ADXR de ADX vía el grafo topológico del motor.
+- AROON (up/down/osc), ULTOSC, TRIX, STOCH-RSI (k/d) con paridad exacta.
