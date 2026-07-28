@@ -55,3 +55,12 @@
   (semilla = suma de los primeros n-1), añadido como math.rolling.dmi_smooth.
 - ADX depende de DMI y ADXR de ADX vía el grafo topológico del motor.
 - AROON (up/down/osc), ULTOSC, TRIX, STOCH-RSI (k/d) con paridad exacta.
+
+### Volume + fix OBV
+- FIX: OBV arrancaba en 0; TA-Lib arranca en volume[0]. Corregido -> paridad exacta.
+- Chaikin AD y ADOSC con paridad exacta vs TA-Lib (ADOSC usa EMA sembrada en el
+  primer valor, distinta de la EMA con semilla SMA del resto).
+- EFI (Elder Force Index) y PVOL: fórmula estándar, verificados point-in-time.
+- Motor: compute() usa pd.concat por productor (elimina el PerformanceWarning de
+  fragmentación al calcular muchos indicadores).
+- 100/318 indicadores migrados. Pendientes de pandas-ta: NVI_1, PVI_1, PVR.

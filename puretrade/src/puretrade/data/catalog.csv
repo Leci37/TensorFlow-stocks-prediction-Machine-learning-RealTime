@@ -308,12 +308,12 @@ vola_THERMOs_20_2_05,Volatility,volatility/risk,Rolling,True,pandas_ta,"H,L,C",5
 vola_TRANGE,Volatility,volatility/risk,Rolling,True,native,"H,L,C",,continuous,False,True
 vola_TRUERANGE_1,Volatility,volatility/risk,Rolling,True,pandas_ta,C,1.0,continuous,False,False
 vola_UI_14,Volatility,volatility/risk,Rolling,True,pandas_ta,C,14.0,continuous,False,False
-volu_Chaikin_AD,Volume,flow/liquidity,Cumulative,True,talib,"H,L,C,V",,continuous,False,False
-volu_Chaikin_ADOSC,Volume,flow/liquidity,Rolling,True,talib,"H,L,C,V",,continuous,False,False
-volu_EFI_13,Volume,flow/liquidity,Rolling,True,talib,"H,L,C,V",13.0,continuous,False,False
+volu_Chaikin_AD,Volume,flow/liquidity,Cumulative,True,native,"H,L,C,V",,continuous,False,True
+volu_Chaikin_ADOSC,Volume,flow/liquidity,Cumulative,True,native,"H,L,C,V",,continuous,False,True
+volu_EFI_13,Volume,flow/liquidity,Rolling,True,native,"H,L,C,V",13.0,continuous,False,True
 volu_NVI_1,Volume,flow/liquidity,Cumulative,True,talib,"H,L,C,V",1.0,continuous,False,False
 volu_OBV,Volume,flow/liquidity,Cumulative,True,native,"H,L,C,V",,continuous,False,True
 volu_PVI_1,Volume,flow/liquidity,Cumulative,True,talib,"H,L,C,V",1.0,continuous,False,False
-volu_PVOL,Volume,flow/liquidity,Rolling,True,talib,"H,L,C,V",,continuous,False,False
+volu_PVOL,Volume,flow/liquidity,Rolling,True,native,"H,L,C,V",,continuous,False,True
 volu_PVR,Volume,flow/liquidity,Rolling,True,talib,"H,L,C,V",,continuous,False,False
 volu_PVT,Volume,flow/liquidity,Cumulative,True,native,"H,L,C,V",,continuous,False,True

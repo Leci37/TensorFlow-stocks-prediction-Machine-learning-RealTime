@@ -59,6 +59,9 @@ def _ref(name, df):
         "mtum_TRIX": lambda: talib.TRIX(c, 30),
         "mtum_STOCH_RSI_k": lambda: talib.STOCHRSI(c, 14, 5, 3, 0)[0],
         "mtum_STOCH_RSI_d": lambda: talib.STOCHRSI(c, 14, 5, 3, 0)[1],
+        "volu_OBV": lambda: talib.OBV(c, df["volume"]),
+        "volu_Chaikin_AD": lambda: talib.AD(h, l, c, df["volume"]),
+        "volu_Chaikin_ADOSC": lambda: talib.ADOSC(h, l, c, df["volume"], 3, 10),
         "vola_ATR": lambda: talib.ATR(h, l, c, 14),
         "vola_NATR": lambda: talib.NATR(h, l, c, 14),
         "vola_TRANGE": lambda: talib.TRANGE(h, l, c),
@@ -78,6 +81,7 @@ NUMERIC = [
     "mtum_PLUS_DM", "mtum_MINUS_DM", "mtum_PLUS_DI", "mtum_MINUS_DI", "mtum_DX",
     "mtum_ADX", "mtum_ADXR", "mtum_AROON_up", "mtum_AROON_down", "mtum_AROONOSC",
     "mtum_ULTOSC", "mtum_TRIX", "mtum_STOCH_RSI_k", "mtum_STOCH_RSI_d",
+    "volu_OBV", "volu_Chaikin_AD", "volu_Chaikin_ADOSC",
     "vola_ATR", "vola_NATR", "vola_TRANGE",
     "ma_EMA_20", "ma_DEMA_20", "ma_TEMA_20", "ma_SMA_20",
 ]

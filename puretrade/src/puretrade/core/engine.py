@@ -83,12 +83,16 @@ def compute(
 
     order = _toposort(keys, producers)
 
-    out = pd.DataFrame(index=work.index)
+    parts = []
     for key in order:
         res = producers[key].func(work)
-        for col in res.columns:
-            work[col] = res[col]   # disponible para productores derivados
-            out[col] = res[col]
+        parts.append(res)
+        new_cols = [c for c in res.columns if c not in work.columns]
+        if new_cols:  # disponible para productores derivados (concat, no inserción 1 a 1)
+            work = pd.concat([work, res[new_cols]], axis=1)
+
+    out = pd.concat(parts, axis=1) if parts else pd.DataFrame(index=work.index)
+    out = out.loc[:, ~out.columns.duplicated()]
 
     if features is not None:
         wanted = [f for f in features if f in out.columns]
