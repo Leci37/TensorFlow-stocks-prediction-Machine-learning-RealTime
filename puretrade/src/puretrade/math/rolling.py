@@ -1,6 +1,7 @@
 """Primitivas de ventana trasera (rolling). Puro pandas — todas point-in-time."""
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 
@@ -13,8 +14,23 @@ def rolling_std(s: pd.Series, n: int) -> pd.Series:
 
 
 def rma(s: pd.Series, n: int) -> pd.Series:
-    """Media móvil de Wilder (usada por RSI, ATR, ADX...)."""
-    return s.ewm(alpha=1.0 / n, adjust=False, min_periods=n).mean()
+    """Media móvil de Wilder, idéntica a TA-Lib.
+
+    Semilla = media simple de los primeros ``n`` valores válidos (no el primer
+    valor, como haría ``ewm``), y a partir de ahí recursión ``(prev*(n-1)+x)/n``.
+    Esta inicialización es la que usa TA-Lib en RSI/ATR/ADX; ``ewm`` no coincide.
+    """
+    x = s.to_numpy(dtype="float64")
+    out = np.full(x.shape, np.nan)
+    valid = np.where(~np.isnan(x))[0]
+    if len(valid) < n:
+        return pd.Series(out, index=s.index)
+    start = valid[0]
+    seed = start + n - 1
+    out[seed] = np.mean(x[start:start + n])
+    for i in range(seed + 1, len(x)):
+        out[i] = (out[i - 1] * (n - 1) + x[i]) / n
+    return pd.Series(out, index=s.index)
 
 
 def true_range(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
@@ -23,4 +39,14 @@ def true_range(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
         [(high - low), (high - prev_close).abs(), (low - prev_close).abs()],
         axis=1,
     )
-    return ranges.max(axis=1)
+    tr = ranges.max(axis=1)
+    tr.iloc[0] = np.nan   # sin cierre previo el rango verdadero no está definido (como TA-Lib)
+    return tr
+
+
+def highest(s: pd.Series, n: int) -> pd.Series:
+    return s.rolling(n, min_periods=n).max()
+
+
+def lowest(s: pd.Series, n: int) -> pd.Series:
+    return s.rolling(n, min_periods=n).min()

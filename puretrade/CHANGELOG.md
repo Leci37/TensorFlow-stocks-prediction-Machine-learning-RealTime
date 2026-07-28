@@ -29,3 +29,12 @@
 - _3blackcrows y la familia HAMMER (HAMMER/INVERTEDHAMMER/HANGINGMAN/SHOOTINGSTAR)
   implementados parcialmente pero NO registrados: su contexto de tendencia con
   tolerancia Near aún no da paridad exacta. Pendientes de una pasada dedicada.
+
+### Momentum + correctness
+- FIX importante: rma (Wilder) y ema ahora replican la inicialización de TA-Lib
+  (semilla = SMA de los primeros n). Antes usaban pandas.ewm y NO coincidían;
+  esto corrige RSI/ATR/NATR y las 20 medias EMA/DEMA/TEMA ya registradas.
+- MACD alineado como TA-Lib (EMA rápida sembrada en slow-1, signal en +sig-1).
+- Nuevos momentum con paridad exacta: CMO, ROCP, ROCR, ROCR100, BOP, WILLR (R),
+  CCI, APO, PPO, STOCH (k/d), STOCHF (k/d).
+- test_momentum.py: 26 comprobaciones de paridad numérica contra TA-Lib.
