@@ -96,3 +96,10 @@
   Pivots se anclan al día natural (índice datetime). Chikou de Ichimoku se omite
   a propósito (look-ahead).
 - Catálogo ampliado a 330 filas; 156 indicadores migrados.
+
+### Velas: 2-3 velas (tanda 2)
+- SEPARATINGLINES, COUNTERATTACK, MORNINGDOJISTAR, EVENINGDOJISTAR con paridad
+  exacta vs TA-Lib. Candle 33/61.
+- KICKING/KICKINGBYLENGTH implementados pero NO registrados (no disparan ni con
+  datos con gaps sintéticos -> no verificables). INNECK/ONNECK/THRUSTING/TRISTAR/
+  STICKSANDWICH/RICKSHAWMAN/3BLACKCROWS siguen pendientes.

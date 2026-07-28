@@ -327,6 +327,53 @@ def _3outside(df):
     return _mask(df.index, up, down)
 
 
+def _separatinglines(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    eq = candle_avg(df, "Equal").shift(1)
+    open_eq = (o <= o.shift(1) + eq) & (o >= o.shift(1) - eq)
+    longb = body > candle_avg(df, "BodyLong")
+    vs = candle_avg(df, "ShadowVeryShort")
+    bull = (c.shift(1) < o.shift(1)) & (c >= o) & open_eq & longb & (ls < vs)
+    bear = (c.shift(1) >= o.shift(1)) & (c < o) & open_eq & longb & (us < vs)
+    return _mask(df.index, bull, bear)
+
+
+def _counterattack(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    eq = candle_avg(df, "Equal").shift(1)
+    close_eq = (c <= c.shift(1) + eq) & (c >= c.shift(1) - eq)
+    longb = (body > candle_avg(df, "BodyLong")) & (body.shift(1) > candle_avg(df, "BodyLong").shift(1))
+    bull = (c.shift(1) < o.shift(1)) & (c >= o) & close_eq & longb
+    bear = (c.shift(1) >= o.shift(1)) & (c < o) & close_eq & longb
+    return _mask(df.index, bull, bear)
+
+
+def _morningdojistar(df, pen=0.3):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = _hilo_bodies(df)
+    bl, bs = candle_avg(df, "BodyLong"), candle_avg(df, "BodyShort")
+    cond = ((body.shift(2) > bl.shift(2)) & (c.shift(2) < o.shift(2))
+            & (body.shift(1) <= candle_avg(df, "BodyDoji").shift(1))
+            & (hi.shift(1) < lo.shift(2)) & (c >= o) & (body > bs)
+            & (c > c.shift(2) + body.shift(2) * pen))
+    return _mask(df.index, bull=cond)
+
+
+def _eveningdojistar(df, pen=0.3):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = _hilo_bodies(df)
+    bl, bs = candle_avg(df, "BodyLong"), candle_avg(df, "BodyShort")
+    cond = ((body.shift(2) > bl.shift(2)) & (c.shift(2) >= o.shift(2))
+            & (body.shift(1) <= candle_avg(df, "BodyDoji").shift(1))
+            & (lo.shift(1) > hi.shift(2)) & (c < o) & (body > bs)
+            & (c < c.shift(2) - body.shift(2) * pen))
+    return _mask(df.index, bear=cond)
+
+
 _PATTERNS = {
     "DOJI": _doji,
     "DRAGONFLYDOJI": _dragonfly,
@@ -352,8 +399,12 @@ _PATTERNS = {
     "MATCHINGLOW": _matchinglow,
     "HOMINGPIGEON": _homingpigeon,
     "DOJISTAR": _dojistar,
+    "SEPARATINGLINES": _separatinglines,
+    "COUNTERATTACK": _counterattack,
     "MORNINGSTAR": _morningstar,
     "EVENINGSTAR": _eveningstar,
+    "MORNINGDOJISTAR": _morningdojistar,
+    "EVENINGDOJISTAR": _eveningdojistar,
     "3INSIDE": _3inside,
     "3OUTSIDE": _3outside,
     "3WHITESOLDIERS": _3whitesoldiers,
