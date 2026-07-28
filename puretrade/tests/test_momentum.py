@@ -18,7 +18,8 @@ def ohlcv():
     open_[1:] = close[:-1] * np.exp(rng.normal(0, 0.0015, n - 1))
     high = np.maximum(open_, close) * (1 + np.abs(rng.normal(0, 0.002, n)))
     low = np.minimum(open_, close) * (1 - np.abs(rng.normal(0, 0.002, n)))
-    return pd.DataFrame({"open": open_, "high": high, "low": low, "close": close})
+    volume = rng.integers(1000, 9000, n).astype(float)
+    return pd.DataFrame({"open": open_, "high": high, "low": low, "close": close, "volume": volume})
 
 
 def _ref(name, df):
@@ -43,6 +44,7 @@ def _ref(name, df):
         "mtum_STOCH_d": lambda: talib.STOCH(h, l, c, 5, 3, 0, 3, 0)[1],
         "mtum_STOCH_Fa_k": lambda: talib.STOCHF(h, l, c, 5, 3, 0)[0],
         "mtum_STOCH_Fa_d": lambda: talib.STOCHF(h, l, c, 5, 3, 0)[1],
+        "mtum_MFI": lambda: talib.MFI(h, l, c, df["volume"], 14),
         "vola_ATR": lambda: talib.ATR(h, l, c, 14),
         "vola_NATR": lambda: talib.NATR(h, l, c, 14),
         "vola_TRANGE": lambda: talib.TRANGE(h, l, c),
@@ -58,7 +60,7 @@ NUMERIC = [
     "mtum_RSI", "mtum_CMO", "mtum_MOM", "mtum_ROC", "mtum_ROCP", "mtum_ROCR",
     "mtum_ROCR100", "mtum_BOP", "mtum_WILLIAMS_R", "mtum_CCI", "mtum_APO", "mtum_PPO",
     "mtum_MACD", "mtum_MACD_signal", "mtum_MACD_list",
-    "mtum_STOCH_k", "mtum_STOCH_d", "mtum_STOCH_Fa_k", "mtum_STOCH_Fa_d",
+    "mtum_STOCH_k", "mtum_STOCH_d", "mtum_STOCH_Fa_k", "mtum_STOCH_Fa_d", "mtum_MFI",
     "vola_ATR", "vola_NATR", "vola_TRANGE",
     "ma_EMA_20", "ma_DEMA_20", "ma_TEMA_20", "ma_SMA_20",
 ]

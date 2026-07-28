@@ -122,4 +122,13 @@ def _stochf(df: pd.DataFrame, k: int = 5, d: int = 3) -> pd.DataFrame:
     fast_k = _stoch_fastk(df, k)
     return pd.DataFrame({"mtum_STOCH_Fa_k": fast_k, "mtum_STOCH_Fa_d": sma(fast_k, d)})
 
-# TODO: ADX/DMI (Wilder), AROON, ULTOSC, TRIX, MFI, STOCH_RSI...
+@register(key="mtum_MFI", outputs=("mtum_MFI",), inputs=("high", "low", "close", "volume"),
+          family=Family.MOMENTUM, nature=Nature.ROLLING, warmup=14)
+def _mfi(df: pd.DataFrame, n: int = 14) -> pd.DataFrame:
+    tp = (df["high"] + df["low"] + df["close"]) / 3
+    rmf = tp * df["volume"]
+    pos = rmf.where(tp > tp.shift(1), 0.0).rolling(n, min_periods=n).sum()
+    neg = rmf.where(tp < tp.shift(1), 0.0).rolling(n, min_periods=n).sum()
+    return pd.DataFrame({"mtum_MFI": 100 * pos / (pos + neg)})
+
+# TODO: ADX/DMI (Wilder), AROON, ULTOSC, TRIX, STOCH_RSI...

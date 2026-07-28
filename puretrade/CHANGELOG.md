@@ -38,3 +38,13 @@
 - Nuevos momentum con paridad exacta: CMO, ROCP, ROCR, ROCR100, BOP, WILLR (R),
   CCI, APO, PPO, STOCH (k/d), STOCHF (k/d).
 - test_momentum.py: 26 comprobaciones de paridad numérica contra TA-Lib.
+
+### Custom: KONCORDE (Blai5)
+- KONCORDE reimplementado fiel al Pine Script v2 original: azul (NVI osc),
+  marrón, verde (PVI osc), media, rest y 3 crash points. 8 columnas ti_konk_*.
+- Corrige 2 bugs de la versión heredada del proyecto: (1) el PVI se calculaba
+  con NVI; (2) PVI/NVI usaban el multiplicador de pandas_ta en vez del volumen
+  del Pine de Blai5.
+- Subcomponentes verificados vs TA-Lib (RSI/MFI/SMA/STDDEV/stoch); PVI/NVI
+  replicados exactos del Pine. KONCORDE completo verificado point-in-time.
+- Nuevo mtum_MFI con paridad exacta vs TA-Lib. 82/318 indicadores migrados.
