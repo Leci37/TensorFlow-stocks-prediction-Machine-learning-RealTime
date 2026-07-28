@@ -5,7 +5,7 @@ cdl_3INSIDE,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",3.0,catego
 cdl_3LINESTRIKE,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",3.0,categorical,False,False
 cdl_3OUTSIDE,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",3.0,categorical,False,True
 cdl_3STARSINSOUTH,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",3.0,categorical,False,False
-cdl_3WHITESOLDIERS,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",3.0,categorical,False,False
+cdl_3WHITESOLDIERS,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",3.0,categorical,False,True
 cdl_ABANDONEDBABY,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_ADVANCEBLOCK,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_BELTHOLD,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True

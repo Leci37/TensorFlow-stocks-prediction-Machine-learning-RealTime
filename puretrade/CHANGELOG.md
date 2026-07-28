@@ -21,3 +21,11 @@
   HARAMI, HARAMICROSS, PIERCING, DARKCLOUDCOVER, MATCHINGLOW, HOMINGPIGEON,
   DOJISTAR, MORNINGSTAR, EVENINGSTAR, 3INSIDE, 3OUTSIDE (23 velas en total).
 - Test de paridad ampliado y validado sobre series con tendencia.
+
+### Candles (cont. 2)
+- 3WHITESOLDIERS migrado con paridad exacta (lógica real TA-Lib: tolerancias
+  Near en aperturas y Far en desaceleración de cuerpos; verificado sobre 500+
+  disparos en múltiples semillas). 24 velas nativas en total.
+- _3blackcrows y la familia HAMMER (HAMMER/INVERTEDHAMMER/HANGINGMAN/SHOOTINGSTAR)
+  implementados parcialmente pero NO registrados: su contexto de tendencia con
+  tolerancia Near aún no da paridad exacta. Pendientes de una pasada dedicada.

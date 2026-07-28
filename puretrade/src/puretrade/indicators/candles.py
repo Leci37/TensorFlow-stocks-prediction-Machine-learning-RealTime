@@ -234,29 +234,31 @@ def _eveningstar(df, pen=0.3):
 def _3whitesoldiers(df):
     body, hl, us, ls, white = parts(df)
     o, c = df["open"], df["close"]
-    vs = candle_avg(df, "ShadowVeryShort")
-    bs = candle_avg(df, "BodyShort")
+    vs, bs = candle_avg(df, "ShadowVeryShort"), candle_avg(df, "BodyShort")
+    near, far = candle_avg(df, "Near"), candle_avg(df, "Far")
     allwhite = (c >= o) & (c.shift(1) >= o.shift(1)) & (c.shift(2) >= o.shift(2))
-    rising = (c > c.shift(1)) & (c.shift(1) > c.shift(2))
-    within = ((o <= c.shift(1)) & (o >= o.shift(1))
-              & (o.shift(1) <= c.shift(2)) & (o.shift(1) >= o.shift(2)))
-    longbodies = (body > bs) & (body.shift(1) > bs.shift(1)) & (body.shift(2) > bs.shift(2))
     shortshadows = (us < vs) & (us.shift(1) < vs.shift(1)) & (us.shift(2) < vs.shift(2))
-    return _mask(df.index, bull=allwhite & rising & within & longbodies & shortshadows)
+    rising = (c > c.shift(1)) & (c.shift(1) > c.shift(2))
+    # cada vela abre dentro del cuerpo anterior (tolerancia Near)
+    within = ((o.shift(1) > o.shift(2)) & (o.shift(1) <= c.shift(2) + near.shift(2))
+              & (o > o.shift(1)) & (o <= c.shift(1) + near.shift(1)))
+    # sin gran desaceleración de cuerpo (tolerancia Far) y la vela actual con cuerpo largo
+    no_decel = (body.shift(1) > body.shift(2) - far.shift(2)) & (body > body.shift(1) - far.shift(1))
+    return _mask(df.index, bull=allwhite & shortshadows & rising & within & no_decel & (body > bs))
 
 
 def _3blackcrows(df):
     body, hl, us, ls, white = parts(df)
     o, c = df["open"], df["close"]
-    vs = candle_avg(df, "ShadowVeryShort")
-    bs = candle_avg(df, "BodyShort")
+    vs, bs = candle_avg(df, "ShadowVeryShort"), candle_avg(df, "BodyShort")
+    near, far = candle_avg(df, "Near"), candle_avg(df, "Far")
     allblack = (c < o) & (c.shift(1) < o.shift(1)) & (c.shift(2) < o.shift(2))
-    falling = (c < c.shift(1)) & (c.shift(1) < c.shift(2))
-    within = ((o >= c.shift(1)) & (o <= o.shift(1))
-              & (o.shift(1) >= c.shift(2)) & (o.shift(1) <= o.shift(2)))
-    longbodies = (body > bs) & (body.shift(1) > bs.shift(1)) & (body.shift(2) > bs.shift(2))
     shortshadows = (ls < vs) & (ls.shift(1) < vs.shift(1)) & (ls.shift(2) < vs.shift(2))
-    return _mask(df.index, bear=allblack & falling & within & longbodies & shortshadows)
+    falling = (c < c.shift(1)) & (c.shift(1) < c.shift(2))
+    within = ((o.shift(1) < o.shift(2)) & (o.shift(1) >= c.shift(2) - near.shift(2))
+              & (o < o.shift(1)) & (o >= c.shift(1) - near.shift(1)))
+    no_decel = (body.shift(1) > body.shift(2) - far.shift(2)) & (body > body.shift(1) - far.shift(1))
+    return _mask(df.index, bear=allblack & shortshadows & falling & within & no_decel & (body > bs))
 
 
 def _3inside(df):
@@ -304,12 +306,12 @@ _PATTERNS = {
     "EVENINGSTAR": _eveningstar,
     "3INSIDE": _3inside,
     "3OUTSIDE": _3outside,
+    "3WHITESOLDIERS": _3whitesoldiers,
 }
 
-# TODO: _3whitesoldiers / _3blackcrows implementados pero AÚN NO registrados:
-# falta clavar la tolerancia de desaceleración (settings Near/Far) para lograr
-# paridad exacta con TA-Lib. No se exponen hasta verificarlos (integridad del
-# contrato "todo cdl_ registrado == paridad exacta con TA-Lib").
+# TODO: _3blackcrows implementado pero AÚN NO registrado: no es el espejo exacto
+# de 3WHITESOLDIERS (sobre-dispara frente a TA-Lib). No se expone hasta lograr
+# paridad exacta (contrato: todo cdl_ registrado == paridad exacta con TA-Lib).
 
 for _name, _fn in _PATTERNS.items():
     _register(_name, _fn)
