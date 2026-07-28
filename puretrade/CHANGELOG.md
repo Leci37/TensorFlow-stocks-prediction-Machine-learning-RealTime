@@ -110,3 +110,9 @@
   y combinaciones. Nuevos helpers pt.families() y pt.list_features().
 - Documentación estructurada en docs/ (index, installation, usage, catalog,
   design, contributing) + mkdocs.yml, y README reescrito con todos los modos de uso.
+
+### Documentación: tiempo real
+- Nueva página docs/realtime.md: generar features al cerrar cada vela (1m/5m/15m)
+  con el patrón recompute-on-close sobre ventana trasera, tabla de tamaños de
+  buffer medida (rolling/velas exactas; recursivos convergen; OBV/VWAP salvedades),
+  helper LiveIndicators y ejemplo multi-timeframe. Enlazada en README y mkdocs.

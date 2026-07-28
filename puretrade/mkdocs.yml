@@ -15,6 +15,7 @@ nav:
   - Inicio: index.md
   - Instalación: installation.md
   - Guía de uso: usage.md
+  - Tiempo real: realtime.md
   - Catálogo: catalog.md
   - Diseño interno: design.md
   - Contribuir: contributing.md

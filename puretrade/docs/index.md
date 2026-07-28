@@ -18,6 +18,7 @@ features = pt.compute(df, family="Candle")  # solo velas
 |---|---|
 | [Instalación](installation.md) | `pip install`, extras opcionales |
 | [Guía de uso](usage.md) | cómo ejecutar y **cómo elegir qué generar** (todo / por familia / por tipo / point-in-time) |
+| [Tiempo real](realtime.md) | generar al cerrar cada vela (1m, 5m, 15m…), streaming |
 | [Catálogo](catalog.md) | los 3 ejes de clasificación y cómo explorar los ~160 indicadores |
 | [Diseño interno](design.md) | registro, motor, grafo de dependencias, validación PIT |
 | [Contribuir](contributing.md) | cómo añadir un indicador nuevo |

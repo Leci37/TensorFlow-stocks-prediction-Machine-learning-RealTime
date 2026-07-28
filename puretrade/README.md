@@ -80,6 +80,20 @@ transforms.fracdiff(df["close"], d=0.4)  # diferenciación fraccionaria
 transforms.zscore(features["mtum_RSI"], 100)
 ```
 
+## Tiempo real (al cerrar cada vela)
+
+Como todos los indicadores son point-in-time, la última fila calculada es el valor
+"en vivo" correcto. Mantén una ventana trasera y recalcula al cerrar la vela:
+
+```python
+buf = df.tail(500)                       # ventana trasera (1m, 5m, 15m…)
+live = pt.compute(buf).iloc[-1]          # features de la vela recién cerrada
+```
+
+Un buffer de ~500 barras deja medias y velas exactas y los recursivos (EMA/RSI/
+ATR) a ruido de float. Detalles, multi-timeframe y salvedades (OBV, VWAP) en
+[docs/realtime.md](docs/realtime.md).
+
 ## Validar que un indicador no filtra el futuro
 
 ```python
