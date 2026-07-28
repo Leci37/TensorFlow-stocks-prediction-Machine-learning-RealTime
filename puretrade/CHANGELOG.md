@@ -71,3 +71,13 @@
 - olap_MIDPOINT, olap_MIDPRICE con paridad exacta.
 - SAR/SAREXT y MAMA/FAMA/HT_TRENDLINE (Hilbert) pendientes -> _optional/talib_bridge.
 - 122/318 indicadores migrados.
+
+### Custom ti_* (paridad con py_ti)
+- 16 indicadores ti_* verificados byte-a-byte contra el py_ti vendorizado del
+  proyecto: donchian (3), vortex 5/14 (4), choppiness, coppock, mass_index,
+  chaikin, force_index, hma, keltner (2), supertrend. Custom 24/26.
+- Replicado el ema exacto de py_ti (math.ewm.pyti_ema), incl. su quirk de semilla
+  en el caso anidado (mass_index).
+- ti_acc_dist y ti_ease_of_movement_14 deferidos: el primero genera None en py_ti;
+  el segundo NO es point-in-time en py_ti (normaliza con Volume.max() global).
+- 138/318 indicadores migrados.

@@ -42,3 +42,20 @@ def test_koncorde_crash_are_signals(ohlcv):
 def test_koncorde_is_point_in_time(ohlcv):
     report = pit_check(ohlcv, ["ti_konk_blue", "ti_konk_green", "ti_konk_avg"])
     assert report["pit_safe"].all(), report[~report["pit_safe"]]
+
+
+# ti_* validados byte-a-byte contra py_ti durante el desarrollo; aquí se garantiza
+# que computan y que son point-in-time (la suite de la librería es autónoma).
+TI = [
+    "ti_donchian_upper_20", "ti_donchian_lower_20", "ti_donchian_center_20",
+    "ti_vortex_pos_5", "ti_vortex_neg_5", "ti_vortex_pos_14", "ti_vortex_neg_14",
+    "ti_choppiness_14", "ti_coppock_14_11_10", "ti_mass_index_9_25", "ti_chaikin_10_3",
+    "ti_force_index_13", "ti_hma_20", "ti_kelt_20_lower", "ti_kelt_20_upper", "ti_supertrend_20",
+]
+
+
+@pytest.mark.parametrize("name", TI)
+def test_ti_computes_and_is_pit_safe(ohlcv, name):
+    report = pit_check(ohlcv, [name])
+    assert report["pit_safe"].all(), report
+    assert report["n_compared"].iloc[0] > 50

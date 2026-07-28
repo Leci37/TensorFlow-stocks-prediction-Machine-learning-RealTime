@@ -24,6 +24,18 @@ def ema(s: pd.Series, n: int) -> pd.Series:
     return pd.Series(out, index=s.index)
 
 
+def pyti_ema(s: pd.Series, n: int) -> pd.Series:
+    """EMA replicando literalmente la de py_ti (para paridad de los ti_*).
+
+    Coincide con ``ema`` cuando la entrada no tiene NaN iniciales; difiere en el
+    caso anidado (p. ej. mass_index), donde la semilla SMA de py_ti cae al primer
+    valor por los NaN — se reproduce ese comportamiento tal cual.
+    """
+    first_value = s.iloc[:n].rolling(n).mean()
+    _ema = pd.concat([first_value, s.iloc[n:]])
+    return _ema.ewm(span=n, adjust=False).mean()
+
+
 def ema_seed_at(s: pd.Series, n: int, seed_idx: int) -> pd.Series:
     """EMA cuya semilla (SMA de ``n`` valores) se coloca en ``seed_idx``.
 
