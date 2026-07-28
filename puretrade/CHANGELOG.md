@@ -81,3 +81,10 @@
 - ti_acc_dist y ti_ease_of_movement_14 deferidos: el primero genera None en py_ti;
   el segundo NO es point-in-time en py_ti (normaliza con Volume.max() global).
 - 138/318 indicadores migrados.
+
+### Velas: familia HAMMER + TAKURI
+- HAMMER, HANGINGMAN, INVERTEDHAMMER, SHOOTINGSTAR, TAKURI con paridad exacta.
+  Contextos de tendencia clavados por búsqueda: HAMMER min(o,c)<=low1+Near;
+  HANGINGMAN min(o,c)>=high1-Near; INVERTEDHAMMER gap-down; SHOOTINGSTAR gap-up.
+- FIX: _sig ahora admite cond_white=None (patrones solo bajistas).
+- 29/61 velas; 143/318 indicadores. RICKSHAWMAN y 3BLACKCROWS siguen pendientes.

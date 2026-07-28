@@ -22,8 +22,8 @@ cdl_EVENINGDOJISTAR,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,ca
 cdl_EVENINGSTAR,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_GAPSIDESIDEWHITE,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_GRAVESTONEDOJI,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
-cdl_HAMMER,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
-cdl_HANGINGMAN,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
+cdl_HAMMER,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
+cdl_HANGINGMAN,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_HARAMI,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_HARAMICROSS,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_HIGHWAVE,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
@@ -32,7 +32,7 @@ cdl_HIKKAKEMOD,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categor
 cdl_HOMINGPIGEON,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_IDENTICAL3CROWS,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_INNECK,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
-cdl_INVERTEDHAMMER,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
+cdl_INVERTEDHAMMER,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_KICKING,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_KICKINGBYLENGTH,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_LADDERBOTTOM,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
@@ -48,12 +48,12 @@ cdl_PIERCING,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categori
 cdl_RICKSHAWMAN,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_RISEFALL3METHODS,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_SEPARATINGLINES,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
-cdl_SHOOTINGSTAR,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
+cdl_SHOOTINGSTAR,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_SHORTLINE,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_SPINNINGTOP,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_STALLEDPATTERN,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_STICKSANDWICH,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
-cdl_TAKURI,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
+cdl_TAKURI,Candle,microstructure/shape,Pattern,True,native,"O,H,L,C",,categorical,False,True
 cdl_TASUKIGAP,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_THRUSTING,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False
 cdl_TRISTAR,Candle,microstructure/shape,Pattern,True,talib,"O,H,L,C",,categorical,False,False

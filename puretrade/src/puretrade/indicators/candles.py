@@ -25,9 +25,14 @@ def _register(name: str, fn):
 
 
 def _sig(cond_white, cond_black=None):
-    """Construye la serie -100/0/100 a partir de máscaras booleanas."""
-    out = pd.Series(0, index=cond_white.index, dtype="int16")
-    out[cond_white.fillna(False)] = 100
+    """Construye la serie -100/0/100 a partir de máscaras booleanas.
+
+    ``cond_white`` puede ser None para patrones solo bajistas.
+    """
+    idx = cond_white.index if cond_white is not None else cond_black.index
+    out = pd.Series(0, index=idx, dtype="int16")
+    if cond_white is not None:
+        out[cond_white.fillna(False)] = 100
     if cond_black is not None:
         out[cond_black.fillna(False)] = -100
     return out
@@ -107,6 +112,46 @@ def _belthold(df):
     long = body > candle_avg(df, "BodyLong")
     vs = candle_avg(df, "ShadowVeryShort")
     return _sig(long & white & (ls < vs), long & ~white & (us < vs))
+
+
+# ------------------------- familia HAMMER (1 vela + contexto) -------------------------
+
+def _hammer(df):
+    body, hl, us, ls, white = parts(df)
+    o, c, l = df["open"], df["close"], df["low"]
+    shape = (body < candle_avg(df, "BodyShort")) & (ls > candle_avg(df, "ShadowLong")) & (us < candle_avg(df, "ShadowVeryShort"))
+    ctx = np.minimum(o, c) <= l.shift(1) + candle_avg(df, "Near").shift(1)
+    return _sig(shape & ctx)
+
+
+def _hangingman(df):
+    body, hl, us, ls, white = parts(df)
+    o, c, h = df["open"], df["close"], df["high"]
+    shape = (body < candle_avg(df, "BodyShort")) & (ls > candle_avg(df, "ShadowLong")) & (us < candle_avg(df, "ShadowVeryShort"))
+    ctx = np.minimum(o, c) >= h.shift(1) - candle_avg(df, "Near").shift(1)
+    return _sig(None, shape & ctx)
+
+
+def _invertedhammer(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    shape = (body < candle_avg(df, "BodyShort")) & (us > candle_avg(df, "ShadowLong")) & (ls < candle_avg(df, "ShadowVeryShort"))
+    gap_down = np.maximum(o, c) < np.minimum(o.shift(1), c.shift(1))
+    return _sig(shape & gap_down)
+
+
+def _shootingstar(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    shape = (body < candle_avg(df, "BodyShort")) & (us > candle_avg(df, "ShadowLong")) & (ls < candle_avg(df, "ShadowVeryShort"))
+    gap_up = np.minimum(o, c) > np.maximum(o.shift(1), c.shift(1))
+    return _sig(None, shape & gap_up)
+
+
+def _takuri(df):
+    body, hl, us, ls, white = parts(df)
+    c = (body <= candle_avg(df, "BodyDoji")) & (us < candle_avg(df, "ShadowVeryShort")) & (ls > candle_avg(df, "ShadowVeryLong"))
+    return _sig(c)
 
 
 # ------------------------- patrones de dos velas -------------------------
@@ -294,6 +339,11 @@ _PATTERNS = {
     "LONGLINE": _longline,
     "SHORTLINE": _shortline,
     "BELTHOLD": _belthold,
+    "HAMMER": _hammer,
+    "HANGINGMAN": _hangingman,
+    "INVERTEDHAMMER": _invertedhammer,
+    "SHOOTINGSTAR": _shootingstar,
+    "TAKURI": _takuri,
     "ENGULFING": _engulfing,
     "HARAMI": _harami,
     "HARAMICROSS": _haramicross,
