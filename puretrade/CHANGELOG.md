@@ -15,3 +15,9 @@
   MARUBOZU, CLOSINGMARUBOZU, SPINNINGTOP, HIGHWAVE, LONGLINE, SHORTLINE, BELTHOLD).
 - Primitivas de vela (TA_CandleSettings) replicadas en math/candle.py.
 - Catálogo anotado con columna `migrated` (47/318 ya en núcleo puro).
+
+### Candles (cont.)
+- +12 patrones de 2 y 3 velas con paridad exacta contra TA-Lib: ENGULFING,
+  HARAMI, HARAMICROSS, PIERCING, DARKCLOUDCOVER, MATCHINGLOW, HOMINGPIGEON,
+  DOJISTAR, MORNINGSTAR, EVENINGSTAR, 3INSIDE, 3OUTSIDE (23 velas en total).
+- Test de paridad ampliado y validado sobre series con tendencia.

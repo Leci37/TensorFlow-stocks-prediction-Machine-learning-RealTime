@@ -6,6 +6,7 @@ Las implementaciones se validan contra TA-Lib en tests/test_candles.py.
 """
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 from ..core.enums import Family, Nature, OutputType
@@ -108,6 +109,177 @@ def _belthold(df):
     return _sig(long & white & (ls < vs), long & ~white & (us < vs))
 
 
+# ------------------------- patrones de dos velas -------------------------
+
+def _mask(index, bull=None, bear=None):
+    out = pd.Series(0, index=index, dtype="int16")
+    if bull is not None:
+        out[bull.fillna(False)] = 100
+    if bear is not None:
+        out[bear.fillna(False)] = -100
+    return out
+
+
+def _engulfing(df):
+    o, c = df["open"], df["close"]
+    white, white1 = c >= o, c.shift(1) >= o.shift(1)
+    o1, c1 = o.shift(1), c.shift(1)
+    bull = white & ~white1 & (c >= o1) & (o <= c1) & ((c > o1) | (o < c1))
+    bear = ~white & white1 & (o >= c1) & (c <= o1) & ((o > c1) | (c < o1))
+    return _mask(df.index, bull, bear)
+
+
+def _harami(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = np.maximum(o, c), np.minimum(o, c)
+    hi1, lo1 = np.maximum(o.shift(1), c.shift(1)), np.minimum(o.shift(1), c.shift(1))
+    cond = (body.shift(1) > candle_avg(df, "BodyLong").shift(1)) & (body <= candle_avg(df, "BodyShort")) & (hi < hi1) & (lo > lo1)
+    prev_white = c.shift(1) >= o.shift(1)
+    return _mask(df.index, cond & ~prev_white, cond & prev_white)
+
+
+def _haramicross(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = np.maximum(o, c), np.minimum(o, c)
+    hi1, lo1 = np.maximum(o.shift(1), c.shift(1)), np.minimum(o.shift(1), c.shift(1))
+    cond = (body.shift(1) > candle_avg(df, "BodyLong").shift(1)) & (body <= candle_avg(df, "BodyDoji")) & (hi < hi1) & (lo > lo1)
+    prev_white = c.shift(1) >= o.shift(1)
+    return _mask(df.index, cond & ~prev_white, cond & prev_white)
+
+
+def _piercing(df):
+    body, hl, us, ls, white = parts(df)
+    o, h, l, c = df["open"], df["high"], df["low"], df["close"]
+    bl = candle_avg(df, "BodyLong")
+    cond = ((c.shift(1) < o.shift(1)) & (body.shift(1) > bl.shift(1))
+            & (c >= o) & (body > bl)
+            & (o < l.shift(1)) & (c > c.shift(1) + body.shift(1) * 0.5) & (c < o.shift(1)))
+    return _mask(df.index, cond)
+
+
+def _darkcloud(df):
+    body, hl, us, ls, white = parts(df)
+    o, h, l, c = df["open"], df["high"], df["low"], df["close"]
+    bl = candle_avg(df, "BodyLong")
+    cond = ((c.shift(1) >= o.shift(1)) & (body.shift(1) > bl.shift(1))
+            & (c < o)
+            & (o > h.shift(1)) & (c < c.shift(1) - body.shift(1) * 0.5) & (c > o.shift(1)))
+    return _mask(df.index, bear=cond)
+
+
+def _matchinglow(df):
+    o, c = df["open"], df["close"]
+    eq = candle_avg(df, "Equal").shift(1)
+    cond = (c.shift(1) < o.shift(1)) & (c < o) & (c <= c.shift(1) + eq) & (c >= c.shift(1) - eq)
+    return _mask(df.index, cond)
+
+
+def _homingpigeon(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    cond = ((c.shift(1) < o.shift(1)) & (c < o)
+            & (body.shift(1) > candle_avg(df, "BodyLong").shift(1)) & (body < candle_avg(df, "BodyShort"))
+            & (o < o.shift(1)) & (c > c.shift(1)))
+    return _mask(df.index, cond)
+
+
+def _dojistar(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = np.maximum(o, c), np.minimum(o, c)
+    hi1, lo1 = np.maximum(o.shift(1), c.shift(1)), np.minimum(o.shift(1), c.shift(1))
+    long1 = body.shift(1) > candle_avg(df, "BodyLong").shift(1)
+    doji = body <= candle_avg(df, "BodyDoji")
+    prev_white = c.shift(1) >= o.shift(1)
+    bear = long1 & doji & prev_white & (lo > hi1)      # gap up tras vela blanca
+    bull = long1 & doji & ~prev_white & (hi < lo1)     # gap down tras vela negra
+    return _mask(df.index, bull, bear)
+
+
+# ------------------------- patrones de tres velas -------------------------
+
+def _hilo_bodies(df):
+    o, c = df["open"], df["close"]
+    return np.maximum(o, c), np.minimum(o, c)
+
+
+def _morningstar(df, pen=0.3):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = _hilo_bodies(df)
+    bl, bs = candle_avg(df, "BodyLong"), candle_avg(df, "BodyShort")
+    cond = ((body.shift(2) > bl.shift(2)) & (c.shift(2) < o.shift(2))
+            & (body.shift(1) <= bs.shift(1))
+            & (hi.shift(1) < lo.shift(2))                       # gap down 2->1
+            & (c >= o) & (body > bs)                            # 3ª vela blanca de cuerpo largo
+            & (c > c.shift(2) + body.shift(2) * pen))
+    return _mask(df.index, bull=cond)
+
+
+def _eveningstar(df, pen=0.3):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = _hilo_bodies(df)
+    bl, bs = candle_avg(df, "BodyLong"), candle_avg(df, "BodyShort")
+    cond = ((body.shift(2) > bl.shift(2)) & (c.shift(2) >= o.shift(2))
+            & (body.shift(1) <= bs.shift(1))
+            & (lo.shift(1) > hi.shift(2))                       # gap up 2->1
+            & (c < o) & (body > bs)                             # 3ª vela negra de cuerpo largo
+            & (c < c.shift(2) - body.shift(2) * pen))
+    return _mask(df.index, bear=cond)
+
+
+def _3whitesoldiers(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    vs = candle_avg(df, "ShadowVeryShort")
+    bs = candle_avg(df, "BodyShort")
+    allwhite = (c >= o) & (c.shift(1) >= o.shift(1)) & (c.shift(2) >= o.shift(2))
+    rising = (c > c.shift(1)) & (c.shift(1) > c.shift(2))
+    within = ((o <= c.shift(1)) & (o >= o.shift(1))
+              & (o.shift(1) <= c.shift(2)) & (o.shift(1) >= o.shift(2)))
+    longbodies = (body > bs) & (body.shift(1) > bs.shift(1)) & (body.shift(2) > bs.shift(2))
+    shortshadows = (us < vs) & (us.shift(1) < vs.shift(1)) & (us.shift(2) < vs.shift(2))
+    return _mask(df.index, bull=allwhite & rising & within & longbodies & shortshadows)
+
+
+def _3blackcrows(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    vs = candle_avg(df, "ShadowVeryShort")
+    bs = candle_avg(df, "BodyShort")
+    allblack = (c < o) & (c.shift(1) < o.shift(1)) & (c.shift(2) < o.shift(2))
+    falling = (c < c.shift(1)) & (c.shift(1) < c.shift(2))
+    within = ((o >= c.shift(1)) & (o <= o.shift(1))
+              & (o.shift(1) >= c.shift(2)) & (o.shift(1) <= o.shift(2)))
+    longbodies = (body > bs) & (body.shift(1) > bs.shift(1)) & (body.shift(2) > bs.shift(2))
+    shortshadows = (ls < vs) & (ls.shift(1) < vs.shift(1)) & (ls.shift(2) < vs.shift(2))
+    return _mask(df.index, bear=allblack & falling & within & longbodies & shortshadows)
+
+
+def _3inside(df):
+    body, hl, us, ls, white = parts(df)
+    o, c = df["open"], df["close"]
+    hi, lo = _hilo_bodies(df)
+    bl, bs = candle_avg(df, "BodyLong"), candle_avg(df, "BodyShort")
+    harami = (body.shift(2) > bl.shift(2)) & (body.shift(1) <= bs.shift(1)) & (hi.shift(1) < hi.shift(2)) & (lo.shift(1) > lo.shift(2))
+    up = harami & (c.shift(2) < o.shift(2)) & (c >= o) & (c > o.shift(2))
+    down = harami & (c.shift(2) >= o.shift(2)) & (c < o) & (c < o.shift(2))
+    return _mask(df.index, up, down)
+
+
+def _3outside(df):
+    o, c = df["open"], df["close"]
+    o1, c1, o2, c2 = o.shift(1), c.shift(1), o.shift(2), c.shift(2)
+    eng_bull = (c1 >= o1) & (c2 < o2) & (c1 > o2) & (o1 < c2)
+    eng_bear = (c1 < o1) & (c2 >= o2) & (o1 > c2) & (c1 < o2)
+    up = eng_bull & (c > c1)
+    down = eng_bear & (c < c1)
+    return _mask(df.index, up, down)
+
+
 _PATTERNS = {
     "DOJI": _doji,
     "DRAGONFLYDOJI": _dragonfly,
@@ -120,7 +292,24 @@ _PATTERNS = {
     "LONGLINE": _longline,
     "SHORTLINE": _shortline,
     "BELTHOLD": _belthold,
+    "ENGULFING": _engulfing,
+    "HARAMI": _harami,
+    "HARAMICROSS": _haramicross,
+    "PIERCING": _piercing,
+    "DARKCLOUDCOVER": _darkcloud,
+    "MATCHINGLOW": _matchinglow,
+    "HOMINGPIGEON": _homingpigeon,
+    "DOJISTAR": _dojistar,
+    "MORNINGSTAR": _morningstar,
+    "EVENINGSTAR": _eveningstar,
+    "3INSIDE": _3inside,
+    "3OUTSIDE": _3outside,
 }
+
+# TODO: _3whitesoldiers / _3blackcrows implementados pero AÚN NO registrados:
+# falta clavar la tolerancia de desaceleración (settings Near/Far) para lograr
+# paridad exacta con TA-Lib. No se exponen hasta verificarlos (integridad del
+# contrato "todo cdl_ registrado == paridad exacta con TA-Lib").
 
 for _name, _fn in _PATTERNS.items():
     _register(_name, _fn)
