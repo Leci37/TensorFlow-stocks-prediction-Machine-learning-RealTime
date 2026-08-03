@@ -33,7 +33,9 @@ docs = ["mkdocs-material"]
 all = ["puretrade[talib]"]
 
 [project.urls]
-Homepage = "https://github.com/Leci37/TensorFlow-stocks-prediction-Machine-learning-RealTime"
+Homepage = "https://github.com/Leci37/puretrade"
+Repository = "https://github.com/Leci37/puretrade"
+Documentation = "https://github.com/Leci37/puretrade/tree/main/docs"
 
 [tool.setuptools.packages.find]
 where = ["src"]
