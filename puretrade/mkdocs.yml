@@ -19,6 +19,7 @@ nav:
   - Catálogo: catalog.md
   - Diseño interno: design.md
   - Contribuir: contributing.md
+  - Publicar (PyPI): releasing.md
 
 markdown_extensions:
   - admonition

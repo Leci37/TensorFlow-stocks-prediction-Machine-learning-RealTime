@@ -22,3 +22,4 @@ features = pt.compute(df, family="Candle")  # solo velas
 | [Catálogo](catalog.md) | los 3 ejes de clasificación y cómo explorar los ~160 indicadores |
 | [Diseño interno](design.md) | registro, motor, grafo de dependencias, validación PIT |
 | [Contribuir](contributing.md) | cómo añadir un indicador nuevo |
+| [Publicar](releasing.md) | construir y subir a PyPI |
