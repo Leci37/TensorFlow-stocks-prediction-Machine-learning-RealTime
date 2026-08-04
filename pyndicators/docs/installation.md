@@ -5,7 +5,7 @@
 Solo necesita `numpy` y `pandas`. No compila nada:
 
 ```bash
-pip install puretrade
+pip install pyndicators
 ```
 
 Cubre ~95% de los indicadores en implementación nativa pura.
@@ -13,9 +13,9 @@ Cubre ~95% de los indicadores en implementación nativa pura.
 ## Extras opcionales
 
 ```bash
-pip install puretrade[talib]   # +TA-Lib, solo para indicadores DSP/Hilbert
-pip install puretrade[dev]     # pytest, ruff, mypy (desarrollo)
-pip install puretrade[all]     # todo
+pip install pyndicators[talib]   # +TA-Lib, solo para indicadores DSP/Hilbert
+pip install pyndicators[dev]     # pytest, ruff, mypy (desarrollo)
+pip install pyndicators[all]     # todo
 ```
 
 El extra `talib` requiere la librería C de TA-Lib. **No hace falta** para el núcleo:

@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "puretrade"
+name = "pyndicators"
 version = "0.1.0"
 description = "Indicadores técnicos para ML financiero en puro numpy + pandas: point-in-time, sin dependencias que compilar."
 readme = "README.md"
@@ -30,18 +30,18 @@ dependencies = [
 talib = ["TA-Lib>=0.4"]
 dev = ["pytest>=7", "ruff", "mypy"]
 docs = ["mkdocs-material"]
-all = ["puretrade[talib]"]
+all = ["pyndicators[talib]"]
 
 [project.urls]
-Homepage = "https://github.com/Leci37/puretrade"
-Repository = "https://github.com/Leci37/puretrade"
-Documentation = "https://github.com/Leci37/puretrade/tree/main/docs"
+Homepage = "https://github.com/Leci37/pyndicators"
+Repository = "https://github.com/Leci37/pyndicators"
+Documentation = "https://github.com/Leci37/pyndicators/tree/main/docs"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-puretrade = ["data/*.csv", "py.typed"]
+pyndicators = ["data/*.csv", "py.typed"]
 
 [tool.ruff]
 line-length = 100

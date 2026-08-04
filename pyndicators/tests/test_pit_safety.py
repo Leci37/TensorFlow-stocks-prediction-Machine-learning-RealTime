@@ -1,6 +1,6 @@
 """El test estrella: los indicadores del núcleo NO deben mirar al futuro."""
-import puretrade as pt
-from puretrade.core.validate import pit_check
+import pyndicators as pt
+from pyndicators.core.validate import pit_check
 
 
 def test_core_indicators_are_pit_safe(ohlcv):

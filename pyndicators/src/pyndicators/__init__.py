@@ -1,10 +1,10 @@
-"""puretrade — indicadores técnicos para ML financiero, en puro numpy + pandas.
+"""pyndicators — indicadores técnicos para ML financiero, en puro numpy + pandas.
 
-Instalación limpia (sin compilar nada):  ``pip install puretrade``
+Instalación limpia (sin compilar nada):  ``pip install pyndicators``
 
 Uso básico::
 
-    import puretrade as pt
+    import pyndicators as pt
     features = pt.compute(ohlcv_df)                 # todos los indicadores
     features = pt.compute(ohlcv_df, ["mtum_RSI"])   # solo algunos
     features = pt.compute(ohlcv_df, rt_safe_only=True)  # solo point-in-time

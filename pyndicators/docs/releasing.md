@@ -20,7 +20,7 @@ twine check dist/*              # valida metadatos y README -> PASSED
 
    ```bash
    twine upload --repository testpypi dist/*
-   pip install --index-url https://test.pypi.org/simple/ puretrade
+   pip install --index-url https://test.pypi.org/simple/ pyndicators
    ```
 
 4. Sube a PyPI de verdad:
@@ -29,7 +29,7 @@ twine check dist/*              # valida metadatos y README -> PASSED
    twine upload dist/*
    ```
 
-Listo: `pip install puretrade` funciona para todo el mundo.
+Listo: `pip install pyndicators` funciona para todo el mundo.
 
 ## Opción B — Trusted Publishing (recomendada, sin tokens)
 
@@ -53,4 +53,4 @@ El workflow `.github/workflows/release.yml` construye y publica solo.
 - [ ] Actualizar `CHANGELOG.md`.
 - [ ] `python -m build && twine check dist/*`.
 - [ ] Tag `vX.Y.Z` (o subida manual).
-- [ ] Verificar `pip install puretrade==X.Y.Z` en un entorno limpio.
+- [ ] Verificar `pip install pyndicators==X.Y.Z` en un entorno limpio.

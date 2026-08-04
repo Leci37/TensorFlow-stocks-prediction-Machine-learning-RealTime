@@ -1,4 +1,4 @@
-site_name: puretrade
+site_name: pyndicators
 site_description: Indicadores técnicos para ML financiero en puro numpy + pandas
 theme:
   name: material

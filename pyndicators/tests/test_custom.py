@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import puretrade as pt
-from puretrade.core.validate import pit_check
+import pyndicators as pt
+from pyndicators.core.validate import pit_check
 
 KONK = [
     "ti_konk_blue", "ti_konk_brown", "ti_konk_green", "ti_konk_avg", "ti_konk_rest",

@@ -1,4 +1,4 @@
-# puretrade
+# pyndicators
 
 Indicadores técnicos para **machine learning financiero**, en puro `numpy` + `pandas`.
 
@@ -7,7 +7,7 @@ Indicadores técnicos para **machine learning financiero**, en puro `numpy` + `p
 - **Instalación limpia** — núcleo sin dependencias que compilar.
 
 ```python
-import puretrade as pt
+import pyndicators as pt
 features = pt.compute(df)                 # todos
 features = pt.compute(df, family="Candle")  # solo velas
 ```

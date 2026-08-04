@@ -1,6 +1,6 @@
 import pandas as pd
 
-import puretrade as pt
+import pyndicators as pt
 
 
 def test_compute_all_runs(ohlcv):

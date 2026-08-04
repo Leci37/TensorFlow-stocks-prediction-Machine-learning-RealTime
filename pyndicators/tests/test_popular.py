@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import puretrade as pt
-from puretrade.core.validate import pit_check
+import pyndicators as pt
+from pyndicators.core.validate import pit_check
 
 POPULAR = [
     "mtum_AO_5_34",

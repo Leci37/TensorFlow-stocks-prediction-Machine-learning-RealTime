@@ -4,7 +4,7 @@
 
 ```python
 import pandas as pd
-import puretrade as pt
+import pyndicators as pt
 
 df = pd.read_csv("ohlcv.csv", parse_dates=["Date"], index_col="Date")
 features = pt.compute(df)
@@ -110,7 +110,7 @@ Los indicadores en crudo suelen ser no estacionarios. El submódulo `transforms`
 los prepara para el modelo:
 
 ```python
-from puretrade import transforms
+from pyndicators import transforms
 transforms.returns(df["close"])
 transforms.log_returns(df["close"])
 transforms.fracdiff(df["close"], d=0.4)          # estacionariza conservando memoria
@@ -121,7 +121,7 @@ transforms.cross_sectional_rank(panel_df)        # ranking entre activos
 ## Verificar point-in-time
 
 ```python
-from puretrade.core.validate import pit_check
+from pyndicators.core.validate import pit_check
 pit_check(df, ["mtum_RSI", "vola_ATR"])
 # -> tabla con n_compared, n_mismatch, max_abs_diff, pit_safe por feature
 ```

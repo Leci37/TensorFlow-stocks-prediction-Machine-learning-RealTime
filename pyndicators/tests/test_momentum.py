@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import puretrade as pt
+import pyndicators as pt
 
 talib = pytest.importorskip("talib")
 

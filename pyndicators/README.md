@@ -1,20 +1,20 @@
-# puretrade
+# pyndicators
 
 **Indicadores técnicos para machine learning financiero — en puro `numpy` + `pandas`.**
 
-Sin TA-Lib obligatorio, sin nada que compilar. `pip install puretrade` y funciona.
+Sin TA-Lib obligatorio, sin nada que compilar. `pip install pyndicators` y funciona.
 Cada indicador registrado está verificado **byte a byte contra TA-Lib** (o py_ti) y
 es **point-in-time** (no mira al futuro).
 
 ```bash
-pip install puretrade
+pip install pyndicators
 ```
 
 ## Uso en 30 segundos
 
 ```python
 import pandas as pd
-import puretrade as pt
+import pyndicators as pt
 
 df = pd.read_csv("ohlcv.csv", parse_dates=["Date"], index_col="Date")
 # df tiene columnas open/high/low/close[/volume] (mayúsculas o minúsculas)
@@ -72,7 +72,7 @@ cat[cat.factor_style == "volatility/risk"]
 ## Transformaciones para ML (estacionariedad y normalización)
 
 ```python
-from puretrade import transforms
+from pyndicators import transforms
 
 transforms.returns(df["close"])          # retornos
 transforms.log_returns(df["close"])
@@ -97,13 +97,13 @@ ATR) a ruido de float. Detalles, multi-timeframe y salvedades (OBV, VWAP) en
 ## Validar que un indicador no filtra el futuro
 
 ```python
-from puretrade.core.validate import pit_check
+from pyndicators.core.validate import pit_check
 pit_check(df, ["mtum_RSI", "vola_ATR"])   # tabla con pit_safe por feature
 ```
 
 ## Por qué otra librería de indicadores
 
-Hay decenas de envoltorios de TA-Lib. `puretrade` es distinta en cuatro cosas:
+Hay decenas de envoltorios de TA-Lib. `pyndicators` es distinta en cuatro cosas:
 
 1. **Point-in-Time garantizado.** Cada feature marcada `pit_safe`, con un test que
    verifica que recalcular con datos futuros no cambia el pasado.
@@ -111,7 +111,7 @@ Hay decenas de envoltorios de TA-Lib. `puretrade` es distinta en cuatro cosas:
    factor antes de calcular nada.
 3. **Transforms de estacionariedad incluidas** (returns, z-score, fracdiff).
 4. **Instalación limpia.** Núcleo solo `numpy` + `pandas`. TA-Lib es opcional
-   (`pip install puretrade[talib]`) y solo para un puñado de indicadores DSP.
+   (`pip install pyndicators[talib]`) y solo para un puñado de indicadores DSP.
 
 ## Estado
 

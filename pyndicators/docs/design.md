@@ -5,7 +5,7 @@ Para entender cómo funciona por dentro y poder extenderlo.
 ## Componentes
 
 ```
-src/puretrade/
+src/pyndicators/
 ├── core/
 │   ├── spec.py / registry.py   registro de indicadores + metadata
 │   ├── engine.py               resuelve dependencias y computa (compute)

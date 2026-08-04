@@ -15,7 +15,7 @@ llamas a `compute()` sobre el buffer y te quedas con **la última fila**.
 ```python
 import collections
 import pandas as pd
-import puretrade as pt
+import pyndicators as pt
 
 
 class LiveIndicators:

@@ -12,6 +12,6 @@ import pandas as pd
 
 def load_catalog() -> pd.DataFrame:
     """Devuelve el catálogo de las ~300 features clasificadas."""
-    ref = resources.files("puretrade.data").joinpath("catalog.csv")
+    ref = resources.files("pyndicators.data").joinpath("catalog.csv")
     with resources.as_file(ref) as path:
         return pd.read_csv(path)
