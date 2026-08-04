@@ -9,7 +9,7 @@ librería publicada e instalable con `pip install pyndicators`.
 
 - **Dónde está el código:** carpeta `pyndicators/` dentro del repo
   `Leci37/TensorFlow-stocks-prediction-Machine-learning-RealTime`, rama
-  `claude/stocks-prediction-review-bud91u` (commit `37b909e` o posterior).
+  `claude/stocks-prediction-review-bud91u` (commit `64a8610` o posterior).
 - **Qué es:** 160 indicadores técnicos en puro `numpy`+`pandas`, verificados
   contra TA-Lib / py_ti y point-in-time. Docs en `pyndicators/docs/`.
 - **Verificado ya:** compila (`python -m build`), pasa `twine check`, instala en
