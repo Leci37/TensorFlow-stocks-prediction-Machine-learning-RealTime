@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stockpred"
+version = "0.1.0"
+description = "Buy/sell point prediction on 5-minute candles: technical indicators + TensorFlow (the tutorial pipeline)"
+readme = "README.md"
+requires-python = ">=3.9,<3.12"
+
+# Dependencies are pinned in requirements.txt; this file only makes stockpred/ importable
+# from pipeline/ (pip install -e .).
+[tool.setuptools.packages.find]
+include = ["stockpred*"]

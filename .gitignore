@@ -1,0 +1,21 @@
+# Everything the pipeline writes (stockpred/paths.py creates these folders)
+outputs/
+# Downloaded price history; only the tutorial sample is kept in git
+data/*
+!data/sample/
+
+# Models, logs, Python and IDE leftovers
+*.h5
+*.keras
+*.log
+__pycache__/
+*.egg-info/
+.venv/
+venv/
+.idea/
+.vscode/
+.ipynb_checkpoints/
+
+# The old real-time pipeline writes inside its own folder
+legacy/realtime_v1/d_result/*.csv
+legacy/realtime_v1/Models/**/*.h5
